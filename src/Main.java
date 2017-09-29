@@ -5,10 +5,10 @@ public class Main {
 
 		String[] parameters = new String[2];
 		parameters[0] = "-gui";
-		parameters[1] = "sellingAgent:basicAgents.Selling;" 
-						+ "financesAgent:basicAgents.Finances;"
-						+ "procurementAgent:basicAgents.Procurement;" 
-						+ "productionAgent:basicAgents.Production;";
+		parameters[1] = "sellingAgent:basicAgents.Selling;" + "financesAgent:basicAgents.Finances;"
+				+ "procurementAgent:basicAgents.Procurement;" + "productionAgent:basicAgents.Production;"
+				+ "procurementMarketAgent:basicAgents.ProcurementMarket;"
+				+ "capitalMarketAgent:basicAgents.CapitalMarket;" + "salesMarketAgent:basicAgents.SalesMarket;";
 		Boot.main(parameters);
 
 	}
