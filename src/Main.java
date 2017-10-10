@@ -1,6 +1,7 @@
 import jade.Boot;
 
 public class Main {
+
 	public static void main(String[] args) {
 
 		String[] parameters = new String[2];
