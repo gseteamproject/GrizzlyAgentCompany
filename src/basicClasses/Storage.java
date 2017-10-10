@@ -16,7 +16,7 @@ public class Storage {
     public int getAmountByColor(String color){
         int count=0;
         for (int a=0; a<this.materiallist.size(); a++){
-            if (this.materiallist.get(a).getColor()==color){
+            if (this.materiallist.get(a).getColor().equals(color)){
                 count++;
             }
         }
