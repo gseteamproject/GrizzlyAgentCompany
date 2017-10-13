@@ -127,10 +127,20 @@ public class Selling extends Agent {
 		@Override
 		public void action() {
 			System.out.println("SellingAgent: Asking warehouse about " + obj);
-
-			// TODO: Get color and size from message
-			int amountInWH = warehouse.getAmountByColor("blue");
-
+			
+			int amountInWH = 0;
+			
+			// TODO: Refactoring is needed. Should write really smart analyzer of order string or standardize an order message
+			// TODO: Order may consist of several colors and sizes, so we need to send an answer of each material
+			// TODO: we also have size parameter, but let's assume that we have only size 10 by now
+			if (obj.toLowerCase().contains("blue")) {
+				amountInWH = warehouse.getAmountByColor("blue");
+			}
+			else if (obj.toLowerCase().contains("red")) {
+				amountInWH = warehouse.getAmountByColor("red");				
+			}
+			
+			// TODO: also get amount from order
 			if (amountInWH >= 1) {
 				isInWarehouse = true;
 				System.out.println("SellingAgent: I say that " + obj + " is in warehouse");
@@ -207,9 +217,18 @@ public class Selling extends Agent {
 		@Override
 		public void action() {
 			System.out.println("SellingAgent: Taking " + obj + " from warehouse");
-
-			// TODO: Get color and size from message
-			Material requiredMat = new Material("blue", 10);
+			
+			// TODO: Refactoring is needed. Should write really smart analyzer of order string or standardize an order message
+			// TODO: Order may consist of several colors and sizes, so we need to send an answer of each material
+			
+			Material requiredMat = null;			
+			if (obj.toLowerCase().contains("blue")) {
+				requiredMat = new Material("blue", 10);
+			}
+			else if (obj.toLowerCase().contains("red")) {
+				requiredMat = new Material("red", 10);			
+			}
+						
 			warehouse.remove(requiredMat);
 		}
 	}

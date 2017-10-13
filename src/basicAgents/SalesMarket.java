@@ -3,6 +3,7 @@ package basicAgents;
 import java.util.Date;
 
 import basicClasses.Material;
+import basicClasses.Order;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
@@ -24,6 +25,18 @@ public class SalesMarket extends Agent {
 	private static final long serialVersionUID = 4718901230605783759L;
 
 	public ACLMessage starterMessage;
+	
+	protected Order readOrder(String request) {
+		String[] params = request.split(" ");
+		String color = params[0];
+		double size = Double.parseDouble(params[1]);
+		int amount = Integer.parseInt(params[2]);
+		
+		Material mat = new Material(color, size);
+		Order order = new Order(mat, amount);
+		
+		return order;
+	}
 
 	@Override
 	protected void setup() {
@@ -72,7 +85,7 @@ public class SalesMarket extends Agent {
 			testMsg.addReceiver(new AID(("salesMarketAgent"), AID.ISLOCALNAME));
 			testMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			// there should be not just stone but on object with whole order
-			testMsg.setContent("stone");
+			testMsg.setContent("blue 10 1");
 			send(testMsg);
 
 			// adding stone to warehouse
@@ -92,12 +105,15 @@ public class SalesMarket extends Agent {
 		@Override
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 			// Sales Market reacts on customer's request
-			System.out.println("[request] Customer orders a " + request.getContent());
+			Order order = readOrder(request.getContent());
+			String orderText = order.getTextOfOrder();
+			
+			System.out.println("[request] Customer orders a " + orderText);
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
 			starterMessage = request;
 			ACLMessage agree = request.createReply();
-			agree.setContent(request.getContent());
+			agree.setContent(orderText);
 			agree.setPerformative(ACLMessage.AGREE);
 			System.out.println("[agree] I will make an order of " + agree.getContent());
 
