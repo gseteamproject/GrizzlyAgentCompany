@@ -3,6 +3,7 @@ package basicAgents;
 import java.util.Date;
 
 import basicClasses.Material;
+import basicClasses.Order;
 import basicClasses.Storage;
 import jade.core.AID;
 import jade.core.Agent;
@@ -58,17 +59,18 @@ public class Selling extends Agent {
 	class WaitingForOrder extends AchieveREResponder {
 		private static final long serialVersionUID = 6130496380982287815L;
 
+		private String orderText;
+
 		public WaitingForOrder(Agent a, MessageTemplate mt) {
 			super(a, mt);
 		}
 
 		@Override
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
-
-			// this shows subject of interaction, request of SalesMarket
-			System.out.println("ID " + request.getConversationId());
-
 			// Selling reacts on SalesMarket's request
+
+			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
 
@@ -78,12 +80,12 @@ public class Selling extends Agent {
 			agree.setPerformative(ACLMessage.AGREE);
 
 			if (request.getConversationId() == "Order") {
-				System.out.println("[request] SalesMarket orders a " + request.getContent());
-				System.out.println("[agree] I will check warehouse for " + agree.getContent());
+				System.out.println("[request] SalesMarket orders a " + orderText);
+				System.out.println("[agree] I will check warehouse for " + orderText);
 				addBehaviour(new CheckWarehouse(myAgent, agree));
 			} else if (request.getConversationId() == "Take") {
-				System.out.println("[request] SalesMarket wants to get " + request.getContent() + " from warehouse");
-				System.out.println("[agree] I will give you " + agree.getContent() + " from warehouse");
+				System.out.println("[request] SalesMarket wants to get " + orderText + " from warehouse");
+				System.out.println("[agree] I will give you " + orderText + " from warehouse");
 				addBehaviour(new GiveProductToMarket(myAgent, agree));
 			}
 
@@ -96,16 +98,21 @@ public class Selling extends Agent {
 			// if agent agrees to request
 			// after executing, it should send failure of inform
 
+			// some testing
+			System.out.println("\nSellingAgent: response.getContent()" + response.getContent());
+			System.out.println("SellingAgent: response.getSender()" + request.getSender());
+			System.out.println("SellingAgent: response.getPerformative()" + response.getPerformative() + "\n");
+
 			// in case of inform product will be taken from warehouse
 			// in case of failure product will be produced
 			if (isInWarehouse) {
 				ACLMessage inform = request.createReply();
-				inform.setContent(response.getContent());
+				inform.setContent(request.getContent());
 				inform.setPerformative(ACLMessage.INFORM);
 				return inform;
 			} else {
 				ACLMessage failure = request.createReply();
-				failure.setContent(response.getContent());
+				failure.setContent(request.getContent());
 				failure.setPerformative(ACLMessage.FAILURE);
 				return failure;
 			}
@@ -115,38 +122,50 @@ public class Selling extends Agent {
 	class CheckWarehouse extends OneShotBehaviour {
 		private static final long serialVersionUID = -1534610326024914625L;
 
-		public String obj;
-		public ACLMessage agree;
+		private String requestedOrder;
+		private String orderText;
+
+		private ACLMessage agree;
 
 		public CheckWarehouse(Agent a, ACLMessage msg) {
 			super(a);
-			obj = msg.getContent();
+			requestedOrder = msg.getContent();
 			agree = msg;
 		}
 
 		@Override
 		public void action() {
-			System.out.println("SellingAgent: Asking warehouse about " + obj);
-			
+			orderText = Order.readOrder(requestedOrder).getTextOfOrder();
+
+			System.out.println("SellingAgent: Asking warehouse about " + orderText);
+
 			int amountInWH = 0;
-			
-			// TODO: Refactoring is needed. Should write really smart analyzer of order string or standardize an order message
-			// TODO: Order may consist of several colors and sizes, so we need to send an answer of each material
-			// TODO: we also have size parameter, but let's assume that we have only size 10 by now
-			if (obj.toLowerCase().contains("blue")) {
-				amountInWH = warehouse.getAmountByColor("blue");
-			}
-			else if (obj.toLowerCase().contains("red")) {
-				amountInWH = warehouse.getAmountByColor("red");				
-			}
-			
-			// TODO: also get amount from order
-			if (amountInWH >= 1) {
+
+			// TODO: Refactoring is needed
+			// TODO: Order may consist of several colors and sizes, so we need to send an
+			// answer of each material
+			// TODO: we also have size parameter, but let's assume that we have only size 10
+			// by now
+
+			Order order = Order.readOrder(requestedOrder);
+
+			// TODO: should be some iteration over list
+			Material materialToCheck = (Material) order.getMaterials().get(0);
+
+			String color = materialToCheck.getColor();
+			int amount = order.getAmountByMaterial(materialToCheck);
+
+			System.out.println("color: " + color + ", amount: " + amount);
+
+			amountInWH = warehouse.getAmountByColor(color);
+
+			if (amountInWH >= amount) {
 				isInWarehouse = true;
-				System.out.println("SellingAgent: I say that " + obj + " is in warehouse");
+				System.out.println("SellingAgent: I say that " + orderText + " is in warehouse");
 			} else {
 				isInWarehouse = false;
-				System.out.println("send info to Finances about product to produce " + obj);
+				System.out.println("send info to Finances about product to produce " + orderText);
+				// TODO: calculate needed materials
 				addBehaviour(new SendInfo(myAgent, 2000, agree));
 			}
 		}
@@ -155,16 +174,18 @@ public class Selling extends Agent {
 	class SendInfo extends TickerBehaviour {
 		private static final long serialVersionUID = -1534610326024914625L;
 
-		public String obj;
+		private String orderToProceed;
+		private String orderText;
 
 		public SendInfo(Agent a, long period, ACLMessage msg) {
 			super(a, period);
-			obj = msg.getContent();
+			orderToProceed = msg.getContent();
 		}
 
 		@Override
 		protected void onTick() {
-			System.out.println("SellingAgent: Sending an info to Finance Agent to produce " + obj);
+			orderText = Order.readOrder(orderToProceed).getTextOfOrder();
+			System.out.println("SellingAgent: Sending an info to Finance Agent to produce " + orderText);
 
 			String requestedAction = "Order";
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
@@ -172,14 +193,15 @@ public class Selling extends Agent {
 			msg.addReceiver(new AID(("financesAgent"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
-			msg.setContent(obj);
+			msg.setContent(orderToProceed);
 
 			addBehaviour(new RequestToFinance(myAgent, msg));
 		}
 
 		@Override
 		public void stop() {
-			System.out.println("SellingAgent: " + obj + " is in production");
+			orderText = Order.readOrder(orderToProceed).getTextOfOrder();
+			System.out.println("SellingAgent: " + orderText + " is in production");
 			super.stop();
 		}
 
@@ -192,7 +214,9 @@ public class Selling extends Agent {
 
 			@Override
 			protected void handleInform(ACLMessage inform) {
-				System.out.println(inform.getContent());
+
+				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+				System.out.println("SellingAgent: [inform] " + orderText);
 				stop();
 
 				// TODO: Is it nessessary to send something?
@@ -207,29 +231,27 @@ public class Selling extends Agent {
 	class GiveProductToMarket extends OneShotBehaviour {
 		private static final long serialVersionUID = -1534610326024914625L;
 
-		public String obj;
+		private String orderToGive;
+		private String orderText;
 
 		public GiveProductToMarket(Agent a, ACLMessage msg) {
 			super(a);
-			obj = msg.getContent();
+			orderToGive = msg.getContent();
 		}
 
 		@Override
 		public void action() {
-			System.out.println("SellingAgent: Taking " + obj + " from warehouse");
-			
-			// TODO: Refactoring is needed. Should write really smart analyzer of order string or standardize an order message
-			// TODO: Order may consist of several colors and sizes, so we need to send an answer of each material
-			
-			Material requiredMat = null;			
-			if (obj.toLowerCase().contains("blue")) {
-				requiredMat = new Material("blue", 10);
-			}
-			else if (obj.toLowerCase().contains("red")) {
-				requiredMat = new Material("red", 10);			
-			}
-						
-			warehouse.remove(requiredMat);
+			Order order = Order.readOrder(orderToGive);
+			orderText = order.getTextOfOrder();
+			System.out.println("SellingAgent: Taking " + orderText + " from warehouse");
+
+			// TODO: Refactoring is needed
+			// TODO: Order may consist of several colors and sizes, so we need to send an
+			// answer of each material
+
+			Material materialToGive = (Material) order.getMaterials().get(0);
+
+			warehouse.remove(materialToGive);
 		}
 	}
 }

@@ -2,8 +2,6 @@ package basicClasses;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,5 +35,17 @@ public class Order implements Serializable {
 		    text += value.toString() + " " + key.getColor() + " stone of size " + key.getSize();
 		}
 		return text;
+	}
+	
+	public static Order readOrder(String request) {
+		String[] params = request.split(" ");
+		String color = params[0];
+		double size = Double.parseDouble(params[1]);
+		int amount = Integer.parseInt(params[2]);
+		
+		Material mat = new Material(color, size);
+		Order order = new Order(mat, amount);
+		
+		return order;
 	}
 }

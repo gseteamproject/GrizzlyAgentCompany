@@ -25,18 +25,6 @@ public class SalesMarket extends Agent {
 	private static final long serialVersionUID = 4718901230605783759L;
 
 	public ACLMessage starterMessage;
-	
-	protected Order readOrder(String request) {
-		String[] params = request.split(" ");
-		String color = params[0];
-		double size = Double.parseDouble(params[1]);
-		int amount = Integer.parseInt(params[2]);
-		
-		Material mat = new Material(color, size);
-		Order order = new Order(mat, amount);
-		
-		return order;
-	}
 
 	@Override
 	protected void setup() {
@@ -84,7 +72,11 @@ public class SalesMarket extends Agent {
 			ACLMessage testMsg = new ACLMessage(ACLMessage.REQUEST);
 			testMsg.addReceiver(new AID(("salesMarketAgent"), AID.ISLOCALNAME));
 			testMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-			// there should be not just stone but on object with whole order
+
+			// improvised customer
+			testMsg.setSender(new AID(("customer"), AID.ISLOCALNAME));
+
+			// it is an example of order
 			testMsg.setContent("blue 10 1");
 			send(testMsg);
 
@@ -98,6 +90,8 @@ public class SalesMarket extends Agent {
 	class WaitingCustomerMessage extends AchieveREResponder {
 		private static final long serialVersionUID = 6130496380982287815L;
 
+		private String orderText;
+
 		public WaitingCustomerMessage(Agent a, MessageTemplate mt) {
 			super(a, mt);
 		}
@@ -105,17 +99,17 @@ public class SalesMarket extends Agent {
 		@Override
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 			// Sales Market reacts on customer's request
-			Order order = readOrder(request.getContent());
-			String orderText = order.getTextOfOrder();
-			
+
+			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+
 			System.out.println("[request] Customer orders a " + orderText);
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
 			starterMessage = request;
 			ACLMessage agree = request.createReply();
-			agree.setContent(orderText);
+			agree.setContent(request.getContent());
 			agree.setPerformative(ACLMessage.AGREE);
-			System.out.println("[agree] I will make an order of " + agree.getContent());
+			System.out.println("[agree] I will make an order of " + orderText);
 
 			// if agent agrees it starts executing request
 			addBehaviour(new SendAnOrder(myAgent, 2000, agree));
@@ -127,13 +121,20 @@ public class SalesMarket extends Agent {
 		protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
 				throws FailureException {
 
+			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+
+			// some testing
+			System.out.println("\nSalesMarketAgent: response.getContent()" + response.getContent());
+			System.out.println("SalesMarketAgent: response.getSender()" + request.getSender());
+			System.out.println("SalesMarketAgent: response.getPerformative()" + response.getPerformative() + "\n");
+
 			// result of request to sales market
 			// if agent agrees to request
 			// after executing, it should send failure of inform
 			ACLMessage inform = request.createReply();
-			inform.setContent("[inform] I ordered a " + response.getContent());
+			inform.setContent("[inform] I ordered a " + orderText);
 			inform.setPerformative(ACLMessage.INFORM);
-			System.out.println("[inform] I ordered a " + response.getContent());
+			System.out.println("[inform] I ordered a " + orderText);
 
 			return inform;
 		}
@@ -142,16 +143,19 @@ public class SalesMarket extends Agent {
 	class SendAnOrder extends TickerBehaviour {
 		private static final long serialVersionUID = -1534610326024914625L;
 
-		public String obj;
+		private String orderToRequest;
+		private String orderText;
 
 		public SendAnOrder(Agent a, long period, ACLMessage msg) {
 			super(a, period);
-			obj = msg.getContent();
+			orderToRequest = msg.getContent();
 		}
 
 		@Override
 		protected void onTick() {
-			System.out.println("SalesMarketAgent: Sending an order to SellingAgent to get " + obj);
+			orderText = Order.readOrder(orderToRequest).getTextOfOrder();
+
+			System.out.println("SalesMarketAgent: Sending an order to SellingAgent to get " + orderText);
 
 			String requestedAction = "Order";
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
@@ -159,14 +163,17 @@ public class SalesMarket extends Agent {
 			msg.addReceiver(new AID(("sellingAgent"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
-			msg.setContent(obj);
+			msg.setContent(orderToRequest);
 
 			addBehaviour(new RequestToExecute(myAgent, msg));
 		}
 
 		@Override
 		public void stop() {
-			System.out.println("SalesMarketAgent: Now I know that " + obj + " is in warehouse");
+
+			orderText = Order.readOrder(orderToRequest).getTextOfOrder();
+
+			System.out.println("SalesMarketAgent: Now I know that " + orderText + " is in warehouse");
 			super.stop();
 		}
 
@@ -179,7 +186,10 @@ public class SalesMarket extends Agent {
 
 			@Override
 			protected void handleInform(ACLMessage inform) {
-				System.out.println("SalesMarketAgent: received [inform] " + inform.getContent() + " is in warehouse");
+
+				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+
+				System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
 				stop();
 
 				// TODO: Is it nessessary to send something?
@@ -193,8 +203,10 @@ public class SalesMarket extends Agent {
 
 			@Override
 			protected void handleFailure(ACLMessage failure) {
-				System.out.println(
-						"SalesMarketAgent: received [failure] " + failure.getContent() + " is not in warehouse");
+
+				orderText = Order.readOrder(failure.getContent()).getTextOfOrder();
+
+				System.out.println("SalesMarketAgent: received [failure] " + orderText + " is not in warehouse");
 				stop();
 			}
 		}
@@ -203,16 +215,20 @@ public class SalesMarket extends Agent {
 	class GetFromWarehouse extends TickerBehaviour {
 		private static final long serialVersionUID = -1534610326024914625L;
 
-		public String obj;
+		private String orderToTake;
+		private String orderText;
 
 		public GetFromWarehouse(Agent a, long period, ACLMessage msg) {
 			super(a, period);
-			obj = msg.getContent();
+			orderToTake = msg.getContent();
 		}
 
 		@Override
 		protected void onTick() {
-			System.out.println("SalesMarketAgent: Asking SellingAgent to take " + obj + " from warehouse");
+
+			orderText = Order.readOrder(orderToTake).getTextOfOrder();
+
+			System.out.println("SalesMarketAgent: Asking SellingAgent to take " + orderText + " from warehouse");
 
 			String requestedAction = "Take";
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
@@ -220,14 +236,17 @@ public class SalesMarket extends Agent {
 			msg.addReceiver(new AID(("sellingAgent"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
-			msg.setContent(obj);
+			msg.setContent(orderToTake);
 
 			addBehaviour(new RequestToExecute(myAgent, msg));
 		}
 
 		@Override
 		public void stop() {
-			System.out.println("SalesMarketAgent: Now I have a " + obj);
+
+			orderText = Order.readOrder(orderToTake).getTextOfOrder();
+
+			System.out.println("SalesMarketAgent: Now I have a " + orderText);
 			super.stop();
 		}
 
@@ -240,15 +259,21 @@ public class SalesMarket extends Agent {
 
 			@Override
 			protected void handleInform(ACLMessage inform) {
-				System.out.println(
-						"SalesMarketAgent: received [inform] " + inform.getContent() + " will be taken from warehouse");
+
+				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+
+				System.out
+						.println("SalesMarketAgent: received [inform] " + orderText + " will be taken from warehouse");
 				stop();
 			}
 
 			@Override
 			protected void handleFailure(ACLMessage failure) {
-				System.out.println("SalesMarketAgent: received [failure] " + failure.getContent()
-						+ " will not be taken from warehouse");
+
+				orderText = Order.readOrder(failure.getContent()).getTextOfOrder();
+
+				System.out.println(
+						"SalesMarketAgent: received [failure] " + orderText + " will not be taken from warehouse");
 				stop();
 			}
 		}
