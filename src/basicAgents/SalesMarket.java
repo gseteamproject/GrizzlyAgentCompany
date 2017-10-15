@@ -22,8 +22,11 @@ import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
 
 public class SalesMarket extends Agent {
-	private static final long serialVersionUID = 4718901230605783759L;
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2003110338808844985L;
 	public ACLMessage starterMessage;
 
 	@Override
@@ -60,7 +63,11 @@ public class SalesMarket extends Agent {
 
 	// class that sends test message with example of order. This simulates customer.
 	class SimpleAgentWakerBehaviour extends WakerBehaviour {
-		private static final long serialVersionUID = 2508808170658574583L;
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3327849748177688933L;
 
 		public SimpleAgentWakerBehaviour(Agent a, long timeout) {
 			super(a, timeout);
@@ -83,13 +90,22 @@ public class SalesMarket extends Agent {
 			// adding stone to warehouse
 			Material mat = new Material("blue", 10);
 			Selling.warehouse.add(mat);
+
+			// adding materials to storage
+			Material matCol = new Material("blue");
+			Material matStone = new Material(10);
+			Procurement.materialStorage.add(matCol);
+			Procurement.materialStorage.add(matStone);
 		}
 	}
 
 	// this class waits for receiving a message with certain template
 	class WaitingCustomerMessage extends AchieveREResponder {
-		private static final long serialVersionUID = 6130496380982287815L;
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 7386418031416044376L;
 		private String orderText;
 
 		public WaitingCustomerMessage(Agent a, MessageTemplate mt) {
@@ -132,7 +148,7 @@ public class SalesMarket extends Agent {
 			// if agent agrees to request
 			// after executing, it should send failure of inform
 			ACLMessage inform = request.createReply();
-			inform.setContent("[inform] I ordered a " + orderText);
+			inform.setContent(request.getContent());
 			inform.setPerformative(ACLMessage.INFORM);
 			System.out.println("[inform] I ordered a " + orderText);
 
@@ -141,8 +157,11 @@ public class SalesMarket extends Agent {
 	}
 
 	class SendAnOrder extends TickerBehaviour {
-		private static final long serialVersionUID = -1534610326024914625L;
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 8296971392230921846L;
 		private String orderToRequest;
 		private String orderText;
 
@@ -165,7 +184,7 @@ public class SalesMarket extends Agent {
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 			msg.setContent(orderToRequest);
 
-			addBehaviour(new RequestToExecute(myAgent, msg));
+			addBehaviour(new RequestToOrder(myAgent, msg));
 		}
 
 		@Override
@@ -177,10 +196,14 @@ public class SalesMarket extends Agent {
 			super.stop();
 		}
 
-		class RequestToExecute extends AchieveREInitiator {
-			private static final long serialVersionUID = -8104498062148279796L;
+		class RequestToOrder extends AchieveREInitiator {
 
-			public RequestToExecute(Agent a, ACLMessage msg) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6945741747877024833L;
+
+			public RequestToOrder(Agent a, ACLMessage msg) {
 				super(a, msg);
 			}
 
@@ -192,7 +215,7 @@ public class SalesMarket extends Agent {
 				System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
 				stop();
 
-				// TODO: Is it nessessary to send something?
+				// TODO: Is it necessary to send something?
 				// ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				// msg.addReceiver(starterMessage.getSender());
 				// msg.setContent(starterMessage.getContent());
@@ -213,8 +236,11 @@ public class SalesMarket extends Agent {
 	}
 
 	class GetFromWarehouse extends TickerBehaviour {
-		private static final long serialVersionUID = -1534610326024914625L;
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4233055394916376580L;
 		private String orderToTake;
 		private String orderText;
 
@@ -238,7 +264,7 @@ public class SalesMarket extends Agent {
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 			msg.setContent(orderToTake);
 
-			addBehaviour(new RequestToExecute(myAgent, msg));
+			addBehaviour(new RequestToTake(myAgent, msg));
 		}
 
 		@Override
@@ -250,10 +276,14 @@ public class SalesMarket extends Agent {
 			super.stop();
 		}
 
-		class RequestToExecute extends AchieveREInitiator {
-			private static final long serialVersionUID = -8104498062148279796L;
+		class RequestToTake extends AchieveREInitiator {
 
-			public RequestToExecute(Agent a, ACLMessage msg) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -2624609588724924573L;
+
+			public RequestToTake(Agent a, ACLMessage msg) {
 				super(a, msg);
 			}
 

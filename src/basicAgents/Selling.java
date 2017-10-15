@@ -23,7 +23,10 @@ import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
 
 public class Selling extends Agent {
-	private static final long serialVersionUID = 3662790430798172624L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7150875080288668056L;
 	public ACLMessage starterMessage;
 	public boolean isInWarehouse;
 
@@ -57,8 +60,11 @@ public class Selling extends Agent {
 
 	// this class waits for receiving a message with certain template
 	class WaitingForOrder extends AchieveREResponder {
-		private static final long serialVersionUID = 6130496380982287815L;
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4671831774439180119L;
 		private String orderText;
 
 		public WaitingForOrder(Agent a, MessageTemplate mt) {
@@ -120,8 +126,11 @@ public class Selling extends Agent {
 	}
 
 	class CheckWarehouse extends OneShotBehaviour {
-		private static final long serialVersionUID = -1534610326024914625L;
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3856126876248315456L;
 		private String requestedOrder;
 		private String orderText;
 
@@ -172,8 +181,11 @@ public class Selling extends Agent {
 	}
 
 	class SendInfo extends TickerBehaviour {
-		private static final long serialVersionUID = -1534610326024914625L;
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6365251601845699295L;
 		private String orderToProceed;
 		private String orderText;
 
@@ -206,7 +218,11 @@ public class Selling extends Agent {
 		}
 
 		class RequestToFinance extends AchieveREInitiator {
-			private static final long serialVersionUID = -8104498062148279796L;
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 994161564616428958L;
 
 			public RequestToFinance(Agent a, ACLMessage msg) {
 				super(a, msg);
@@ -219,7 +235,7 @@ public class Selling extends Agent {
 				System.out.println("SellingAgent: [inform] " + orderText);
 				stop();
 
-				// TODO: Is it nessessary to send something?
+				// TODO: Is it necessary to send something?
 				// ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				// msg.addReceiver(starterMessage.getSender());
 				// msg.setContent(starterMessage.getContent());
@@ -229,8 +245,11 @@ public class Selling extends Agent {
 	}
 
 	class GiveProductToMarket extends OneShotBehaviour {
-		private static final long serialVersionUID = -1534610326024914625L;
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6498277261596869382L;
 		private String orderToGive;
 		private String orderText;
 

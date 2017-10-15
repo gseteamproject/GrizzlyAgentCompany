@@ -1,8 +1,283 @@
 package basicAgents;
 
+import java.util.Date;
+import java.util.List;
+
+import basicClasses.Material;
+import basicClasses.Order;
+import basicClasses.Storage;
+import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.TickerBehaviour;
+import jade.domain.FIPANames;
+import jade.domain.FIPAAgentManagement.FailureException;
+import jade.domain.FIPAAgentManagement.NotUnderstoodException;
+import jade.domain.FIPAAgentManagement.RefuseException;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.proto.AchieveREInitiator;
+import jade.proto.AchieveREResponder;
 
 public class Procurement extends Agent {
-	private static final long serialVersionUID = 3662790430798172624L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2923962894395399488L;
+	public ACLMessage starterMessage;
+	public boolean isInMaterialStorage;
 
+	public static Storage materialStorage = new Storage();
+
+	@Override
+	protected void setup() {
+
+		// TODO: Should we use service here?
+
+		// // description
+		// ServiceDescription serviceDescription = new ServiceDescription();
+		// serviceDescription.setName("Stone");
+		// // agent
+		// DFAgentDescription agentDescription = new DFAgentDescription();
+		// agentDescription.setName(getAID());
+		// agentDescription.addServices(serviceDescription);
+		// try {
+		// // register DF
+		// DFService.register(this, agentDescription);
+		// } catch (FIPAException exception) {
+		// exception.printStackTrace();
+		// }
+
+		// adding behaviours
+
+		MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+		addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
+	}
+
+	// this class waits for receiving a message with certain template
+	class WaitingForMaterialOrder extends AchieveREResponder {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -5804509731381843266L;
+		private String orderText;
+
+		public WaitingForMaterialOrder(Agent a, MessageTemplate mt) {
+			super(a, mt);
+		}
+
+		@Override
+		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+			// Selling reacts on SalesMarket's request
+
+			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+
+			// Agent should send agree or refuse
+			// TODO: Add refuse answer (some conditions should be added)
+
+			starterMessage = request;
+			ACLMessage agree = request.createReply();
+			agree.setContent(request.getContent());
+			agree.setPerformative(ACLMessage.AGREE);
+
+			if (request.getConversationId() == "Order") {
+				System.out.println("[request] ProductionAgent asks for materials for " + orderText);
+				System.out.println("[agree] I will check materialStorage for materials for " + orderText);
+				addBehaviour(new CheckMaterialStorage(myAgent, agree));
+			} else if (request.getConversationId() == "Take") {
+				System.out.println(
+						"[request] ProductionAgent wants to get materials for " + orderText + " from materialStorage");
+				System.out.println("[agree] I will give you materials for " + orderText + " from materialStorage");
+				addBehaviour(new GiveMaterialToProduction(myAgent, agree));
+			}
+
+			return agree;
+		}
+
+		@Override
+		protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
+				throws FailureException {
+			// if agent agrees to request
+			// after executing, it should send failure of inform
+
+			// some testing
+			System.out.println("\nProcurementAgent: response.getContent()" + response.getContent());
+			System.out.println("ProcurementAgent: response.getSender()" + request.getSender());
+			System.out.println("ProcurementAgent: response.getPerformative()" + response.getPerformative() + "\n");
+
+			// in case of inform product will be taken from warehouse
+			// in case of failure product will be produced
+			if (isInMaterialStorage) {
+				ACLMessage inform = request.createReply();
+				inform.setContent(request.getContent());
+				inform.setPerformative(ACLMessage.INFORM);
+				return inform;
+			} else {
+				ACLMessage failure = request.createReply();
+				failure.setContent(request.getContent());
+				failure.setPerformative(ACLMessage.FAILURE);
+				return failure;
+			}
+		}
+	}
+
+	class CheckMaterialStorage extends OneShotBehaviour {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4869963544017982955L;
+		private String requestedMaterial;
+		private String orderText;
+
+		private ACLMessage agree;
+
+		public CheckMaterialStorage(Agent a, ACLMessage msg) {
+			super(a);
+			requestedMaterial = msg.getContent();
+			agree = msg;
+		}
+
+		@Override
+		public void action() {
+			orderText = Order.readOrder(requestedMaterial).getTextOfOrder();
+
+			System.out.println("ProcurementAgent: Asking materialStorage about " + orderText);
+
+			int paintAmountInMS = 0;
+			int stoneAmountInMS = 0;
+			int amount = 0;
+
+			// TODO: Refactoring is needed
+			// TODO: Order may consist of several colors and sizes, so we need to send an
+			// answer of each material
+			// TODO: we also have size parameter, but let's assume that we have only size 10
+			// by now
+
+			Order order = Order.readOrder(requestedMaterial);
+
+			// TODO: should be some iteration over list
+			List<Material> materialsToCheck = order.getMaterials();
+
+			for (Material materialToCheck : materialsToCheck) {
+				String color = materialToCheck.getColor();
+				Double size = materialToCheck.getSize();
+
+				amount = order.getAmountByMaterial(materialToCheck);
+				System.out.println("color: " + color + "size: " + size + ", amount: " + amount);
+
+				paintAmountInMS = materialStorage.getAmountByColor(color);
+				stoneAmountInMS = materialStorage.getAmountBySize(size);
+
+				if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
+					isInMaterialStorage = true;
+					System.out.println(
+							"ProcurementAgent: I say that materials for " + orderText + " are in materialStorage");
+				} else {
+					// need to describe multiple statements to check every material
+					isInMaterialStorage = false;
+					System.out.println("send info to ProcurementMarket to buy materials for " + orderText);
+					// TODO: calculate needed materials
+					addBehaviour(new AskForAuction(myAgent, 2000, agree));
+				}
+			}
+		}
+	}
+
+	class AskForAuction extends TickerBehaviour {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6100676860519799721L;
+		private String materialToBuy;
+		private String orderText;
+
+		public AskForAuction(Agent a, long period, ACLMessage msg) {
+			super(a, period);
+			materialToBuy = msg.getContent();
+		}
+
+		@Override
+		protected void onTick() {
+			orderText = Order.readOrder(materialToBuy).getTextOfOrder();
+			System.out.println(
+					"ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
+
+			String requestedAction = "Order";
+			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+			msg.setConversationId(requestedAction);
+			msg.addReceiver(new AID(("procurementMarketAgent"), AID.ISLOCALNAME));
+			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
+			msg.setContent(materialToBuy);
+
+			addBehaviour(new RequestToBuy(myAgent, msg));
+		}
+
+		@Override
+		public void stop() {
+			orderText = Order.readOrder(materialToBuy).getTextOfOrder();
+			System.out.println("ProcurementAgent: materials for " + orderText + " are in auction");
+			super.stop();
+		}
+
+		class RequestToBuy extends AchieveREInitiator {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -1322936877118129497L;
+
+			public RequestToBuy(Agent a, ACLMessage msg) {
+				super(a, msg);
+			}
+
+			@Override
+			protected void handleInform(ACLMessage inform) {
+
+				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+				System.out.println("ProcurementAgent: [inform] " + orderText);
+				stop();
+
+				// TODO: Is it necessary to send something?
+				// ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				// msg.addReceiver(starterMessage.getSender());
+				// msg.setContent(starterMessage.getContent());
+				// send(msg);
+			}
+		}
+	}
+
+	class GiveMaterialToProduction extends OneShotBehaviour {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1386982676634257780L;
+		private String materialsToGive;
+		private String orderText;
+
+		public GiveMaterialToProduction(Agent a, ACLMessage msg) {
+			super(a);
+			materialsToGive = msg.getContent();
+		}
+
+		@Override
+		public void action() {
+			Order order = Order.readOrder(materialsToGive);
+			orderText = order.getTextOfOrder();
+			System.out.println("ProcurementAgent: Taking " + orderText + " from materialStorage");
+
+			// TODO: Refactoring is needed
+			// TODO: Order may consist of several colors and sizes, so we need to send an
+			// answer of each material
+
+			Material materialToGive = (Material) order.getMaterials().get(0);
+
+			materialStorage.remove(materialToGive);
+		}
+	}
 }
