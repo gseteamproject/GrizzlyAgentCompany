@@ -76,13 +76,12 @@ public class Procurement extends Agent {
 
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
-
 			starterMessage = request;
 			ACLMessage agree = request.createReply();
 			agree.setContent(request.getContent());
 			agree.setPerformative(ACLMessage.AGREE);
 
-			if (request.getConversationId() == "Order") {
+			if (request.getConversationId() == "Materials") {
 				System.out.println("[request] ProductionAgent asks for materials for " + orderText);
 				System.out.println("[agree] I will check materialStorage for materials for " + orderText);
 				addBehaviour(new CheckMaterialStorage(myAgent, agree));
@@ -166,10 +165,12 @@ public class Procurement extends Agent {
 				Double size = materialToCheck.getSize();
 
 				amount = order.getAmountByMaterial(materialToCheck);
-				System.out.println("color: " + color + "size: " + size + ", amount: " + amount);
+				System.out.println("color: " + color + ", size: " + size + ", amount: " + amount);
 
-				paintAmountInMS = materialStorage.getAmountByColor(color);
-				stoneAmountInMS = materialStorage.getAmountBySize(size);
+				paintAmountInMS = (int) materialStorage.getAmountByColor(color);
+				stoneAmountInMS = (int) materialStorage.getAmountBySize(size);
+
+				System.out.println("paints: " + paintAmountInMS + ", stones: " + stoneAmountInMS);
 
 				if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
 					isInMaterialStorage = true;

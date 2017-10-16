@@ -202,7 +202,9 @@ public class Selling extends Agent {
 			String requestedAction = "Order";
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setConversationId(requestedAction);
-			msg.addReceiver(new AID(("financesAgent"), AID.ISLOCALNAME));
+			// there should be financesAgent, but we will ignore it by now
+			msg.addReceiver(new AID(("productionAgent"), AID.ISLOCALNAME));
+//			msg.addReceiver(new AID(("financesAgent"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 			msg.setContent(orderToProceed);

@@ -16,9 +16,14 @@ public class Storage {
 	public int getAmountByColor(String color) {
 		int count = 0;
 		for (int a = 0; a < this.materiallist.size(); a++) {
-			if (this.materiallist.get(a).getColor().equals(color)) {
-				count++;
+			try {
+				if (this.materiallist.get(a).getColor().equals(color)) {
+					count++;
+				}
+			} catch (java.lang.NullPointerException e) {
+				return count;
 			}
+
 		}
 		return count;
 	}
@@ -26,8 +31,13 @@ public class Storage {
 	public int getAmountBySize(Double size) {
 		int count = 0;
 		for (int a = 0; a < this.materiallist.size(); a++) {
-			if (this.materiallist.get(a).getSize() == size) {
-				count++;
+
+			try {
+				if (this.materiallist.get(a).getSize() == size) {
+					count++;
+				}
+			} catch (java.lang.NullPointerException e) {
+				return count;
 			}
 		}
 		return count;

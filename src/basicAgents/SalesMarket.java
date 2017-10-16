@@ -88,8 +88,8 @@ public class SalesMarket extends Agent {
 			send(testMsg);
 
 			// adding stone to warehouse
-			Material mat = new Material("blue", 10);
-			Selling.warehouse.add(mat);
+//			Material mat = new Material("blue", 10);
+//			Selling.warehouse.add(mat);
 
 			// adding materials to storage
 			Material matCol = new Material("blue");
