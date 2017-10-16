@@ -1,6 +1,8 @@
 package basicAgents;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import basicClasses.Material;
 import basicClasses.Order;
@@ -30,6 +32,7 @@ public class Selling extends Agent {
 	public ACLMessage starterMessage;
 	public boolean isInWarehouse;
 
+	// creating storage for products
 	public static Storage warehouse = new Storage();
 
 	@Override
@@ -86,12 +89,12 @@ public class Selling extends Agent {
 			agree.setPerformative(ACLMessage.AGREE);
 
 			if (request.getConversationId() == "Order") {
-				System.out.println("[request] SalesMarket orders a " + orderText);
-				System.out.println("[agree] I will check warehouse for " + orderText);
+				System.out.println("SellingAgent: [request] SalesMarket orders a " + orderText);
+				System.out.println("SellingAgent: [agree] I will check warehouse for " + orderText);
 				addBehaviour(new CheckWarehouse(myAgent, agree));
 			} else if (request.getConversationId() == "Take") {
-				System.out.println("[request] SalesMarket wants to get " + orderText + " from warehouse");
-				System.out.println("[agree] I will give you " + orderText + " from warehouse");
+				System.out.println("SellingAgent: [request] SalesMarket wants to get " + orderText + " from warehouse");
+				System.out.println("SellingAgent: [agree] I will give you " + orderText + " from warehouse");
 				addBehaviour(new GiveProductToMarket(myAgent, agree));
 			}
 
@@ -103,11 +106,6 @@ public class Selling extends Agent {
 				throws FailureException {
 			// if agent agrees to request
 			// after executing, it should send failure of inform
-
-			// some testing
-			System.out.println("\nSellingAgent: response.getContent()" + response.getContent());
-			System.out.println("SellingAgent: response.getSender()" + request.getSender());
-			System.out.println("SellingAgent: response.getPerformative()" + response.getPerformative() + "\n");
 
 			// in case of inform product will be taken from warehouse
 			// in case of failure product will be produced
@@ -164,8 +162,6 @@ public class Selling extends Agent {
 			String color = materialToCheck.getColor();
 			int amount = order.getAmountByMaterial(materialToCheck);
 
-			System.out.println("color: " + color + ", amount: " + amount);
-
 			amountInWH = warehouse.getAmountByColor(color);
 
 			if (amountInWH >= amount) {
@@ -173,9 +169,22 @@ public class Selling extends Agent {
 				System.out.println("SellingAgent: I say that " + orderText + " is in warehouse");
 			} else {
 				isInWarehouse = false;
-				System.out.println("send info to Finances about product to produce " + orderText);
+				System.out.println("SellingAgent: send info to Finances about product to produce " + orderText);
 				// TODO: calculate needed materials
-				addBehaviour(new SendInfo(myAgent, 2000, agree));
+
+				// check if this order is not in queue yet
+				boolean isInQueue = false;
+				for (Order orderInQueue : SalesMarket.orderQueue) {
+					if (orderInQueue.getID() == order.getID()) {
+						isInQueue = true;
+					}
+				}
+
+				if (!isInQueue) {
+					// add order to queue
+					SalesMarket.orderQueue.add(order);
+					addBehaviour(new SendInfo(myAgent, 2000, agree));
+				}
 			}
 		}
 	}
@@ -204,7 +213,7 @@ public class Selling extends Agent {
 			msg.setConversationId(requestedAction);
 			// there should be financesAgent, but we will ignore it by now
 			msg.addReceiver(new AID(("productionAgent"), AID.ISLOCALNAME));
-//			msg.addReceiver(new AID(("financesAgent"), AID.ISLOCALNAME));
+			// msg.addReceiver(new AID(("financesAgent"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 			msg.setContent(orderToProceed);
@@ -262,7 +271,7 @@ public class Selling extends Agent {
 
 		@Override
 		public void action() {
-			Order order = Order.readOrder(orderToGive);
+			Order order = Order.readOrder(SalesMarket.orderQueue.size(), orderToGive);
 			orderText = order.getTextOfOrder();
 			System.out.println("SellingAgent: Taking " + orderText + " from warehouse");
 

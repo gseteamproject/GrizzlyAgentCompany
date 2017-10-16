@@ -9,11 +9,12 @@ import java.util.Map.Entry;
 
 public class Order implements Serializable {
 	private static final long serialVersionUID = 8348788729049247785L;
+	
+	private int orderID;
+	private Map<Material, Integer> order = new HashMap<Material, Integer>();
 
-	private Map<Material, Integer> order = new HashMap<Material, Integer>();;
-
-	public Order(Material mat, int amount) {
-		this.order.put(mat, amount);
+	public Order(int id) {
+		this.orderID = id;
 	}
 
 	public List<Material> getMaterials() {
@@ -21,6 +22,14 @@ public class Order implements Serializable {
 		return list;
 	}
 
+	public void addMaterial(Material mat, int amount) {
+		this.order.put(mat, amount);
+	}
+	
+	public int getID() {
+		return orderID;
+	}
+	
 	public int getAmountByMaterial(Material mat) {
 		return order.get(mat);
 	}
@@ -44,7 +53,21 @@ public class Order implements Serializable {
 		int amount = Integer.parseInt(params[2]);
 
 		Material mat = new Material(color, size);
-		Order order = new Order(mat, amount);
+		Order order = new Order(0);
+		order.addMaterial(mat, amount);
+
+		return order;
+	}
+	
+	public static Order readOrder(int id, String request) {
+		String[] params = request.split(" ");
+		String color = params[0];
+		double size = Double.parseDouble(params[1]);
+		int amount = Integer.parseInt(params[2]);
+
+		Material mat = new Material(color, size);
+		Order order = new Order(id);
+		order.addMaterial(mat, amount);
 
 		return order;
 	}

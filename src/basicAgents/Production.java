@@ -2,9 +2,11 @@ package basicAgents;
 
 import java.util.Date;
 
+import basicClasses.Material;
 import basicClasses.Order;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.FailureException;
@@ -73,14 +75,14 @@ public class Production extends Agent {
 
 			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
 
-			System.out.println("[request] SellingAgent asks to produce " + orderText);
+			System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
 			starterMessage = request;
 			ACLMessage agree = request.createReply();
 			agree.setContent(request.getContent());
 			agree.setPerformative(ACLMessage.AGREE);
-			System.out.println("[agree] I will produce " + orderText);
+			System.out.println("ProductionAgent: [agree] I will produce " + orderText);
 
 			// if agent agrees it starts executing request
 			addBehaviour(new AskForMaterial(myAgent, 2000, agree));
@@ -94,18 +96,13 @@ public class Production extends Agent {
 
 			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
 
-			// some testing
-			System.out.println("\nProductionAgent: response.getContent()" + response.getContent());
-			System.out.println("ProductionAgent: response.getSender()" + request.getSender());
-			System.out.println("ProductionAgent: response.getPerformative()" + response.getPerformative() + "\n");
-
 			// result of request to ProductionAgent
 			// if agent agrees to request
 			// after executing, it should send failure of inform
 			ACLMessage inform = request.createReply();
 			inform.setContent(request.getContent());
 			inform.setPerformative(ACLMessage.INFORM);
-			System.out.println("[inform] I initiated producing " + orderText);
+			System.out.println("ProductionAgent: [inform] I initiated producing " + orderText);
 
 			return inform;
 		}
@@ -188,7 +185,8 @@ public class Production extends Agent {
 
 				System.out.println(
 						"ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
-				stop();
+				// TODO: may cause infinite loop
+				// stop();
 			}
 		}
 	}
@@ -251,8 +249,10 @@ public class Production extends Agent {
 				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
 
 				System.out.println("ProductionAgent: received [inform] materials for " + orderText
-						+ " will not be taken from storage");
+						+ " will be taken from storage");
 				stop();
+
+				addBehaviour(new DeliverToSelling(myAgent, inform));
 			}
 
 			@Override
@@ -262,8 +262,36 @@ public class Production extends Agent {
 
 				System.out.println("ProductionAgent: received [failure] materials for " + orderText
 						+ " will not be taken from storage");
-				stop();
+				// TODO: may cause infinite loop
+				// stop();
 			}
+		}
+	}
+
+	class DeliverToSelling extends OneShotBehaviour {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 313682933400751868L;
+		private String orderToGive;
+		private String orderText;
+
+		public DeliverToSelling(Agent a, ACLMessage msg) {
+			super(a);
+			orderToGive = msg.getContent();
+		}
+
+		@Override
+		public void action() {
+			Order order = Order.readOrder(SalesMarket.orderQueue.size(), orderToGive);
+			orderText = order.getTextOfOrder();
+			System.out.println("ProductionAgent: Delivering " + orderText + " to warehouse");
+
+			// TODO: Refactoring is needed
+
+			Material productToGive = (Material) order.getMaterials().get(0);
+			Selling.warehouse.add(productToGive);
 		}
 	}
 }

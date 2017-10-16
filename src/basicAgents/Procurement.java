@@ -27,6 +27,7 @@ public class Procurement extends Agent {
 	public ACLMessage starterMessage;
 	public boolean isInMaterialStorage;
 
+	// creating storage for raw materials
 	public static Storage materialStorage = new Storage();
 
 	@Override
@@ -82,13 +83,15 @@ public class Procurement extends Agent {
 			agree.setPerformative(ACLMessage.AGREE);
 
 			if (request.getConversationId() == "Materials") {
-				System.out.println("[request] ProductionAgent asks for materials for " + orderText);
-				System.out.println("[agree] I will check materialStorage for materials for " + orderText);
+				System.out.println("ProcurementAgent: [request] ProductionAgent asks for materials for " + orderText);
+				System.out.println(
+						"ProcurementAgent: [agree] I will check materialStorage for materials for " + orderText);
 				addBehaviour(new CheckMaterialStorage(myAgent, agree));
 			} else if (request.getConversationId() == "Take") {
-				System.out.println(
-						"[request] ProductionAgent wants to get materials for " + orderText + " from materialStorage");
-				System.out.println("[agree] I will give you materials for " + orderText + " from materialStorage");
+				System.out.println("ProcurementAgent: [request] ProductionAgent wants to get materials for " + orderText
+						+ " from materialStorage");
+				System.out.println("ProcurementAgent: [agree] I will give you materials for " + orderText
+						+ " from materialStorage");
 				addBehaviour(new GiveMaterialToProduction(myAgent, agree));
 			}
 
@@ -100,11 +103,6 @@ public class Procurement extends Agent {
 				throws FailureException {
 			// if agent agrees to request
 			// after executing, it should send failure of inform
-
-			// some testing
-			System.out.println("\nProcurementAgent: response.getContent()" + response.getContent());
-			System.out.println("ProcurementAgent: response.getSender()" + request.getSender());
-			System.out.println("ProcurementAgent: response.getPerformative()" + response.getPerformative() + "\n");
 
 			// in case of inform product will be taken from warehouse
 			// in case of failure product will be produced
@@ -155,9 +153,8 @@ public class Procurement extends Agent {
 			// TODO: we also have size parameter, but let's assume that we have only size 10
 			// by now
 
-			Order order = Order.readOrder(requestedMaterial);
+			Order order = Order.readOrder(SalesMarket.orderQueue.size(), requestedMaterial);
 
-			// TODO: should be some iteration over list
 			List<Material> materialsToCheck = order.getMaterials();
 
 			for (Material materialToCheck : materialsToCheck) {
@@ -165,12 +162,9 @@ public class Procurement extends Agent {
 				Double size = materialToCheck.getSize();
 
 				amount = order.getAmountByMaterial(materialToCheck);
-				System.out.println("color: " + color + ", size: " + size + ", amount: " + amount);
 
 				paintAmountInMS = (int) materialStorage.getAmountByColor(color);
 				stoneAmountInMS = (int) materialStorage.getAmountBySize(size);
-
-				System.out.println("paints: " + paintAmountInMS + ", stones: " + stoneAmountInMS);
 
 				if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
 					isInMaterialStorage = true;
@@ -179,7 +173,8 @@ public class Procurement extends Agent {
 				} else {
 					// need to describe multiple statements to check every material
 					isInMaterialStorage = false;
-					System.out.println("send info to ProcurementMarket to buy materials for " + orderText);
+					System.out.println(
+							"ProcurementAgent: send info to ProcurementMarket to buy materials for " + orderText);
 					// TODO: calculate needed materials
 					addBehaviour(new AskForAuction(myAgent, 2000, agree));
 				}
@@ -268,7 +263,7 @@ public class Procurement extends Agent {
 
 		@Override
 		public void action() {
-			Order order = Order.readOrder(materialsToGive);
+			Order order = Order.readOrder(SalesMarket.orderQueue.size(), materialsToGive);
 			orderText = order.getTextOfOrder();
 			System.out.println("ProcurementAgent: Taking " + orderText + " from materialStorage");
 
@@ -276,9 +271,11 @@ public class Procurement extends Agent {
 			// TODO: Order may consist of several colors and sizes, so we need to send an
 			// answer of each material
 
-			Material materialToGive = (Material) order.getMaterials().get(0);
+			List<Material> materialsToGive = order.getMaterials();
 
-			materialStorage.remove(materialToGive);
+			for (Material materialToGive : materialsToGive) {
+				materialStorage.remove(materialToGive);
+			}
 		}
 	}
 }

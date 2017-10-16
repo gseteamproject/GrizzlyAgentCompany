@@ -1,6 +1,8 @@
 package basicAgents;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import basicClasses.Material;
 import basicClasses.Order;
@@ -29,6 +31,9 @@ public class SalesMarket extends Agent {
 	private static final long serialVersionUID = 2003110338808844985L;
 	public ACLMessage starterMessage;
 
+	// creating list of orders
+	public static List<Order> orderQueue = new ArrayList<Order>();
+
 	@Override
 	protected void setup() {
 
@@ -52,6 +57,7 @@ public class SalesMarket extends Agent {
 
 		// MessageTemplate reqTemp =
 		// AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
 		MessageTemplate reqTemp = MessageTemplate.and(
 				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 				MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
@@ -88,8 +94,8 @@ public class SalesMarket extends Agent {
 			send(testMsg);
 
 			// adding stone to warehouse
-//			Material mat = new Material("blue", 10);
-//			Selling.warehouse.add(mat);
+			// Material mat = new Material("blue", 10);
+			// Selling.warehouse.add(mat);
 
 			// adding materials to storage
 			Material matCol = new Material("blue");
@@ -118,14 +124,14 @@ public class SalesMarket extends Agent {
 
 			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
 
-			System.out.println("[request] Customer orders a " + orderText);
+			System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
 			starterMessage = request;
 			ACLMessage agree = request.createReply();
 			agree.setContent(request.getContent());
 			agree.setPerformative(ACLMessage.AGREE);
-			System.out.println("[agree] I will make an order of " + orderText);
+			System.out.println("SalesMarketAgent: [agree] I will make an order of " + orderText);
 
 			// if agent agrees it starts executing request
 			addBehaviour(new SendAnOrder(myAgent, 2000, agree));
@@ -139,18 +145,13 @@ public class SalesMarket extends Agent {
 
 			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
 
-			// some testing
-			System.out.println("\nSalesMarketAgent: response.getContent()" + response.getContent());
-			System.out.println("SalesMarketAgent: response.getSender()" + request.getSender());
-			System.out.println("SalesMarketAgent: response.getPerformative()" + response.getPerformative() + "\n");
-
 			// result of request to sales market
 			// if agent agrees to request
 			// after executing, it should send failure of inform
 			ACLMessage inform = request.createReply();
 			inform.setContent(request.getContent());
 			inform.setPerformative(ACLMessage.INFORM);
-			System.out.println("[inform] I ordered a " + orderText);
+			System.out.println("SalesMarketAgent: [inform] I ordered a " + orderText);
 
 			return inform;
 		}
@@ -230,7 +231,8 @@ public class SalesMarket extends Agent {
 				orderText = Order.readOrder(failure.getContent()).getTextOfOrder();
 
 				System.out.println("SalesMarketAgent: received [failure] " + orderText + " is not in warehouse");
-				stop();
+				// TODO: may cause infinite loop
+				// stop();
 			}
 		}
 	}
@@ -304,7 +306,8 @@ public class SalesMarket extends Agent {
 
 				System.out.println(
 						"SalesMarketAgent: received [failure] " + orderText + " will not be taken from warehouse");
-				stop();
+				// TODO: may cause infinite loop
+				// stop();
 			}
 		}
 	}
