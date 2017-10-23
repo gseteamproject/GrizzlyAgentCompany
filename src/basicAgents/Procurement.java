@@ -32,27 +32,9 @@ public class Procurement extends Agent {
 
 	@Override
 	protected void setup() {
-
-		// TODO: Should we use service here?
-
-		// // description
-		// ServiceDescription serviceDescription = new ServiceDescription();
-		// serviceDescription.setName("Stone");
-		// // agent
-		// DFAgentDescription agentDescription = new DFAgentDescription();
-		// agentDescription.setName(getAID());
-		// agentDescription.addServices(serviceDescription);
-		// try {
-		// // register DF
-		// DFService.register(this, agentDescription);
-		// } catch (FIPAException exception) {
-		// exception.printStackTrace();
-		// }
-
-		// adding behaviours
-
 		MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
+		// adding behaviours
 		addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
 	}
 
@@ -205,7 +187,7 @@ public class Procurement extends Agent {
 			String requestedAction = "Order";
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setConversationId(requestedAction);
-			msg.addReceiver(new AID(("procurementMarketAgent"), AID.ISLOCALNAME));
+			msg.addReceiver(new AID(("AgentProcurementMarket"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 			msg.setContent(materialToBuy);
@@ -237,12 +219,6 @@ public class Procurement extends Agent {
 				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
 				System.out.println("ProcurementAgent: [inform] " + orderText);
 				stop();
-
-				// TODO: Is it necessary to send something?
-				// ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-				// msg.addReceiver(starterMessage.getSender());
-				// msg.setContent(starterMessage.getContent());
-				// send(msg);
 			}
 		}
 	}

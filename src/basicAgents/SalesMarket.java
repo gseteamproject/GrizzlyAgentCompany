@@ -36,32 +36,11 @@ public class SalesMarket extends Agent {
 
 	@Override
 	protected void setup() {
-
-		// TODO: Should we use service here?
-
-		// // description
-		// ServiceDescription serviceDescription = new ServiceDescription();
-		// serviceDescription.setName("Stone");
-		// // agent
-		// DFAgentDescription agentDescription = new DFAgentDescription();
-		// agentDescription.setName(getAID());
-		// agentDescription.addServices(serviceDescription);
-		// try {
-		// // register DF
-		// DFService.register(this, agentDescription);
-		// } catch (FIPAException exception) {
-		// exception.printStackTrace();
-		// }
-
-		// adding behaviours
-
-		// MessageTemplate reqTemp =
-		// AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
-
 		MessageTemplate reqTemp = MessageTemplate.and(
 				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 				MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 
+		// adding behaviours
 		addBehaviour(new WaitingCustomerMessage(this, reqTemp));
 
 		addBehaviour(new SimpleAgentWakerBehaviour(this, 4000));
@@ -83,11 +62,11 @@ public class SalesMarket extends Agent {
 		public void onWake() {
 			// THIS MESSAGE IS FOR TESTING
 			ACLMessage testMsg = new ACLMessage(ACLMessage.REQUEST);
-			testMsg.addReceiver(new AID(("salesMarketAgent"), AID.ISLOCALNAME));
+			testMsg.addReceiver(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
 			testMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
 			// improvised customer
-			testMsg.setSender(new AID(("customer"), AID.ISLOCALNAME));
+			testMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
 
 			// it is an example of order
 			testMsg.setContent("blue 10 1");
@@ -180,7 +159,7 @@ public class SalesMarket extends Agent {
 			String requestedAction = "Order";
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setConversationId(requestedAction);
-			msg.addReceiver(new AID(("sellingAgent"), AID.ISLOCALNAME));
+			msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 			msg.setContent(orderToRequest);
@@ -215,12 +194,6 @@ public class SalesMarket extends Agent {
 
 				System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
 				stop();
-
-				// TODO: Is it necessary to send something?
-				// ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-				// msg.addReceiver(starterMessage.getSender());
-				// msg.setContent(starterMessage.getContent());
-				// send(msg);
 
 				addBehaviour(new GetFromWarehouse(myAgent, 2000, inform));
 			}
@@ -261,7 +234,7 @@ public class SalesMarket extends Agent {
 			String requestedAction = "Take";
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setConversationId(requestedAction);
-			msg.addReceiver(new AID(("sellingAgent"), AID.ISLOCALNAME));
+			msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 			msg.setContent(orderToTake);

@@ -37,27 +37,9 @@ public class Selling extends Agent {
 
 	@Override
 	protected void setup() {
-
-		// TODO: Should we use service here?
-
-		// // description
-		// ServiceDescription serviceDescription = new ServiceDescription();
-		// serviceDescription.setName("Stone");
-		// // agent
-		// DFAgentDescription agentDescription = new DFAgentDescription();
-		// agentDescription.setName(getAID());
-		// agentDescription.addServices(serviceDescription);
-		// try {
-		// // register DF
-		// DFService.register(this, agentDescription);
-		// } catch (FIPAException exception) {
-		// exception.printStackTrace();
-		// }
-
-		// adding behaviours
-
 		MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
+		// adding behaviours
 		addBehaviour(new WaitingForOrder(this, reqTemp));
 	}
 
@@ -212,8 +194,8 @@ public class Selling extends Agent {
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setConversationId(requestedAction);
 			// there should be financesAgent, but we will ignore it by now
-			msg.addReceiver(new AID(("productionAgent"), AID.ISLOCALNAME));
-			// msg.addReceiver(new AID(("financesAgent"), AID.ISLOCALNAME));
+			msg.addReceiver(new AID(("AgentProduction"), AID.ISLOCALNAME));
+			// msg.addReceiver(new AID(("AgentFinances"), AID.ISLOCALNAME));
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 			msg.setContent(orderToProceed);
@@ -245,12 +227,6 @@ public class Selling extends Agent {
 				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
 				System.out.println("SellingAgent: [inform] " + orderText);
 				stop();
-
-				// TODO: Is it necessary to send something?
-				// ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-				// msg.addReceiver(starterMessage.getSender());
-				// msg.setContent(starterMessage.getContent());
-				// send(msg);
 			}
 		}
 	}
