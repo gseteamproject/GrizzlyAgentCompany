@@ -103,6 +103,10 @@ html{
 }
 #Content{
 	background-color:#fff;
+	padding-top:170px; /*Adjust content position to head (head height 140px)*/
+	padding-left:30px;
+	padding-right:50px;
+	padding-bottom:50px;s
 	z-index:1;
 	top:0;
 	left:10%;
