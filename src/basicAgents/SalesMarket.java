@@ -4,20 +4,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import basicClasses.Material;
+import basicClasses.Paint;
+import basicClasses.Product;
 import basicClasses.Order;
+import basicClasses.Stone;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WakerBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPANames;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREInitiator;
@@ -73,14 +71,14 @@ public class SalesMarket extends Agent {
 			send(testMsg);
 
 			// adding stone to warehouse
-			// Material mat = new Material("blue", 10);
+			// Product mat = new Product("blue", 10);
 			// Selling.warehouse.add(mat);
 
 			// adding materials to storage
-			Material matCol = new Material("blue");
-			Material matStone = new Material(10);
-			Procurement.materialStorage.add(matCol);
-			Procurement.materialStorage.add(matStone);
+			Paint paint = new Paint("blue");
+			Stone stone = new Stone(11);
+			Procurement.materialStorage.add(paint);
+			Procurement.materialStorage.add(stone);
 		}
 	}
 

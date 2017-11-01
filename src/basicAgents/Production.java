@@ -2,7 +2,7 @@ package basicAgents;
 
 import java.util.Date;
 
-import basicClasses.Material;
+import basicClasses.Product;
 import basicClasses.Order;
 import jade.core.AID;
 import jade.core.Agent;
@@ -265,7 +265,7 @@ public class Production extends Agent {
 
 			// TODO: Refactoring is needed
 
-			Material productToGive = (Material) order.getMaterials().get(0);
+			Product productToGive = (Product) order.getProducts().get(0);
 			Selling.warehouse.add(productToGive);
 		}
 	}

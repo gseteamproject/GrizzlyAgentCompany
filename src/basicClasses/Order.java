@@ -7,38 +7,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/* Orders are Product-Orders (Red Small Stones or Big Blue Stones and so on) from Customers which
+   are safed in this Class and are used by different Agents
+ */
+
 public class Order implements Serializable {
 	private static final long serialVersionUID = 8348788729049247785L;
 	
 	private int orderID;
-	private Map<Material, Integer> order = new HashMap<Material, Integer>();
+	private Map<Product, Integer> order = new HashMap<Product, Integer>();
 
 	public Order(int id) {
 		this.orderID = id;
 	}
 
-	public List<Material> getMaterials() {
-		List<Material> list = new ArrayList<Material>(order.keySet());
+	public List<Product> getProducts() {
+		List<Product> list = new ArrayList<Product>(order.keySet());
 		return list;
 	}
 
-	public void addMaterial(Material mat, int amount) {
-		this.order.put(mat, amount);
+	public void addProduct (Product prod, int amount) {
+		this.order.put(prod, amount);
 	}
 	
 	public int getID() {
 		return orderID;
 	}
 	
-	public int getAmountByMaterial(Material mat) {
-		return order.get(mat);
+	public int getAmountByProduct (Product prod) {
+		return order.get(prod);
 	}
 
 	public String getTextOfOrder() {
 		String text = "";
 
-		for (Entry<Material, Integer> entry : order.entrySet()) {
-			Material key = entry.getKey();
+		for (Entry<Product, Integer> entry : order.entrySet()) {
+			Product key = entry.getKey();
 			Integer value = entry.getValue();
 
 			text += value.toString() + " " + key.getColor() + " stone of size " + key.getSize();
@@ -52,9 +56,9 @@ public class Order implements Serializable {
 		double size = Double.parseDouble(params[1]);
 		int amount = Integer.parseInt(params[2]);
 
-		Material mat = new Material(color, size);
+		Product prod = new Product(size, color);
 		Order order = new Order(0);
-		order.addMaterial(mat, amount);
+		order.addProduct(prod, amount);
 
 		return order;
 	}
@@ -65,9 +69,9 @@ public class Order implements Serializable {
 		double size = Double.parseDouble(params[1]);
 		int amount = Integer.parseInt(params[2]);
 
-		Material mat = new Material(color, size);
+		Product prod = new Product(size, color);
 		Order order = new Order(id);
-		order.addMaterial(mat, amount);
+		order.addProduct(prod, amount);
 
 		return order;
 	}

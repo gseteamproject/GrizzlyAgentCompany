@@ -3,9 +3,7 @@ package basicAgents;
 import java.util.Date;
 import java.util.List;
 
-import basicClasses.Material;
-import basicClasses.Order;
-import basicClasses.Storage;
+import basicClasses.*;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
@@ -28,7 +26,7 @@ public class Procurement extends Agent {
 	public boolean isInMaterialStorage;
 
 	// creating storage for raw materials
-	public static Storage materialStorage = new Storage();
+	public static MaterialStorage materialStorage = new MaterialStorage();
 
 	@Override
 	protected void setup() {
@@ -137,16 +135,16 @@ public class Procurement extends Agent {
 
 			Order order = Order.readOrder(SalesMarket.orderQueue.size(), requestedMaterial);
 
-			List<Material> materialsToCheck = order.getMaterials();
+			List<Product> productsToCheck = order.getProducts();
 
-			for (Material materialToCheck : materialsToCheck) {
-				String color = materialToCheck.getColor();
-				Double size = materialToCheck.getSize();
+			for (Product productToCheck : productsToCheck) {
+				String color = productToCheck.getColor();
+				Double size = productToCheck.getSize();
 
-				amount = order.getAmountByMaterial(materialToCheck);
+				amount = order.getAmountByProduct(productToCheck);
 
-				paintAmountInMS = (int) materialStorage.getAmountByColor(color);
-				stoneAmountInMS = (int) materialStorage.getAmountBySize(size);
+				paintAmountInMS = (int) materialStorage.getAmountOfPaint(color);
+				stoneAmountInMS = (int) materialStorage.getAmountOfStones(size);
 
 				if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
 					isInMaterialStorage = true;
@@ -247,10 +245,13 @@ public class Procurement extends Agent {
 			// TODO: Order may consist of several colors and sizes, so we need to send an
 			// answer of each material
 
-			List<Material> materialsToGive = order.getMaterials();
 
-			for (Material materialToGive : materialsToGive) {
-				materialStorage.remove(materialToGive);
+			List<Product> orderedProducts = order.getProducts();
+
+			for (Product product : orderedProducts) {
+
+				materialStorage.remove(new Paint(product.getColor()));
+				materialStorage.remove(new Stone(product.getSize()));
 			}
 		}
 	}

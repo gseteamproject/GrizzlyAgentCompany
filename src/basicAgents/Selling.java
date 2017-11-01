@@ -1,24 +1,18 @@
 package basicAgents;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import basicClasses.Material;
+import basicClasses.Product;
 import basicClasses.Order;
-import basicClasses.Storage;
+import basicClasses.ProductStorage;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPANames;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREInitiator;
@@ -33,7 +27,7 @@ public class Selling extends Agent {
 	public boolean isInWarehouse;
 
 	// creating storage for products
-	public static Storage warehouse = new Storage();
+	public static ProductStorage warehouse = new ProductStorage();
 
 	@Override
 	protected void setup() {
@@ -132,19 +126,20 @@ public class Selling extends Agent {
 
 			// TODO: Refactoring is needed
 			// TODO: Order may consist of several colors and sizes, so we need to send an
-			// answer of each material
+			// answer of each PRODUCT
 			// TODO: we also have size parameter, but let's assume that we have only size 10
 			// by now
 
 			Order order = Order.readOrder(requestedOrder);
 
 			// TODO: should be some iteration over list
-			Material materialToCheck = (Material) order.getMaterials().get(0);
+			Product productToCheck = (Product) order.getProducts().get(0);
 
-			String color = materialToCheck.getColor();
-			int amount = order.getAmountByMaterial(materialToCheck);
+			//String color = productToCheck.getColor();
 
-			amountInWH = warehouse.getAmountByColor(color);
+			int amount = order.getAmountByProduct(productToCheck);
+
+			amountInWH = warehouse.getAmountOfProduct(productToCheck);
 
 			if (amountInWH >= amount) {
 				isInWarehouse = true;
@@ -152,7 +147,7 @@ public class Selling extends Agent {
 			} else {
 				isInWarehouse = false;
 				System.out.println("SellingAgent: send info to Finances about product to produce " + orderText);
-				// TODO: calculate needed materials
+				// TODO: calculate needed PRODUCTS
 
 				// check if this order is not in queue yet
 				boolean isInQueue = false;
@@ -253,11 +248,11 @@ public class Selling extends Agent {
 
 			// TODO: Refactoring is needed
 			// TODO: Order may consist of several colors and sizes, so we need to send an
-			// answer of each material
+			// answer of each PRODUCT
 
-			Material materialToGive = (Material) order.getMaterials().get(0);
+			Product productToGive = (Product) order.getProducts().get(0);
 
-			warehouse.remove(materialToGive);
+			warehouse.remove(productToGive);
 		}
 	}
 }

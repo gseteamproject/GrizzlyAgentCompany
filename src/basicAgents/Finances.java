@@ -1,26 +1,15 @@
 package basicAgents;
 
-import java.util.Date;
-
-import basicAgents.Selling.CheckWarehouse;
-import basicAgents.Selling.GiveProductToMarket;
-import basicAgents.Selling.SendInfo;
-import basicAgents.Selling.WaitingForOrder;
-import basicAgents.Selling.SendInfo.RequestToFinance;
-import basicClasses.Material;
 import basicClasses.Order;
-import basicClasses.Storage;
-import jade.core.AID;
+import basicClasses.ProductStorage;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
 
 public class Finances extends Agent {
@@ -32,7 +21,7 @@ public class Finances extends Agent {
 	public boolean isInWarehouse;
 
 	// creating storage for products
-	public static Storage warehouse = new Storage();
+	public static ProductStorage warehouse = new ProductStorage();
 
 	@Override
 	protected void setup() {
