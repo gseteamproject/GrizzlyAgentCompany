@@ -1,11 +1,12 @@
 import jade.Boot;
 
-public class Main {
+public class
+Main {
 
 
 	public static void main(String[] args) {
 
-		System.out.println("ok");
+
 
 
 		String[] parameters = new String[2];
