@@ -7,7 +7,6 @@ import java.util.List;
 import basicClasses.Paint;
 import basicClasses.Product;
 import basicClasses.Order;
-import basicClasses.OrderPart;
 import basicClasses.Stone;
 import jade.core.AID;
 import jade.core.Agent;
@@ -24,278 +23,293 @@ import jade.proto.AchieveREResponder;
 
 public class SalesMarket extends Agent {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2003110338808844985L;
-	public ACLMessage starterMessage;
-
-	// creating list of orders
-	public static List<Order> orderQueue = new ArrayList<Order>();
-
-	@Override
-	protected void setup() {
-		MessageTemplate reqTemp = MessageTemplate.and(
-				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
-				MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-
-		// adding behaviours
-		addBehaviour(new WaitingCustomerMessage(this, reqTemp));
-
-		addBehaviour(new SimpleAgentWakerBehaviour(this, 4000));
-	}
-
-	// class that sends test message with example of order. This simulates customer.
-	class SimpleAgentWakerBehaviour extends WakerBehaviour {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 3327849748177688933L;
-
-		public SimpleAgentWakerBehaviour(Agent a, long timeout) {
-			super(a, timeout);
-		}
-
-		@Override
-		public void onWake() {
-			// THIS MESSAGE IS FOR TESTING
-			ACLMessage testMsg = new ACLMessage(ACLMessage.REQUEST);
-			testMsg.addReceiver(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
-			testMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-
-			// improvised customer
-			testMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
-
-			// it is an example of order
-			List<OrderPart> testList = new ArrayList<OrderPart>();
-			String testGson;
-
-			OrderPart testProducts = new OrderPart();
-			testProducts.product = new Product(10, "blue");
-			testProducts.amount = orderQueue.size() + 1;
-			testList.add(testProducts);
-
-			Order order = new Order();
-			order.id = 1;
-			order.orderList = testList;
-			testGson = Order.gson.toJson(order);
-			// "{'id':1,'orderList':[{'product':{'stone':{'size':10.0,'price':0},'paint':{'color':'blue','price':0},'price':0},'amount':1}]}"
-
-			testMsg.setContent(testGson);
-			send(testMsg);
-
-			// adding stone to warehouse
-			// Product mat = new Product("blue", 10);
-			// Selling.warehouse.add(mat);
-
-			// adding materials to storage
-			Paint paint = new Paint("blue");
-			Stone stone = new Stone(10);
-			Procurement.materialStorage.add(paint);
-			Procurement.materialStorage.add(stone);
-		}
-	}
-
-	// this class waits for receiving a message with certain template
-	class WaitingCustomerMessage extends AchieveREResponder {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 7386418031416044376L;
-		private String orderText;
-
-		public WaitingCustomerMessage(Agent a, MessageTemplate mt) {
-			super(a, mt);
-		}
-
-		@Override
-		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
-			// Sales Market reacts on customer's request
-			System.out.println("request" + request.getContent());
-
-			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
-
-			System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
-			// Agent should send agree or refuse
-			// TODO: Add refuse answer (some conditions should be added)
-			starterMessage = request;
-			ACLMessage agree = request.createReply();
-			agree.setContent(request.getContent());
-			agree.setPerformative(ACLMessage.AGREE);
-			System.out.println("SalesMarketAgent: [agree] I will make an order of " + orderText);
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 2003110338808844985L;
+    public ACLMessage starterMessage;
+
+    // creating list of orders
+    public static List<Order> orderQueue = new ArrayList<Order>();
+
+    @Override
+    protected void setup() {
+        MessageTemplate reqTemp = MessageTemplate.and(
+                MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+                MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+
+        // adding behaviours
+        addBehaviour(new WaitingCustomerMessage(this, reqTemp));
+
+        addBehaviour(new SimpleAgentWakerBehaviour(this, 4000));
+    }
+
+    // class that sends test message with example of order. This simulates customer.
+    class SimpleAgentWakerBehaviour extends WakerBehaviour {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 3327849748177688933L;
+
+        public SimpleAgentWakerBehaviour(Agent a, long timeout) {
+            super(a, timeout);
+        }
+
+        @Override
+        public void onWake() {
+            // THIS MESSAGE IS FOR TESTING
+            ACLMessage testMsg = new ACLMessage(ACLMessage.REQUEST);
+            testMsg.addReceiver(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
+            testMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+            // improvised customer
+            testMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
+
+            // it is an example of order
+            Order order = new Order();
+            order.id = orderQueue.size() + 1;
+
+            // TODO: Если нужно изготовить больше 1 типа камней, цикл застревает на
+            // ProcurementAgent: I say that materials for ... are in materialStorage
+            order.addProduct(new Product(10, "red"), 1);
+            order.addProduct(new Product(10, "blue"), 2);
+            order.addProduct(new Product(10, "green"), 2);
+
+            String testGson = Order.gson.toJson(order);
+            // {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
+
+            testMsg.setContent(testGson);
+            send(testMsg);
+
+            // adding stone to warehouse and storage
+            Paint paint = new Paint("red");
+            Stone stone = new Stone(10);
+            Product prdct = new Product(stone, paint);
+            Selling.warehouse.add(prdct);
+
+            paint = new Paint("blue");
+            stone = new Stone(10);
+            prdct = new Product(stone, paint);
+            Selling.warehouse.add(prdct);
+            Procurement.materialStorage.add(paint);
+            Procurement.materialStorage.add(stone);
+
+            paint = new Paint("green");
+            stone = new Stone(10);
+            prdct = new Product(stone, paint);
+            Procurement.materialStorage.add(paint);
+            Procurement.materialStorage.add(stone);
+            Procurement.materialStorage.add(paint);
+            Procurement.materialStorage.add(stone);
+
+            // That means:
+            // 1 red stone will be taken from warehouse
+            // 1 blue stone will be taken from warehouse
+            // 1 blue stone will be produced
+            // 2 green stone will be produced
+        }
+    }
+
+    // this class waits for receiving a message with certain template
+    class WaitingCustomerMessage extends AchieveREResponder {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 7386418031416044376L;
+        private String orderText;
+
+        public WaitingCustomerMessage(Agent a, MessageTemplate mt) {
+            super(a, mt);
+        }
+
+        @Override
+        protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+            // Sales Market reacts on customer's request
+            System.out.println("request" + request.getContent());
+
+            Order order = Order.gson.fromJson(request.getContent(), Order.class);
+            orderText = order.getTextOfOrder();
 
-			// if agent agrees it starts executing request
-			addBehaviour(new SendAnOrder(myAgent, 2000, agree));
+            System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
+            // Agent should send agree or refuse
+            // TODO: Add refuse answer (some conditions should be added)
+            starterMessage = request;
+            ACLMessage agree = request.createReply();
+            agree.setContent(request.getContent());
+            agree.setPerformative(ACLMessage.AGREE);
+            System.out.println("SalesMarketAgent: [agree] I will make an order of " + orderText);
 
-			return agree;
-		}
+            // if agent agrees it starts executing request
+            addBehaviour(new SendAnOrder(myAgent, 2000, agree));
 
-		@Override
-		protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
-				throws FailureException {
+            return agree;
+        }
+
+        @Override
+        protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
+                throws FailureException {
+
+            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+
+            // result of request to sales market
+            // if agent agrees to request
+            // after executing, it should send failure of inform
+            ACLMessage inform = request.createReply();
+            inform.setContent(request.getContent());
+            inform.setPerformative(ACLMessage.INFORM);
+            System.out.println("SalesMarketAgent: [inform] I ordered a " + orderText);
 
-			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+            return inform;
+        }
+    }
+
+    class SendAnOrder extends TickerBehaviour {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 8296971392230921846L;
+        private String orderToRequest;
+        private String orderText;
 
-			// result of request to sales market
-			// if agent agrees to request
-			// after executing, it should send failure of inform
-			ACLMessage inform = request.createReply();
-			inform.setContent(request.getContent());
-			inform.setPerformative(ACLMessage.INFORM);
-			System.out.println("SalesMarketAgent: [inform] I ordered a " + orderText);
+        public SendAnOrder(Agent a, long period, ACLMessage msg) {
+            super(a, period);
+            orderToRequest = msg.getContent();
+        }
 
-			return inform;
-		}
-	}
+        @Override
+        protected void onTick() {
+            orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
+            System.out.println("SalesMarketAgent: Sending an order to SellingAgent to get " + orderText);
 
-	class SendAnOrder extends TickerBehaviour {
+            String requestedAction = "Order";
+            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+            msg.setConversationId(requestedAction);
+            msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
+            msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+            msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
+            msg.setContent(orderToRequest);
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 8296971392230921846L;
-		private String orderToRequest;
-		private String orderText;
+            addBehaviour(new RequestToOrder(myAgent, msg));
+        }
 
-		public SendAnOrder(Agent a, long period, ACLMessage msg) {
-			super(a, period);
-			orderToRequest = msg.getContent();
-		}
+        @Override
+        public void stop() {
 
-		@Override
-		protected void onTick() {
-			orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
 
-			System.out.println("SalesMarketAgent: Sending an order to SellingAgent to get " + orderText);
+            System.out.println("SalesMarketAgent: Now I know that " + orderText + " is in warehouse");
+            super.stop();
+        }
 
-			String requestedAction = "Order";
-			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-			msg.setConversationId(requestedAction);
-			msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
-			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
-			msg.setContent(orderToRequest);
+        class RequestToOrder extends AchieveREInitiator {
 
-			addBehaviour(new RequestToOrder(myAgent, msg));
-		}
+            /**
+             * 
+             */
+            private static final long serialVersionUID = -6945741747877024833L;
 
-		@Override
-		public void stop() {
+            public RequestToOrder(Agent a, ACLMessage msg) {
+                super(a, msg);
+            }
 
-			orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
+            @Override
+            protected void handleInform(ACLMessage inform) {
 
-			System.out.println("SalesMarketAgent: Now I know that " + orderText + " is in warehouse");
-			super.stop();
-		}
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
-		class RequestToOrder extends AchieveREInitiator {
+                System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
+                stop();
 
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = -6945741747877024833L;
+                addBehaviour(new GetFromWarehouse(myAgent, 2000, inform));
+            }
 
-			public RequestToOrder(Agent a, ACLMessage msg) {
-				super(a, msg);
-			}
+            @Override
+            protected void handleFailure(ACLMessage failure) {
 
-			@Override
-			protected void handleInform(ACLMessage inform) {
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
-				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                System.out.println("SalesMarketAgent: received [failure] " + orderText + " is not in warehouse");
+                // TODO: may cause infinite loop
+                // stop();
+            }
+        }
+    }
 
-				System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
-				stop();
+    class GetFromWarehouse extends TickerBehaviour {
 
-				addBehaviour(new GetFromWarehouse(myAgent, 2000, inform));
-			}
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 4233055394916376580L;
+        private String orderToTake;
+        private String orderText;
 
-			@Override
-			protected void handleFailure(ACLMessage failure) {
+        public GetFromWarehouse(Agent a, long period, ACLMessage msg) {
+            super(a, period);
+            orderToTake = msg.getContent();
+        }
 
-				orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
+        @Override
+        protected void onTick() {
 
-				System.out.println("SalesMarketAgent: received [failure] " + orderText + " is not in warehouse");
-				// TODO: may cause infinite loop
-				// stop();
-			}
-		}
-	}
+            orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
 
-	class GetFromWarehouse extends TickerBehaviour {
+            System.out.println("SalesMarketAgent: Asking SellingAgent to take " + orderText + " from warehouse");
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 4233055394916376580L;
-		private String orderToTake;
-		private String orderText;
+            String requestedAction = "Take";
+            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+            msg.setConversationId(requestedAction);
+            msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
+            msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+            msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
+            msg.setContent(orderToTake);
 
-		public GetFromWarehouse(Agent a, long period, ACLMessage msg) {
-			super(a, period);
-			orderToTake = msg.getContent();
-		}
+            addBehaviour(new RequestToTake(myAgent, msg));
+        }
 
-		@Override
-		protected void onTick() {
+        @Override
+        public void stop() {
 
-			orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
 
-			System.out.println("SalesMarketAgent: Asking SellingAgent to take " + orderText + " from warehouse");
+            System.out.println("SalesMarketAgent: Now I have a " + orderText);
+            super.stop();
+        }
 
-			String requestedAction = "Take";
-			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-			msg.setConversationId(requestedAction);
-			msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
-			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
-			msg.setContent(orderToTake);
+        class RequestToTake extends AchieveREInitiator {
 
-			addBehaviour(new RequestToTake(myAgent, msg));
-		}
+            /**
+             * 
+             */
+            private static final long serialVersionUID = -2624609588724924573L;
 
-		@Override
-		public void stop() {
+            public RequestToTake(Agent a, ACLMessage msg) {
+                super(a, msg);
+            }
 
-			orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
+            @Override
+            protected void handleInform(ACLMessage inform) {
 
-			System.out.println("SalesMarketAgent: Now I have a " + orderText);
-			super.stop();
-		}
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
-		class RequestToTake extends AchieveREInitiator {
+                System.out
+                        .println("SalesMarketAgent: received [inform] " + orderText + " will be taken from warehouse");
+                stop();
+            }
 
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = -2624609588724924573L;
+            @Override
+            protected void handleFailure(ACLMessage failure) {
 
-			public RequestToTake(Agent a, ACLMessage msg) {
-				super(a, msg);
-			}
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
-			@Override
-			protected void handleInform(ACLMessage inform) {
-
-				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-
-				System.out
-						.println("SalesMarketAgent: received [inform] " + orderText + " will be taken from warehouse");
-				stop();
-			}
-
-			@Override
-			protected void handleFailure(ACLMessage failure) {
-
-				orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-
-				System.out.println(
-						"SalesMarketAgent: received [failure] " + orderText + " will not be taken from warehouse");
-				// TODO: may cause infinite loop
-				// stop();
-			}
-		}
-	}
+                System.out.println(
+                        "SalesMarketAgent: received [failure] " + orderText + " will not be taken from warehouse");
+                // TODO: may cause infinite loop
+                // stop();
+            }
+        }
+    }
 }
