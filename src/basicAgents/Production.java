@@ -54,7 +54,7 @@ public class Production extends Agent {
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 			// ProductionAgent reacts on SellingAgent's request
 
-			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
 			System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);
 			// Agent should send agree or refuse
@@ -75,7 +75,7 @@ public class Production extends Agent {
 		protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
 				throws FailureException {
 
-			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
 			// result of request to ProductionAgent
 			// if agent agrees to request
@@ -105,7 +105,7 @@ public class Production extends Agent {
 
 		@Override
 		protected void onTick() {
-			orderText = Order.readOrder(materialsToRequest).getTextOfOrder();
+			orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
 
 			// TODO: ask for all materials at once
 
@@ -125,7 +125,7 @@ public class Production extends Agent {
 		@Override
 		public void stop() {
 
-			orderText = Order.readOrder(materialsToRequest).getTextOfOrder();
+			orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
 
 			System.out.println("ProductionAgent: Now I know that materials for " + orderText + " are in storage");
 			super.stop();
@@ -145,7 +145,7 @@ public class Production extends Agent {
 			@Override
 			protected void handleInform(ACLMessage inform) {
 
-				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
 				System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
 				stop();
@@ -156,7 +156,7 @@ public class Production extends Agent {
 			@Override
 			protected void handleFailure(ACLMessage failure) {
 
-				orderText = Order.readOrder(failure.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
 				System.out.println(
 						"ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
@@ -183,7 +183,7 @@ public class Production extends Agent {
 		@Override
 		protected void onTick() {
 
-			orderText = Order.readOrder(materialsToTake).getTextOfOrder();
+			orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
 
 			System.out.println("ProductionAgent: Asking SellingAgent to take " + orderText + " from warehouse");
 
@@ -201,7 +201,7 @@ public class Production extends Agent {
 		@Override
 		public void stop() {
 
-			orderText = Order.readOrder(materialsToTake).getTextOfOrder();
+			orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
 
 			System.out.println("ProductionAgent: Now I have materials for " + orderText);
 			super.stop();
@@ -221,7 +221,7 @@ public class Production extends Agent {
 			@Override
 			protected void handleInform(ACLMessage inform) {
 
-				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
 				System.out.println("ProductionAgent: received [inform] materials for " + orderText
 						+ " will be taken from storage");
@@ -233,7 +233,7 @@ public class Production extends Agent {
 			@Override
 			protected void handleFailure(ACLMessage failure) {
 
-				orderText = Order.readOrder(failure.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
 				System.out.println("ProductionAgent: received [failure] materials for " + orderText
 						+ " will not be taken from storage");
@@ -259,13 +259,13 @@ public class Production extends Agent {
 
 		@Override
 		public void action() {
-			Order order = Order.readOrder(SalesMarket.orderQueue.size(), orderToGive);
+			Order order = Order.gson.fromJson(orderToGive, Order.class);
 			orderText = order.getTextOfOrder();
 			System.out.println("ProductionAgent: Delivering " + orderText + " to warehouse");
 
 			// TODO: Refactoring is needed
 
-			Product productToGive = (Product) order.getProducts().get(0);
+			Product productToGive = (Product) order.orderList.get(0).product;
 			Selling.warehouse.add(productToGive);
 		}
 	}

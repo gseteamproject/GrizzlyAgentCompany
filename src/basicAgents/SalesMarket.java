@@ -7,6 +7,7 @@ import java.util.List;
 import basicClasses.Paint;
 import basicClasses.Product;
 import basicClasses.Order;
+import basicClasses.OrderPart;
 import basicClasses.Stone;
 import jade.core.AID;
 import jade.core.Agent;
@@ -67,7 +68,21 @@ public class SalesMarket extends Agent {
 			testMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
 
 			// it is an example of order
-			testMsg.setContent("blue 10 1");
+			List<OrderPart> testList = new ArrayList<OrderPart>();
+			String testGson;
+
+			OrderPart testProducts = new OrderPart();
+			testProducts.product = new Product(10, "blue");
+			testProducts.amount = orderQueue.size() + 1;
+			testList.add(testProducts);
+
+			Order order = new Order();
+			order.id = 1;
+			order.orderList = testList;
+			testGson = Order.gson.toJson(order);
+			// "{'id':1,'orderList':[{'product':{'stone':{'size':10.0,'price':0},'paint':{'color':'blue','price':0},'price':0},'amount':1}]}"
+
+			testMsg.setContent(testGson);
 			send(testMsg);
 
 			// adding stone to warehouse
@@ -76,7 +91,7 @@ public class SalesMarket extends Agent {
 
 			// adding materials to storage
 			Paint paint = new Paint("blue");
-			Stone stone = new Stone(11);
+			Stone stone = new Stone(10);
 			Procurement.materialStorage.add(paint);
 			Procurement.materialStorage.add(stone);
 		}
@@ -98,8 +113,9 @@ public class SalesMarket extends Agent {
 		@Override
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 			// Sales Market reacts on customer's request
+			System.out.println("request" + request.getContent());
 
-			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
 			System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
 			// Agent should send agree or refuse
@@ -120,7 +136,7 @@ public class SalesMarket extends Agent {
 		protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
 				throws FailureException {
 
-			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
 			// result of request to sales market
 			// if agent agrees to request
@@ -150,7 +166,7 @@ public class SalesMarket extends Agent {
 
 		@Override
 		protected void onTick() {
-			orderText = Order.readOrder(orderToRequest).getTextOfOrder();
+			orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
 
 			System.out.println("SalesMarketAgent: Sending an order to SellingAgent to get " + orderText);
 
@@ -168,7 +184,7 @@ public class SalesMarket extends Agent {
 		@Override
 		public void stop() {
 
-			orderText = Order.readOrder(orderToRequest).getTextOfOrder();
+			orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
 
 			System.out.println("SalesMarketAgent: Now I know that " + orderText + " is in warehouse");
 			super.stop();
@@ -188,7 +204,7 @@ public class SalesMarket extends Agent {
 			@Override
 			protected void handleInform(ACLMessage inform) {
 
-				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
 				System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
 				stop();
@@ -199,7 +215,7 @@ public class SalesMarket extends Agent {
 			@Override
 			protected void handleFailure(ACLMessage failure) {
 
-				orderText = Order.readOrder(failure.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
 				System.out.println("SalesMarketAgent: received [failure] " + orderText + " is not in warehouse");
 				// TODO: may cause infinite loop
@@ -225,7 +241,7 @@ public class SalesMarket extends Agent {
 		@Override
 		protected void onTick() {
 
-			orderText = Order.readOrder(orderToTake).getTextOfOrder();
+			orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
 
 			System.out.println("SalesMarketAgent: Asking SellingAgent to take " + orderText + " from warehouse");
 
@@ -243,7 +259,7 @@ public class SalesMarket extends Agent {
 		@Override
 		public void stop() {
 
-			orderText = Order.readOrder(orderToTake).getTextOfOrder();
+			orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
 
 			System.out.println("SalesMarketAgent: Now I have a " + orderText);
 			super.stop();
@@ -263,7 +279,7 @@ public class SalesMarket extends Agent {
 			@Override
 			protected void handleInform(ACLMessage inform) {
 
-				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
 				System.out
 						.println("SalesMarketAgent: received [inform] " + orderText + " will be taken from warehouse");
@@ -273,7 +289,7 @@ public class SalesMarket extends Agent {
 			@Override
 			protected void handleFailure(ACLMessage failure) {
 
-				orderText = Order.readOrder(failure.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
 				System.out.println(
 						"SalesMarketAgent: received [failure] " + orderText + " will not be taken from warehouse");

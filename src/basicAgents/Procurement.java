@@ -53,7 +53,7 @@ public class Procurement extends Agent {
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 			// Selling reacts on SalesMarket's request
 
-			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
@@ -119,7 +119,7 @@ public class Procurement extends Agent {
 
 		@Override
 		public void action() {
-			orderText = Order.readOrder(requestedMaterial).getTextOfOrder();
+			orderText = Order.gson.fromJson(requestedMaterial, Order.class).getTextOfOrder();
 
 			System.out.println("ProcurementAgent: Asking materialStorage about " + orderText);
 
@@ -133,7 +133,7 @@ public class Procurement extends Agent {
 			// TODO: we also have size parameter, but let's assume that we have only size 10
 			// by now
 
-			Order order = Order.readOrder(SalesMarket.orderQueue.size(), requestedMaterial);
+			Order order = Order.gson.fromJson(requestedMaterial, Order.class);
 
 			List<Product> productsToCheck = order.getProducts();
 
@@ -145,6 +145,8 @@ public class Procurement extends Agent {
 
 				paintAmountInMS = (int) materialStorage.getAmountOfPaint(color);
 				stoneAmountInMS = (int) materialStorage.getAmountOfStones(size);
+				System.out.println("paintAmountInMS " + paintAmountInMS + " stoneAmountInMS " + stoneAmountInMS
+						+ " amount " + amount);
 
 				if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
 					isInMaterialStorage = true;
@@ -178,7 +180,7 @@ public class Procurement extends Agent {
 
 		@Override
 		protected void onTick() {
-			orderText = Order.readOrder(materialToBuy).getTextOfOrder();
+			orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
 			System.out.println(
 					"ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
 
@@ -195,7 +197,7 @@ public class Procurement extends Agent {
 
 		@Override
 		public void stop() {
-			orderText = Order.readOrder(materialToBuy).getTextOfOrder();
+			orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
 			System.out.println("ProcurementAgent: materials for " + orderText + " are in auction");
 			super.stop();
 		}
@@ -214,7 +216,7 @@ public class Procurement extends Agent {
 			@Override
 			protected void handleInform(ACLMessage inform) {
 
-				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 				System.out.println("ProcurementAgent: [inform] " + orderText);
 				stop();
 			}
@@ -237,14 +239,13 @@ public class Procurement extends Agent {
 
 		@Override
 		public void action() {
-			Order order = Order.readOrder(SalesMarket.orderQueue.size(), materialsToGive);
+			Order order = Order.gson.fromJson(materialsToGive, Order.class);
 			orderText = order.getTextOfOrder();
 			System.out.println("ProcurementAgent: Taking " + orderText + " from materialStorage");
 
 			// TODO: Refactoring is needed
 			// TODO: Order may consist of several colors and sizes, so we need to send an
 			// answer of each material
-
 
 			List<Product> orderedProducts = order.getProducts();
 

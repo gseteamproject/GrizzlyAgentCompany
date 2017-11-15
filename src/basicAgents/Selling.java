@@ -2,6 +2,9 @@ package basicAgents;
 
 import java.util.Date;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import basicClasses.Product;
 import basicClasses.Order;
 import basicClasses.ProductStorage;
@@ -54,7 +57,7 @@ public class Selling extends Agent {
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 			// Selling reacts on SalesMarket's request
 
-			orderText = Order.readOrder(request.getContent()).getTextOfOrder();
+			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
@@ -118,7 +121,9 @@ public class Selling extends Agent {
 
 		@Override
 		public void action() {
-			orderText = Order.readOrder(requestedOrder).getTextOfOrder();
+			Order order = Order.gson.fromJson(requestedOrder, Order.class);
+
+			orderText = order.getTextOfOrder();
 
 			System.out.println("SellingAgent: Asking warehouse about " + orderText);
 
@@ -130,12 +135,10 @@ public class Selling extends Agent {
 			// TODO: we also have size parameter, but let's assume that we have only size 10
 			// by now
 
-			Order order = Order.readOrder(requestedOrder);
-
 			// TODO: should be some iteration over list
-			Product productToCheck = (Product) order.getProducts().get(0);
+			Product productToCheck = (Product) order.orderList.get(0).product;
 
-			//String color = productToCheck.getColor();
+			// String color = productToCheck.getColor();
 
 			int amount = order.getAmountByProduct(productToCheck);
 
@@ -152,7 +155,9 @@ public class Selling extends Agent {
 				// check if this order is not in queue yet
 				boolean isInQueue = false;
 				for (Order orderInQueue : SalesMarket.orderQueue) {
-					if (orderInQueue.getID() == order.getID()) {
+					System.out.println("orderInQueue.getID() " + orderInQueue.id);
+					System.out.println("order.getID() " + order.id);
+					if (orderInQueue.id == order.id) {
 						isInQueue = true;
 					}
 				}
@@ -182,7 +187,7 @@ public class Selling extends Agent {
 
 		@Override
 		protected void onTick() {
-			orderText = Order.readOrder(orderToProceed).getTextOfOrder();
+			orderText = Order.gson.fromJson(orderToProceed, Order.class).getTextOfOrder();
 			System.out.println("SellingAgent: Sending an info to Finance Agent to produce " + orderText);
 
 			String requestedAction = "Order";
@@ -200,7 +205,7 @@ public class Selling extends Agent {
 
 		@Override
 		public void stop() {
-			orderText = Order.readOrder(orderToProceed).getTextOfOrder();
+			orderText = Order.gson.fromJson(orderToProceed, Order.class).getTextOfOrder();
 			System.out.println("SellingAgent: " + orderText + " is in production");
 			super.stop();
 		}
@@ -219,7 +224,7 @@ public class Selling extends Agent {
 			@Override
 			protected void handleInform(ACLMessage inform) {
 
-				orderText = Order.readOrder(inform.getContent()).getTextOfOrder();
+				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 				System.out.println("SellingAgent: [inform] " + orderText);
 				stop();
 			}
@@ -242,7 +247,11 @@ public class Selling extends Agent {
 
 		@Override
 		public void action() {
-			Order order = Order.readOrder(SalesMarket.orderQueue.size(), orderToGive);
+			GsonBuilder builder = new GsonBuilder();
+			Gson gson = builder.create();
+			Order order = gson.fromJson(orderToGive, Order.class);
+
+			// Order order = Order.readOrder(SalesMarket.orderQueue.size(), orderToGive);
 			orderText = order.getTextOfOrder();
 			System.out.println("SellingAgent: Taking " + orderText + " from warehouse");
 
@@ -250,7 +259,7 @@ public class Selling extends Agent {
 			// TODO: Order may consist of several colors and sizes, so we need to send an
 			// answer of each PRODUCT
 
-			Product productToGive = (Product) order.getProducts().get(0);
+			Product productToGive = (Product) order.orderList.get(0).product;
 
 			warehouse.remove(productToGive);
 		}
