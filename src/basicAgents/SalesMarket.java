@@ -3,6 +3,7 @@ package basicAgents;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import basicClasses.Paint;
 import basicClasses.Product;
@@ -29,6 +30,7 @@ public class SalesMarket extends Agent {
     private static final long serialVersionUID = 2003110338808844985L;
     public ACLMessage starterMessage;
 
+
     // creating list of orders
     public static List<Order> orderQueue = new ArrayList<Order>();
 
@@ -41,8 +43,78 @@ public class SalesMarket extends Agent {
         // adding behaviours
         addBehaviour(new WaitingCustomerMessage(this, reqTemp));
 
-        addBehaviour(new SimpleAgentWakerBehaviour(this, 4000));
+        addBehaviour(new GenerateOrders(this, 5000));
+
+        //addBehaviour(new SimpleAgentWakerBehaviour(this, 4000));
+
+
     }
+
+    //class for generating random orders and adding them to the randomOrders-List
+    //TODO delete not profitable orders and maybe delete orders after a specific time
+	class GenerateOrders extends TickerBehaviour{
+
+		public GenerateOrders(Agent a, long period) {
+			super(a, period);
+		}
+
+		@Override
+		protected void onTick() {
+			ACLMessage orderMsg = new ACLMessage(ACLMessage.REQUEST);
+			orderMsg.addReceiver(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
+			orderMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+			// improvised customer
+			orderMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
+
+
+			Order order = new Order();
+			order.id = orderQueue.size() + 1;
+
+
+
+			// ProcurementAgent: I say that materials for ... are in materialStorage
+			Random rand = new Random();
+			int randSize, randAmount, randColI;
+			String randColS = "";
+			for (int i = 0; i < 3; i++) {
+				randColI = rand.nextInt(3);
+				switch (randColI){
+					case 0: randColS = "red";
+				        	break;
+					case 1: randColS = "blue";
+                            break;
+					case 2: randColS = "green";
+					        break;
+                    default:randColS= "other";
+                            break;
+				}
+
+				randSize = rand.nextInt(10) + 1;
+				randAmount = rand.nextInt(100) + 1;
+
+				order.addProduct(new Product(randSize, randColS), randAmount);
+
+			}
+
+
+			orderQueue.add(order);
+
+			String testGson = Order.gson.toJson(order);
+			// {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
+
+			orderMsg.setContent(testGson);
+			send(orderMsg);
+
+		}
+
+        @Override
+        public void stop() {
+            super.stop();
+        }
+    }
+
+
 
     // class that sends test message with example of order. This simulates customer.
     class SimpleAgentWakerBehaviour extends WakerBehaviour {
@@ -67,10 +139,13 @@ public class SalesMarket extends Agent {
             testMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
 
             // it is an example of order
+
+
+
             Order order = new Order();
             order.id = orderQueue.size() + 1;
 
-            // TODO: Если нужно изготовить больше 1 типа камней, цикл застревает на
+            // TODO: пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
             // ProcurementAgent: I say that materials for ... are in materialStorage
             order.addProduct(new Product(10, "red"), 1);
             order.addProduct(new Product(10, "blue"), 2);
