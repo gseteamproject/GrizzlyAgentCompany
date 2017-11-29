@@ -11,6 +11,7 @@ import basicClasses.Order;
 import basicClasses.Stone;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.FIPANames;
@@ -43,7 +44,7 @@ public class SalesMarket extends Agent {
         // adding behaviours
         addBehaviour(new WaitingCustomerMessage(this, reqTemp));
 
-        addBehaviour(new GenerateOrders(this, 5000));
+        addBehaviour(new GenerateOrders(this, 10000));
 
         //addBehaviour(new SimpleAgentWakerBehaviour(this, 4000));
 
@@ -203,23 +204,34 @@ public class SalesMarket extends Agent {
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Sales Market reacts on customer's request
             System.out.println("request" + request.getContent());
-
+            ACLMessage agree, refuse;
+            starterMessage = request;
             Order order = Order.gson.fromJson(request.getContent(), Order.class);
             orderText = order.getTextOfOrder();
 
             System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
             // Agent should send agree or refuse
             // TODO: Add refuse answer (some conditions should be added)
-            starterMessage = request;
-            ACLMessage agree = request.createReply();
-            agree.setContent(request.getContent());
-            agree.setPerformative(ACLMessage.AGREE);
-            System.out.println("SalesMarketAgent: [agree] I will make an order of " + orderText);
 
-            // if agent agrees it starts executing request
-            addBehaviour(new SendAnOrder(myAgent, 2000, agree));
+            if(orderQueue.contains(order)) {
+                agree = request.createReply();
+                agree.setContent(request.getContent());
+                agree.setPerformative(ACLMessage.AGREE);
+                System.out.println("SalesMarketAgent: [agree] I will make an order of " + orderText);
 
-            return agree;
+                // if agent agrees it starts executing request
+                addBehaviour(new SendAnOrder(myAgent, agree));
+
+                return agree;
+            }
+            else {
+                refuse = request.createReply();
+                refuse.setContent(request.getContent());
+                refuse.setPerformative(ACLMessage.AGREE);
+                System.out.println("SalesMarketAgent: [refuse] Following order is not in Queue anymore:  " + orderText);
+
+                return refuse;
+            }
         }
 
         @Override
@@ -240,7 +252,7 @@ public class SalesMarket extends Agent {
         }
     }
 
-    class SendAnOrder extends TickerBehaviour {
+    class SendAnOrder extends OneShotBehaviour {
 
         /**
          * 
@@ -249,13 +261,13 @@ public class SalesMarket extends Agent {
         private String orderToRequest;
         private String orderText;
 
-        public SendAnOrder(Agent a, long period, ACLMessage msg) {
-            super(a, period);
+        public SendAnOrder(Agent a, ACLMessage msg) {
+            super(a);
             orderToRequest = msg.getContent();
         }
 
         @Override
-        protected void onTick() {
+        public void action() {
             orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
             System.out.println("SalesMarketAgent: Sending an order to SellingAgent to get " + orderText);
 
@@ -270,14 +282,14 @@ public class SalesMarket extends Agent {
             addBehaviour(new RequestToOrder(myAgent, msg));
         }
 
-        @Override
+       /* @Override
         public void stop() {
 
             orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
 
             System.out.println("SalesMarketAgent: Now I know that " + orderText + " is in warehouse");
             super.stop();
-        }
+        }*/
 
         class RequestToOrder extends AchieveREInitiator {
 
@@ -296,7 +308,7 @@ public class SalesMarket extends Agent {
                 orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
                 System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
-                stop();
+                //stop();
 
                 addBehaviour(new GetFromWarehouse(myAgent, 2000, inform));
             }
@@ -304,10 +316,13 @@ public class SalesMarket extends Agent {
             @Override
             protected void handleFailure(ACLMessage failure) {
 
+                Order order = Order.gson.fromJson(failure.getContent(), Order.class);
                 orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
                 System.out.println("SalesMarketAgent: received [failure] " + orderText + " is not in warehouse");
                 // TODO: may cause infinite loop
+                if(orderQueue.remove(order))
+                System.out.println("SalesMarketAgent: received [failure] " + orderText + " is removed from Orderqueue.");
                 // stop();
             }
         }

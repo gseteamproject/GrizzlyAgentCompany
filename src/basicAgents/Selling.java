@@ -1,6 +1,8 @@
 package basicAgents;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,6 +24,9 @@ import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
 
 public class Selling extends Agent {
+
+    public static List<Order> productionQueue = new ArrayList<Order>();
+
     /**
      * 
      */
@@ -67,6 +72,10 @@ public class Selling extends Agent {
             agree.setContent(request.getContent());
             agree.setPerformative(ACLMessage.AGREE);
 
+            ACLMessage refuse = request.createReply();
+            refuse.setContent(request.getContent());
+            refuse.setPerformative(ACLMessage.REFUSE);
+
             if (request.getConversationId() == "Order") {
                 System.out.println("SellingAgent: [request] SalesMarket orders a " + orderText);
                 System.out.println("SellingAgent: [agree] I will check warehouse for " + orderText);
@@ -83,6 +92,8 @@ public class Selling extends Agent {
         @Override
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
                 throws FailureException {
+            Order order = Order.gson.fromJson(request.getContent(), Order.class);
+
             // if agent agrees to request
             // after executing, it should send failure of inform
 
@@ -97,6 +108,9 @@ public class Selling extends Agent {
                 ACLMessage failure = request.createReply();
                 failure.setContent(request.getContent());
                 failure.setPerformative(ACLMessage.FAILURE);
+                //PUT INTO PRODUCTION QUEUE
+                productionQueue.add(order);
+                System.out.println("SellingAgent: " + orderText + " is added to the ProductionQueue.");
                 return failure;
             }
         }
@@ -126,11 +140,8 @@ public class Selling extends Agent {
             boolean isInQueue = false;
 
             // check if this order is not in queue yet
-            for (Order orderInQueue : SalesMarket.orderQueue) {
-                if (orderInQueue.equals(order)) {
-                    isInQueue = true;
-                }
-            }
+                    isInQueue = productionQueue.contains(order);
+
 
             // part of order, that needs to be produced
             Order orderToProduce = new Order();

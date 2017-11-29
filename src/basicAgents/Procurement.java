@@ -32,7 +32,7 @@ public class Procurement extends Agent {
         MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
         // adding behaviours
-        addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
+       // addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
     }
 
     // this class waits for receiving a message with certain template
