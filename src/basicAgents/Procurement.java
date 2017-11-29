@@ -106,7 +106,6 @@ public class Procurement extends Agent {
          */
         private static final long serialVersionUID = -4869963544017982955L;
         private String requestedMaterial;
-        private String orderText;
 
         private ACLMessage agree;
 
@@ -118,11 +117,11 @@ public class Procurement extends Agent {
 
         @Override
         public void action() {
-            orderText = Order.gson.fromJson(requestedMaterial, Order.class).getTextOfOrder();
-
-            System.out.println("ProcurementAgent: Asking materialStorage about " + orderText);
-
             Order order = Order.gson.fromJson(requestedMaterial, Order.class);
+
+            // part of order, that needs to be produced
+            Order orderToBuy = new Order();
+            orderToBuy.id = order.id;
 
             for (OrderPart orderPart : order.orderList) {
                 Product productToCheck = orderPart.product;
@@ -132,23 +131,43 @@ public class Procurement extends Agent {
 
                 int amount = orderPart.amount;
 
-                int paintAmountInMS = (int) materialStorage.getAmountOfPaint(color);
-                int stoneAmountInMS = (int) materialStorage.getAmountOfStones(size);
+                System.out.println("ProcurementAgent: Asking materialStorage about " + orderPart.getTextOfOrderPart());
+
+                int paintAmountInMS = materialStorage.getAmountOfPaint(color);
+                int stoneAmountInMS = materialStorage.getAmountOfStones(size);
 
                 if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
                     isInMaterialStorage = true;
-                    System.out.println(
-                            "ProcurementAgent: I say that materials for " + orderText + " are in materialStorage");
+                    System.out.println("ProcurementAgent: I say that materials for " + orderPart.getTextOfOrderPart()
+                            + " are in materialStorage");
                 } else {
                     // need to describe multiple statements to check every material
                     isInMaterialStorage = false;
-                    System.out.println(
-                            "ProcurementAgent: send info to ProcurementMarket to buy materials for " + orderText);
 
-                    // TODO: send requests for each material
-                    addBehaviour(new AskForAuction(myAgent, 2000, agree));
+                    // creating new instance of OrderPart to change its amount
+                    OrderPart newOrderPart = new OrderPart();
+                    newOrderPart.product = orderPart.product;
+
+                    int largerAmount = 0;
+                    if (paintAmountInMS >= stoneAmountInMS) {
+                        largerAmount = paintAmountInMS;
+                    } else {
+                        largerAmount = stoneAmountInMS;
+                    }
+
+                    newOrderPart.amount = orderPart.amount - largerAmount;
+                    if (newOrderPart.amount > 0) {
+                        orderToBuy.orderList.add(newOrderPart);
+                    }
                 }
             }
+
+            String testGson = Order.gson.toJson(orderToBuy);
+            agree.setContent(testGson);
+
+            System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
+                    + orderToBuy.getTextOfOrder());
+            addBehaviour(new AskForAuction(myAgent, 2000, agree));
         }
     }
 

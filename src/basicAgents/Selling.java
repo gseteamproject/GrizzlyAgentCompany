@@ -236,7 +236,7 @@ public class Selling extends Agent {
             protected void handleInform(ACLMessage inform) {
 
                 orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-                System.out.println("SellingAgent: [inform] " + orderText);
+                System.out.println("SellingAgent: [inform] Producing of " + orderText + " is initiated");
             }
         }
     }
