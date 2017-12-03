@@ -58,11 +58,13 @@ public class Selling extends Agent {
             super(a, mt);
         }
 
+
+
         @Override
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Selling reacts on SalesMarket's request
 
-            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfProductOrder();
 
             // Agent should send agree or refuse
             // TODO: Add refuse answer (some conditions should be added)
@@ -140,15 +142,15 @@ public class Selling extends Agent {
             boolean isInQueue = false;
 
             // check if this order is not in queue yet
-                    isInQueue = productionQueue.contains(order);
+            isInQueue = productionQueue.contains(order);
 
 
             // part of order, that needs to be produced
             Order orderToProduce = new Order();
             orderToProduce.id = order.id;
 
-            for (OrderPart orderPart : order.orderList) {
-                Product productToCheck = orderPart.product;
+            for (OrderPart orderPart : order.productOrderList) {
+                Product productToCheck = (Product)orderPart.good;
                 int amount = orderPart.amount;
 
                 System.out.println("SellingAgent: Asking warehouse about " + orderPart.getTextOfOrderPart());
@@ -166,10 +168,11 @@ public class Selling extends Agent {
 
                     // creating new instance of OrderPart to change its amount
                     OrderPart newOrderPart = new OrderPart();
-                    newOrderPart.product = orderPart.product;
+                    newOrderPart.good = (Product) newOrderPart.good;
+                    newOrderPart.good = (Product) orderPart.good;
                     newOrderPart.amount = orderPart.amount - amountInWH;
                     if (newOrderPart.amount > 0) {
-                        orderToProduce.orderList.add(newOrderPart);
+                        orderToProduce.productOrderList.add(newOrderPart);
                     }
                 }
             }
@@ -183,7 +186,7 @@ public class Selling extends Agent {
                 SalesMarket.orderQueue.add(order);
 
                 System.out.println(
-                        "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
+                        "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfProductOrder());
                 addBehaviour(new SendInfoToProduction(myAgent, agree));
             }
         }
@@ -205,7 +208,7 @@ public class Selling extends Agent {
 
         @Override
         public void action() {
-            orderText = Order.gson.fromJson(orderToProceed, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(orderToProceed, Order.class).getTextOfProductOrder();
             System.out.println("SellingAgent: " + orderText + " is in production");
 
             String requestedAction = "Order";
@@ -235,7 +238,7 @@ public class Selling extends Agent {
             @Override
             protected void handleInform(ACLMessage inform) {
 
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfProductOrder();
                 System.out.println("SellingAgent: [inform] Producing of " + orderText + " is initiated");
             }
         }
@@ -259,8 +262,8 @@ public class Selling extends Agent {
             GsonBuilder builder = new GsonBuilder();
             Gson gson = builder.create();
             Order order = gson.fromJson(orderToGive, Order.class);
-            for (OrderPart orderPart : order.orderList) {
-                Product productToGive = orderPart.product;
+            for (OrderPart orderPart : order.productOrderList) {
+                Product productToGive = (Product) orderPart.good;
                 System.out.println("SellingAgent: Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
                 warehouse.remove(productToGive);
             }

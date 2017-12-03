@@ -102,7 +102,7 @@ public class SalesMarket extends Agent {
 			orderQueue.add(order);
 
 			String testGson = Order.gson.toJson(order);
-			// {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
+			// {"id":1,"productOrderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
 
 			orderMsg.setContent(testGson);
 			send(orderMsg);
@@ -153,7 +153,7 @@ public class SalesMarket extends Agent {
             order.addProduct(new Product(10, "green"), 2);
 
             String testGson = Order.gson.toJson(order);
-            // {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
+            // {"id":1,"productOrderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
 
             testMsg.setContent(testGson);
             send(testMsg);
@@ -207,7 +207,7 @@ public class SalesMarket extends Agent {
             ACLMessage agree, refuse;
             starterMessage = request;
             Order order = Order.gson.fromJson(request.getContent(), Order.class);
-            orderText = order.getTextOfOrder();
+            orderText = order.getTextOfProductOrder();
 
             System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
             // Agent should send agree or refuse
@@ -238,7 +238,7 @@ public class SalesMarket extends Agent {
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
                 throws FailureException {
 
-            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfProductOrder();
 
             // result of request to sales market
             // if agent agrees to request
@@ -268,7 +268,7 @@ public class SalesMarket extends Agent {
 
         @Override
         public void action() {
-            orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfProductOrder();
             System.out.println("SalesMarketAgent: Sending an order to SellingAgent to get " + orderText);
 
             String requestedAction = "Order";
@@ -285,7 +285,7 @@ public class SalesMarket extends Agent {
        /* @Override
         public void stop() {
 
-            orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfProductOrder();
 
             System.out.println("SalesMarketAgent: Now I know that " + orderText + " is in warehouse");
             super.stop();
@@ -305,7 +305,7 @@ public class SalesMarket extends Agent {
             @Override
             protected void handleInform(ACLMessage inform) {
 
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfProductOrder();
 
                 System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
                 //stop();
@@ -317,7 +317,7 @@ public class SalesMarket extends Agent {
             protected void handleFailure(ACLMessage failure) {
 
                 Order order = Order.gson.fromJson(failure.getContent(), Order.class);
-                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfProductOrder();
 
                 System.out.println("SalesMarketAgent: received [failure] " + orderText + " is not in warehouse");
                 // TODO: may cause infinite loop
@@ -345,7 +345,7 @@ public class SalesMarket extends Agent {
         @Override
         protected void onTick() {
 
-            orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfProductOrder();
 
             System.out.println("SalesMarketAgent: Asking SellingAgent to take " + orderText + " from warehouse");
 
@@ -363,7 +363,7 @@ public class SalesMarket extends Agent {
         @Override
         public void stop() {
 
-            orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfProductOrder();
 
             System.out.println("SalesMarketAgent: Now I have a " + orderText);
             super.stop();
@@ -383,7 +383,7 @@ public class SalesMarket extends Agent {
             @Override
             protected void handleInform(ACLMessage inform) {
 
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfProductOrder();
 
                 System.out
                         .println("SalesMarketAgent: received [inform] " + orderText + " will be taken from warehouse");
@@ -393,7 +393,7 @@ public class SalesMarket extends Agent {
             @Override
             protected void handleFailure(ACLMessage failure) {
 
-                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfProductOrder();
 
                 System.out.println(
                         "SalesMarketAgent: received [failure] " + orderText + " will not be taken from warehouse");

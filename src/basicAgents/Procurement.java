@@ -32,7 +32,7 @@ public class Procurement extends Agent {
         MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
         // adding behaviours
-       // addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
+        addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
     }
 
     // this class waits for receiving a message with certain template
@@ -52,7 +52,7 @@ public class Procurement extends Agent {
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Selling reacts on SalesMarket's request
 
-            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfProductOrder();
 
             // Agent should send agree or refuse
             // TODO: Add refuse answer (some conditions should be added)
@@ -123,8 +123,8 @@ public class Procurement extends Agent {
             Order orderToBuy = new Order();
             orderToBuy.id = order.id;
 
-            for (OrderPart orderPart : order.orderList) {
-                Product productToCheck = orderPart.product;
+            for (OrderPart orderPart : order.productOrderList) {
+                Product productToCheck = (Product) orderPart.good;
 
                 String color = productToCheck.getColor();
                 Double size = productToCheck.getSize();
@@ -146,7 +146,8 @@ public class Procurement extends Agent {
 
                     // creating new instance of OrderPart to change its amount
                     OrderPart newOrderPart = new OrderPart();
-                    newOrderPart.product = orderPart.product;
+                    newOrderPart.good = (Product) newOrderPart.good;
+                    newOrderPart.good = orderPart.good;
 
                     int largerAmount = 0;
                     if (paintAmountInMS >= stoneAmountInMS) {
@@ -157,7 +158,7 @@ public class Procurement extends Agent {
 
                     newOrderPart.amount = orderPart.amount - largerAmount;
                     if (newOrderPart.amount > 0) {
-                        orderToBuy.orderList.add(newOrderPart);
+                        orderToBuy.productOrderList.add(newOrderPart);
                     }
                 }
             }
@@ -166,7 +167,7 @@ public class Procurement extends Agent {
             agree.setContent(testGson);
 
             System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
-                    + orderToBuy.getTextOfOrder());
+                    + orderToBuy.getTextOfProductOrder());
             addBehaviour(new AskForAuction(myAgent, 2000, agree));
         }
     }
@@ -187,7 +188,7 @@ public class Procurement extends Agent {
 
         @Override
         protected void onTick() {
-            orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfProductOrder();
             System.out.println(
                     "ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
 
@@ -204,7 +205,7 @@ public class Procurement extends Agent {
 
         @Override
         public void stop() {
-            orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfProductOrder();
             System.out.println("ProcurementAgent: materials for " + orderText + " are in auction");
             super.stop();
         }
@@ -223,7 +224,7 @@ public class Procurement extends Agent {
             @Override
             protected void handleInform(ACLMessage inform) {
 
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfProductOrder();
                 System.out.println("ProcurementAgent: [inform] " + orderText);
                 stop();
             }
@@ -247,7 +248,7 @@ public class Procurement extends Agent {
         @Override
         public void action() {
             Order order = Order.gson.fromJson(materialsToGive, Order.class);
-            orderText = order.getTextOfOrder();
+            orderText = order.getTextOfProductOrder();
             System.out.println("ProcurementAgent: Taking " + orderText + " from materialStorage");
 
             for (Product product : order.getProducts()) {

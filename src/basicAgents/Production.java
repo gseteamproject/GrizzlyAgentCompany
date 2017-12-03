@@ -17,6 +17,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
+import org.omg.CORBA.PRIVATE_MEMBER;
 
 public class Production extends Agent {
 
@@ -55,7 +56,7 @@ public class Production extends Agent {
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // ProductionAgent reacts on SellingAgent's request
 
-            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfProductOrder();
 
             System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);
             // Agent should send agree or refuse
@@ -67,7 +68,7 @@ public class Production extends Agent {
             System.out.println("ProductionAgent: [agree] I will produce " + orderText);
 
             // if agent agrees it starts executing request
-            addBehaviour(new AskForMaterial(myAgent, 2000, agree));
+            addBehaviour(new AskForMaterial(myAgent, agree));
 
             return agree;
         }
@@ -76,7 +77,7 @@ public class Production extends Agent {
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
                 throws FailureException {
 
-            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfProductOrder();
 
             // result of request to ProductionAgent
             // if agent agrees to request
@@ -89,7 +90,7 @@ public class Production extends Agent {
         }
     }
 
-    class AskForMaterial extends TickerBehaviour {
+    class AskForMaterial extends OneShotBehaviour {
 
         /**
          * 
@@ -98,14 +99,14 @@ public class Production extends Agent {
         private String materialsToRequest;
         private String orderText;
 
-        public AskForMaterial(Agent a, long period, ACLMessage msg) {
-            super(a, period);
+        public AskForMaterial(Agent a, ACLMessage msg) {
+            super(a);
             materialsToRequest = msg.getContent();
         }
 
         @Override
-        protected void onTick() {
-            orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
+        public void action() {
+            orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfProductOrder();
 
             // TODO: ask for all materials at once
 
@@ -122,19 +123,19 @@ public class Production extends Agent {
             addBehaviour(new RequestToGet(myAgent, msg));
         }
 
-        @Override
+        /*@Override
         public void stop() {
 
-            orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfProductOrder();
 
             System.out.println("ProductionAgent: Now I know that materials for " + orderText + " are in storage");
             super.stop();
-        }
+        }*/
 
         class RequestToGet extends AchieveREInitiator {
 
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 1618638159227094879L;
 
@@ -144,17 +145,17 @@ public class Production extends Agent {
 
             @Override
             protected void handleInform(ACLMessage inform) {
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfProductOrder();
 
                 System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
-                stop();
+                //stop();
 
                 addBehaviour(new GetFromStorage(myAgent, 2000, inform));
             }
 
             @Override
             protected void handleFailure(ACLMessage failure) {
-                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfProductOrder();
 
                 System.out.println(
                         "ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
@@ -164,10 +165,12 @@ public class Production extends Agent {
         }
     }
 
+
+
     class GetFromStorage extends TickerBehaviour {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 6717167573013445327L;
         private String materialsToTake;
@@ -181,7 +184,7 @@ public class Production extends Agent {
         @Override
         protected void onTick() {
 
-            orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfProductOrder();
 
             System.out.println("ProductionAgent: Asking ProcurementAgent to take materials for " + orderText
                     + " from materialStorage");
@@ -200,7 +203,7 @@ public class Production extends Agent {
         @Override
         public void stop() {
 
-            orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
+            orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfProductOrder();
 
             System.out.println("ProductionAgent: Now I have materials for " + orderText);
             super.stop();
@@ -209,7 +212,7 @@ public class Production extends Agent {
         class RequestToTake extends AchieveREInitiator {
 
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 7996018163076712881L;
 
@@ -220,7 +223,7 @@ public class Production extends Agent {
             @Override
             protected void handleInform(ACLMessage inform) {
 
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfProductOrder();
 
                 System.out.println("ProductionAgent: received [inform] materials for " + orderText
                         + " will be taken from storage");
@@ -232,7 +235,7 @@ public class Production extends Agent {
             @Override
             protected void handleFailure(ACLMessage failure) {
 
-                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfProductOrder();
 
                 System.out.println("ProductionAgent: received [failure] materials for " + orderText
                         + " will not be taken from storage");
@@ -245,7 +248,7 @@ public class Production extends Agent {
     class DeliverToSelling extends OneShotBehaviour {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 313682933400751868L;
         private String orderToGive;
@@ -259,11 +262,11 @@ public class Production extends Agent {
         @Override
         public void action() {
             Order order = Order.gson.fromJson(orderToGive, Order.class);
-            orderText = order.getTextOfOrder();
+            orderText = order.getTextOfProductOrder();
             System.out.println("ProductionAgent: Delivering " + orderText + " to warehouse");
-
-            for (OrderPart orderPart : order.orderList) {
-                Product productToGive = orderPart.product;
+            Product productToGive;
+            for (OrderPart orderPart : order.productOrderList) {
+                productToGive = (Product) orderPart.good;
                 for (int i = 0; i < orderPart.amount; i++) {
                     Selling.warehouse.add(productToGive);
                 }
