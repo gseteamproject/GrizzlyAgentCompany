@@ -33,6 +33,9 @@ public class Server implements Runnable {
 
     }
 
+    /*
+    setup configuration
+     */
     private Configuration getConfig() {
         Configuration config = new Configuration();
         config.setHostname(server);
