@@ -25,14 +25,15 @@ import jade.proto.AchieveREResponder;
 
 public class Selling extends Agent {
 
-    public static List<Order> productionQueue = new ArrayList<Order>();
-
     /**
      * 
      */
     private static final long serialVersionUID = 7150875080288668056L;
     public ACLMessage starterMessage;
     public boolean isInWarehouse;
+
+    // queue for orders that in production
+    public static List<Order> productionQueue = new ArrayList<Order>();
 
     // creating storage for products
     public static ProductStorage warehouse = new ProductStorage();
@@ -61,6 +62,7 @@ public class Selling extends Agent {
         @Override
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Selling reacts on SalesMarket's request
+
             orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
             // Agent should send agree or refuse
@@ -91,7 +93,7 @@ public class Selling extends Agent {
         @Override
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
                 throws FailureException {
-            Order order = Order.gson.fromJson(request.getContent(), Order.class);
+            // Order order = Order.gson.fromJson(request.getContent(), Order.class);
 
             // if agent agrees to request
             // after executing, it should send failure of inform
@@ -107,9 +109,10 @@ public class Selling extends Agent {
                 ACLMessage failure = request.createReply();
                 failure.setContent(request.getContent());
                 failure.setPerformative(ACLMessage.FAILURE);
-                //PUT INTO PRODUCTION QUEUE
-                productionQueue.add(order);
-                System.out.println("SellingAgent: " + orderText + " is added to the ProductionQueue.");
+                // //PUT INTO PRODUCTION QUEUE
+                // productionQueue.add(order);
+                // System.out.println("SellingAgent: " + orderText + " is added to the
+                // ProductionQueue.");
                 return failure;
             }
         }
@@ -139,8 +142,7 @@ public class Selling extends Agent {
             boolean isInQueue = false;
 
             // check if this order is not in queue yet
-                    isInQueue = productionQueue.contains(order);
-
+            isInQueue = productionQueue.contains(order);
 
             // part of order, that needs to be produced
             Order orderToProduce = new Order();
@@ -174,12 +176,12 @@ public class Selling extends Agent {
             }
 
             // productToCheck needs to be produced
-            if (!isInQueue) {
+            if (!isInQueue && (orderToProduce.orderList.size() > 0)) {
                 String testGson = Order.gson.toJson(orderToProduce);
                 agree.setContent(testGson);
 
                 // add order to queue
-                SalesMarket.orderQueue.add(order);
+                productionQueue.add(order);
 
                 System.out.println(
                         "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
