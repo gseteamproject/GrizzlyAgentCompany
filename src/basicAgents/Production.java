@@ -84,7 +84,6 @@ public class Production extends Agent {
             ACLMessage inform = request.createReply();
             inform.setContent(request.getContent());
             inform.setPerformative(ACLMessage.INFORM);
-            System.out.println("ProductionAgent: [inform] I initiated producing " + orderText);
 
             return inform;
         }
