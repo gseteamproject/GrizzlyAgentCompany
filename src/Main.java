@@ -1,6 +1,9 @@
+import communication.Server;
 import jade.Boot;
 
 public class Main {
+
+	public static Server server;
 
 	public static void main(String[] args) {
 
@@ -14,5 +17,8 @@ public class Main {
 		// AgentProcurement, AgentProcurementMarket, AgentProduction
 		Boot.main(parameters);
 
+		server = new Server();
+		Thread serverThread = new Thread(server);
+		serverThread.start();
 	}
 }

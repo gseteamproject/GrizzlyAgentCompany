@@ -56,7 +56,6 @@ public class Selling extends Agent {
         @Override
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Selling reacts on SalesMarket's request
-
             orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
             // Agent should send agree or refuse
