@@ -31,6 +31,7 @@ public class Selling extends Agent {
     private static final long serialVersionUID = 7150875080288668056L;
     public ACLMessage starterMessage;
     public boolean isInWarehouse;
+    public boolean isTaken;
 
     // queue for orders that in production
     public static List<Order> productionQueue = new ArrayList<Order>();
@@ -82,7 +83,8 @@ public class Selling extends Agent {
                 System.out.println("SellingAgent: [agree] I will check warehouse for " + orderText);
                 addBehaviour(new CheckWarehouse(myAgent, agree));
             } else if (request.getConversationId() == "Take") {
-                System.out.println("SellingAgent: [request] SalesMarket wants to get " + orderText + " from warehouse");
+                System.out
+                        .println("SellingAgent: [request] SalesMarket wants to take " + orderText + " from warehouse");
                 System.out.println("SellingAgent: [agree] I will give you " + orderText + " from warehouse");
                 addBehaviour(new GiveProductToMarket(myAgent, agree));
             }
@@ -100,21 +102,28 @@ public class Selling extends Agent {
 
             // in case of inform product will be taken from warehouse
             // in case of failure product will be produced
-            if (isInWarehouse) {
-                ACLMessage inform = request.createReply();
-                inform.setContent(request.getContent());
-                inform.setPerformative(ACLMessage.INFORM);
-                return inform;
-            } else {
-                ACLMessage failure = request.createReply();
-                failure.setContent(request.getContent());
-                failure.setPerformative(ACLMessage.FAILURE);
-                // //PUT INTO PRODUCTION QUEUE
-                // productionQueue.add(order);
-                // System.out.println("SellingAgent: " + orderText + " is added to the
-                // ProductionQueue.");
-                return failure;
+            ACLMessage reply = request.createReply();
+            reply.setContent(request.getContent());
+
+            if (request.getConversationId() == "Order") {
+                if (isInWarehouse) {
+                    reply.setPerformative(ACLMessage.INFORM);
+                } else {
+                    reply.setPerformative(ACLMessage.FAILURE);
+                    // //PUT INTO PRODUCTION QUEUE
+                    // productionQueue.add(order);
+                    // System.out.println("SellingAgent: " + orderText + " is added to the
+                    // ProductionQueue.");
+                }
+            } else if (request.getConversationId() == "Take") {
+                if (isTaken) {
+                    reply.setPerformative(ACLMessage.INFORM);
+                } else {
+                    reply.setPerformative(ACLMessage.FAILURE);
+                }
             }
+
+            return reply;
         }
     }
 
@@ -234,10 +243,29 @@ public class Selling extends Agent {
             }
 
             @Override
+            protected void handleAgree(ACLMessage agree) {
+
+                orderText = Order.gson.fromJson(agree.getContent(), Order.class).getTextOfOrder();
+                System.out.println("SellingAgent: received [agree] Producing of " + orderText + " is initiated");
+            }
+
+            @Override
             protected void handleInform(ACLMessage inform) {
 
                 orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-                System.out.println("SellingAgent: [inform] Producing of " + orderText + " is initiated");
+                System.out.println("SellingAgent: received [inform] " + orderText + " is delivered to warehouse");
+
+                ACLMessage reply = starterMessage.createReply();
+                reply.setPerformative(ACLMessage.INFORM);
+                reply.setContent(starterMessage.getContent());
+                send(reply);
+            }
+
+            @Override
+            protected void handleFailure(ACLMessage failure) {
+
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
+                System.out.println("SellingAgent: received [failure] ");
             }
         }
     }
@@ -260,10 +288,18 @@ public class Selling extends Agent {
             GsonBuilder builder = new GsonBuilder();
             Gson gson = builder.create();
             Order order = gson.fromJson(orderToGive, Order.class);
+
+            isTaken = false;
+
+            int takeCount = 0;
             for (OrderPart orderPart : order.orderList) {
                 Product productToGive = orderPart.product;
                 System.out.println("SellingAgent: Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
                 warehouse.remove(productToGive);
+                takeCount += 1;
+            }
+            if (takeCount == order.orderList.size()) {
+                isTaken = true;
             }
         }
     }

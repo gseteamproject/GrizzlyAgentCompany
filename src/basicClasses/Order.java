@@ -32,18 +32,20 @@ public class Order implements Serializable {
     }
 
     public void addProduct(Product product, int amount) {
-        OrderPart part = new OrderPart();
-        part.product = product;
-        part.amount = amount;
-        boolean count = false;
-        for (OrderPart partInList : orderList) {
-            if (partInList.product.equals(product)) {
-                partInList.amount += amount;
-                count = true;
+        if (amount > 0) {
+            OrderPart part = new OrderPart();
+            part.product = product;
+            part.amount = amount;
+            boolean count = false;
+            for (OrderPart partInList : orderList) {
+                if (partInList.product.equals(product)) {
+                    partInList.amount += amount;
+                    count = true;
+                }
             }
-        }
-        if (!count) {
-            orderList.add(part);
+            if (!count) {
+                orderList.add(part);
+            }
         }
     }
 

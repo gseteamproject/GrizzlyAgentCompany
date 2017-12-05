@@ -8,6 +8,8 @@ import basicClasses.OrderPart;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.FailureException;
@@ -25,6 +27,7 @@ public class Production extends Agent {
      */
     private static final long serialVersionUID = 9064413910591040008L;
     public ACLMessage starterMessage;
+    public boolean isProduced = false;
 
     @Override
     protected void setup() {
@@ -55,6 +58,8 @@ public class Production extends Agent {
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // ProductionAgent reacts on SellingAgent's request
 
+            registerPrepareResultNotification(new ActivityBehaviour(myAgent, request));
+
             orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
             System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);
@@ -67,7 +72,9 @@ public class Production extends Agent {
             System.out.println("ProductionAgent: [agree] I will produce " + orderText);
 
             // if agent agrees it starts executing request
-            addBehaviour(new AskForMaterial(myAgent, 2000, agree));
+            // addBehaviour(new AskForMaterial(myAgent, 2000, agree));
+
+            // registerPrepareResultNotification(new AskForMaterial(myAgent, 2000, agree));
 
             return agree;
         }
@@ -81,14 +88,93 @@ public class Production extends Agent {
             // result of request to ProductionAgent
             // if agent agrees to request
             // after executing, it should send failure of inform
-            ACLMessage inform = request.createReply();
-            inform.setContent(request.getContent());
-            inform.setPerformative(ACLMessage.INFORM);
+            ACLMessage reply = request.createReply();
+            reply.setContent(request.getContent());
 
-            return inform;
+            if (isProduced) {
+                reply.setPerformative(ACLMessage.INFORM);
+            } else {
+                reply.setPerformative(ACLMessage.FAILURE);
+            }
+            return reply;
+
         }
     }
 
+    // TODO: REFACTOR THIS
+    // TODO: Use DataStore
+
+    public class ActivityBehaviour extends ParallelBehaviour {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 887352333041438646L;
+
+        public ActivityBehaviour(Agent a, ACLMessage msg) {
+            super(a, WHEN_ANY);
+
+            addSubBehaviour(new AskBehaviour(a, msg));
+            addSubBehaviour(new WorkBehaviour(a, msg));
+        }
+    }
+
+    public class Work {
+
+        public Work(ACLMessage msg) {
+            super();
+        }
+
+        public ACLMessage execute(ACLMessage request) {
+            ACLMessage response = request.createReply();
+            response.setPerformative(ACLMessage.INFORM);
+
+            return response;
+        }
+    }
+
+    public class WorkBehaviour extends SimpleBehaviour {
+
+        Agent interactionBehaviour;
+
+        Work interactor;
+
+        public WorkBehaviour(Agent a, ACLMessage msg) {
+            this.interactionBehaviour = a;
+            this.interactor = new Work(msg);
+        }
+
+        @Override
+        public void action() {
+            starterMessage = (interactor.execute(starterMessage));
+        }
+
+        @Override
+        public boolean done() {
+            return true;
+        }
+
+        private static final long serialVersionUID = -3500469822678572098L;
+    }
+
+    public class AskBehaviour extends SimpleBehaviour {
+
+        public AskBehaviour(Agent a, ACLMessage msg) {
+        }
+
+        @Override
+        public void action() {
+            addBehaviour(new AskForMaterial(myAgent, 2000, starterMessage));
+        }
+
+        @Override
+        public boolean done() {
+            return true;
+        }
+
+        private static final long serialVersionUID = -3500469822678572098L;
+    }
+
+    // TODO: Use OneShot (?)
     class AskForMaterial extends TickerBehaviour {
 
         /**
@@ -106,8 +192,6 @@ public class Production extends Agent {
         @Override
         protected void onTick() {
             orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
-
-            // TODO: ask for all materials at once
 
             System.out.println("ProductionAgent: Asking ProcurementAgent to get materials for " + orderText);
 
@@ -158,12 +242,11 @@ public class Production extends Agent {
 
                 System.out.println(
                         "ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
-                // TODO: may cause infinite loop
-                // stop();
             }
         }
     }
 
+    // TODO: Use OneShot (?)
     class GetFromStorage extends TickerBehaviour {
 
         /**
@@ -236,8 +319,6 @@ public class Production extends Agent {
 
                 System.out.println("ProductionAgent: received [failure] materials for " + orderText
                         + " will not be taken from storage");
-                // TODO: may cause infinite loop
-                // stop();
             }
         }
     }
@@ -250,6 +331,7 @@ public class Production extends Agent {
         private static final long serialVersionUID = 313682933400751868L;
         private String orderToGive;
         private String orderText;
+        private ACLMessage reply;
 
         public DeliverToSelling(Agent a, ACLMessage msg) {
             super(a);
@@ -268,6 +350,12 @@ public class Production extends Agent {
                     Selling.warehouse.add(productToGive);
                 }
             }
+            isProduced = true;
+
+            reply = starterMessage.createReply();
+            reply.setPerformative(ACLMessage.INFORM);
+            reply.setContent(orderToGive);
+            send(reply);
         }
     }
 }

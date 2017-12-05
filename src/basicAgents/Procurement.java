@@ -1,6 +1,8 @@
 package basicAgents;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import basicClasses.*;
 import jade.core.AID;
@@ -24,6 +26,9 @@ public class Procurement extends Agent {
     public ACLMessage starterMessage;
     public boolean isInMaterialStorage;
 
+    // queue for procurement orders
+    public static List<Order> procurementQueue = new ArrayList<Order>();
+
     // creating storage for raw materials
     public static MaterialStorage materialStorage = new MaterialStorage();
 
@@ -32,7 +37,7 @@ public class Procurement extends Agent {
         MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
         // adding behaviours
-       // addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
+        addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
     }
 
     // this class waits for receiving a message with certain template
@@ -85,17 +90,15 @@ public class Procurement extends Agent {
 
             // in case of inform product will be taken from warehouse
             // in case of failure product will be produced
+            ACLMessage reply = request.createReply();
+            reply.setContent(request.getContent());
+
             if (isInMaterialStorage) {
-                ACLMessage inform = request.createReply();
-                inform.setContent(request.getContent());
-                inform.setPerformative(ACLMessage.INFORM);
-                return inform;
+                reply.setPerformative(ACLMessage.INFORM);
             } else {
-                ACLMessage failure = request.createReply();
-                failure.setContent(request.getContent());
-                failure.setPerformative(ACLMessage.FAILURE);
-                return failure;
+                reply.setPerformative(ACLMessage.FAILURE);
             }
+            return reply;
         }
     }
 
@@ -118,6 +121,12 @@ public class Procurement extends Agent {
         @Override
         public void action() {
             Order order = Order.gson.fromJson(requestedMaterial, Order.class);
+
+            isInMaterialStorage = true;
+            boolean isInQueue = false;
+
+            // check if this order is not in queue yet
+            isInQueue = procurementQueue.contains(order);
 
             // part of order, that needs to be produced
             Order orderToBuy = new Order();
@@ -162,15 +171,21 @@ public class Procurement extends Agent {
                 }
             }
 
-            String testGson = Order.gson.toJson(orderToBuy);
-            agree.setContent(testGson);
+            if (!isInQueue && orderToBuy.orderList.size() > 0) {
+                String testGson = Order.gson.toJson(orderToBuy);
+                agree.setContent(testGson);
 
-            System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
-                    + orderToBuy.getTextOfOrder());
-            addBehaviour(new AskForAuction(myAgent, 2000, agree));
+                // add order to queue
+                procurementQueue.add(order);
+
+                System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
+                        + orderToBuy.getTextOfOrder());
+                addBehaviour(new AskForAuction(myAgent, 2000, agree));
+            }
         }
     }
-
+    
+    // TODO: Use OneShot (?)
     class AskForAuction extends TickerBehaviour {
 
         /**
