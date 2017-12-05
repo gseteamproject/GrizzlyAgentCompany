@@ -1,7 +1,6 @@
 package basicAgents;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -29,7 +28,6 @@ public class SalesMarket extends Agent {
      * 
      */
     private static final long serialVersionUID = 2003110338808844985L;
-    public ACLMessage starterMessage;
     MessageTemplate infTemp;
 
     // creating list of orders
@@ -41,7 +39,7 @@ public class SalesMarket extends Agent {
         MessageTemplate reqTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 
         infTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-        infTemp = MessageTemplate.and(infTemp, MessageTemplate.MatchConversationId("Order"));
+        infTemp = MessageTemplate.and(infTemp, MessageTemplate.MatchConversationId("Ask"));
 
         // adding behaviours
         addBehaviour(new WaitingCustomerMessage(this, reqTemp));
@@ -198,41 +196,34 @@ public class SalesMarket extends Agent {
         @Override
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Sales Market reacts on customer's request
-            System.out.println("request" + request.getContent());
-            ACLMessage agree, refuse;
-            starterMessage = request;
+            System.out.println("request " + request.getContent());
+
             Order order = Order.gson.fromJson(request.getContent(), Order.class);
             orderText = order.getTextOfOrder();
 
             System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
-            // Agent should send agree or refuse
-            // TODO: Add refuse answer (some conditions should be added)
 
+            // Agent should send agree or refuse
+            ACLMessage response;
+            response = request.createReply();
+            response.setContent(request.getContent());
             if (!orderQueue.contains(order)) {
                 orderQueue.add(order);
-                agree = request.createReply();
-                agree.setContent(request.getContent());
-                agree.setPerformative(ACLMessage.AGREE);
+                response.setPerformative(ACLMessage.AGREE);
                 System.out.println("SalesMarketAgent: [agree] I will make an order of " + orderText);
 
                 // if agent agrees it starts executing request
-                addBehaviour(new SendAnOrder(myAgent, agree));
-
-                return agree;
+                addBehaviour(new AskForOrder(myAgent, response));
             } else {
-                refuse = request.createReply();
-                refuse.setContent(request.getContent());
-                refuse.setPerformative(ACLMessage.REFUSE);
+                response.setPerformative(ACLMessage.REFUSE);
                 System.out.println("SalesMarketAgent: [refuse] Following order is already in queue: " + orderText);
-
-                return refuse;
             }
+            return response;
         }
 
         @Override
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
                 throws FailureException {
-
             orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
             // result of request to sales market
@@ -247,7 +238,7 @@ public class SalesMarket extends Agent {
         }
     }
 
-    class SendAnOrder extends OneShotBehaviour {
+    class AskForOrder extends OneShotBehaviour {
 
         /**
          * 
@@ -256,7 +247,7 @@ public class SalesMarket extends Agent {
         private String orderToRequest;
         private String orderText;
 
-        public SendAnOrder(Agent a, ACLMessage msg) {
+        public AskForOrder(Agent a, ACLMessage msg) {
             super(a);
             orderToRequest = msg.getContent();
         }
@@ -264,14 +255,13 @@ public class SalesMarket extends Agent {
         @Override
         public void action() {
             orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
-            System.out.println("SalesMarketAgent: Sending an order to SellingAgent to get " + orderText);
+            System.out.println("SalesMarketAgent: Asking SellingAgent to get " + orderText);
 
-            String requestedAction = "Order";
+            String requestedAction = "Ask";
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
             msg.setConversationId(requestedAction);
             msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
             msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-            msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
             msg.setContent(orderToRequest);
 
             addBehaviour(new RequestToOrder(myAgent, msg));
@@ -290,17 +280,15 @@ public class SalesMarket extends Agent {
 
             @Override
             protected void handleInform(ACLMessage inform) {
-
                 orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
                 System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
 
-                addBehaviour(new GetFromWarehouse(myAgent, 2000, inform));
+                addBehaviour(new TakeFromWarehouse(myAgent, inform));
             }
 
             @Override
             protected void handleFailure(ACLMessage failure) {
-
                 Order order = Order.gson.fromJson(failure.getContent(), Order.class);
                 orderText = order.getTextOfOrder();
 
@@ -328,7 +316,6 @@ public class SalesMarket extends Agent {
         @Override
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Sales Market reacts on Selling' information
-
             ACLMessage response;
             Order order = Order.gson.fromJson(request.getContent(), Order.class);
             orderText = order.getTextOfOrder();
@@ -342,7 +329,7 @@ public class SalesMarket extends Agent {
                 response.setPerformative(ACLMessage.AGREE);
                 System.out.println("SalesMarketAgent: [agree] I will take " + orderText);
 
-                addBehaviour(new GetFromWarehouse(myAgent, 2000, request));
+                addBehaviour(new TakeFromWarehouse(myAgent, request));
 
             } else {
                 response.setPerformative(ACLMessage.REFUSE);
@@ -366,8 +353,7 @@ public class SalesMarket extends Agent {
         }
     }
 
-    // TODO: Use OneShot (?)
-    class GetFromWarehouse extends TickerBehaviour {
+    class TakeFromWarehouse extends OneShotBehaviour {
 
         /**
          * 
@@ -376,14 +362,13 @@ public class SalesMarket extends Agent {
         private String orderToTake;
         private String orderText;
 
-        public GetFromWarehouse(Agent a, long period, ACLMessage msg) {
-            super(a, period);
+        public TakeFromWarehouse(Agent a, ACLMessage msg) {
+            super(a);
             orderToTake = msg.getContent();
         }
 
         @Override
-        protected void onTick() {
-
+        public void action() {
             orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
 
             System.out.println("SalesMarketAgent: Asking SellingAgent to take " + orderText + " from warehouse");
@@ -393,22 +378,9 @@ public class SalesMarket extends Agent {
             msg.setConversationId(requestedAction);
             msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
             msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-            msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
             msg.setContent(orderToTake);
 
             addBehaviour(new RequestToTake(myAgent, msg));
-        }
-
-        @Override
-        public void stop() {
-            Order order = Order.gson.fromJson(orderToTake, Order.class);
-            orderText = order.getTextOfOrder();
-
-            System.out.println("SalesMarketAgent: Now I have a " + orderText);
-            if (orderQueue.remove(order)) {
-                System.out.println("SalesMarketAgent: " + orderText + " is removed from Orderqueue.");
-            }
-            super.stop();
         }
 
         class RequestToTake extends AchieveREInitiator {
@@ -424,23 +396,23 @@ public class SalesMarket extends Agent {
 
             @Override
             protected void handleInform(ACLMessage inform) {
-
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                Order order = Order.gson.fromJson(inform.getContent(), Order.class);
+                orderText = order.getTextOfOrder();
 
                 System.out
                         .println("SalesMarketAgent: received [inform] " + orderText + " will be taken from warehouse");
-                stop();
+                System.out.println("SalesMarketAgent: Now I have a " + orderText);
+                if (orderQueue.remove(order)) {
+                    System.out.println("SalesMarketAgent: " + orderText + " is removed from Orderqueue.");
+                }
             }
 
             @Override
             protected void handleFailure(ACLMessage failure) {
-
                 orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
                 System.out.println(
                         "SalesMarketAgent: received [failure] " + orderText + " will not be taken from warehouse");
-                // TODO: may cause infinite loop
-                // stop();
             }
         }
     }

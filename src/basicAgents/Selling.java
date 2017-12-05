@@ -1,7 +1,6 @@
 package basicAgents;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -64,38 +63,37 @@ public class Selling extends Agent {
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Selling reacts on SalesMarket's request
 
+            // save this request message to reply on it later
+            starterMessage = request;
+
             orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
             // Agent should send agree or refuse
             // TODO: Add refuse answer (some conditions should be added)
 
-            starterMessage = request;
-            ACLMessage agree = request.createReply();
-            agree.setContent(request.getContent());
-            agree.setPerformative(ACLMessage.AGREE);
+            ACLMessage response = request.createReply();
+            response.setContent(request.getContent());
+            response.setPerformative(ACLMessage.AGREE);
 
-            ACLMessage refuse = request.createReply();
-            refuse.setContent(request.getContent());
-            refuse.setPerformative(ACLMessage.REFUSE);
+            // response.setPerformative(ACLMessage.REFUSE);
 
-            if (request.getConversationId() == "Order") {
+            if (request.getConversationId() == "Ask") {
                 System.out.println("SellingAgent: [request] SalesMarket orders a " + orderText);
                 System.out.println("SellingAgent: [agree] I will check warehouse for " + orderText);
-                addBehaviour(new CheckWarehouse(myAgent, agree));
+                addBehaviour(new CheckWarehouse(myAgent, response));
             } else if (request.getConversationId() == "Take") {
                 System.out
                         .println("SellingAgent: [request] SalesMarket wants to take " + orderText + " from warehouse");
                 System.out.println("SellingAgent: [agree] I will give you " + orderText + " from warehouse");
-                addBehaviour(new GiveProductToMarket(myAgent, agree));
+                addBehaviour(new GiveProductToMarket(myAgent, response));
             }
 
-            return agree;
+            return response;
         }
 
         @Override
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
                 throws FailureException {
-            // Order order = Order.gson.fromJson(request.getContent(), Order.class);
 
             // if agent agrees to request
             // after executing, it should send failure of inform
@@ -105,15 +103,11 @@ public class Selling extends Agent {
             ACLMessage reply = request.createReply();
             reply.setContent(request.getContent());
 
-            if (request.getConversationId() == "Order") {
+            if (request.getConversationId() == "Ask") {
                 if (isInWarehouse) {
                     reply.setPerformative(ACLMessage.INFORM);
                 } else {
                     reply.setPerformative(ACLMessage.FAILURE);
-                    // //PUT INTO PRODUCTION QUEUE
-                    // productionQueue.add(order);
-                    // System.out.println("SellingAgent: " + orderText + " is added to the
-                    // ProductionQueue.");
                 }
             } else if (request.getConversationId() == "Take") {
                 if (isTaken) {
@@ -134,13 +128,12 @@ public class Selling extends Agent {
          */
         private static final long serialVersionUID = 3856126876248315456L;
         private String requestedOrder;
-
-        private ACLMessage agree;
+        private ACLMessage msgToProduction;
 
         public CheckWarehouse(Agent a, ACLMessage msg) {
             super(a);
             requestedOrder = msg.getContent();
-            agree = msg;
+            msgToProduction = msg;
         }
 
         @Override
@@ -187,14 +180,14 @@ public class Selling extends Agent {
             // productToCheck needs to be produced
             if (!isInQueue && (orderToProduce.orderList.size() > 0)) {
                 String testGson = Order.gson.toJson(orderToProduce);
-                agree.setContent(testGson);
+                msgToProduction.setContent(testGson);
 
                 // add order to queue
                 productionQueue.add(order);
 
                 System.out.println(
                         "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
-                addBehaviour(new SendInfoToProduction(myAgent, agree));
+                addBehaviour(new SendInfoToProduction(myAgent, msgToProduction));
             }
         }
     }
@@ -218,17 +211,16 @@ public class Selling extends Agent {
             orderText = Order.gson.fromJson(orderToProceed, Order.class).getTextOfOrder();
             System.out.println("SellingAgent: " + orderText + " is in production");
 
-            String requestedAction = "Order";
-            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.setConversationId(requestedAction);
+            String requestedAction = "Produce";
+            ACLMessage requestToProduction = new ACLMessage(ACLMessage.REQUEST);
+            requestToProduction.setConversationId(requestedAction);
             // there should be financesAgent, but we will ignore it by now
-            msg.addReceiver(new AID(("AgentProduction"), AID.ISLOCALNAME));
-            // msg.addReceiver(new AID(("AgentFinances"), AID.ISLOCALNAME));
-            msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-            msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
-            msg.setContent(orderToProceed);
+            requestToProduction.addReceiver(new AID(("AgentProduction"), AID.ISLOCALNAME));
+            // requestToProduction.addReceiver(new AID(("AgentFinances"), AID.ISLOCALNAME));
+            requestToProduction.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+            requestToProduction.setContent(orderToProceed);
 
-            addBehaviour(new RequestToFinance(myAgent, msg));
+            addBehaviour(new RequestToFinance(myAgent, requestToProduction));
         }
 
         class RequestToFinance extends AchieveREInitiator {
@@ -244,14 +236,12 @@ public class Selling extends Agent {
 
             @Override
             protected void handleAgree(ACLMessage agree) {
-
                 orderText = Order.gson.fromJson(agree.getContent(), Order.class).getTextOfOrder();
                 System.out.println("SellingAgent: received [agree] Producing of " + orderText + " is initiated");
             }
 
             @Override
             protected void handleInform(ACLMessage inform) {
-
                 orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
                 System.out.println("SellingAgent: received [inform] " + orderText + " is delivered to warehouse");
 
@@ -263,9 +253,8 @@ public class Selling extends Agent {
 
             @Override
             protected void handleFailure(ACLMessage failure) {
-
                 orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-                System.out.println("SellingAgent: received [failure] ");
+                System.out.println("SellingAgent: received [failure] is not produced");
             }
         }
     }
