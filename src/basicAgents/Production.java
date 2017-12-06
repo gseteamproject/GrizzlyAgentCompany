@@ -8,7 +8,7 @@ import basicClasses.OrderPart;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.ParallelBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
@@ -52,12 +52,16 @@ public class Production extends Agent {
         public WaitingTaskMessage(Agent a, MessageTemplate mt) {
             super(a, mt);
         }
+        
+        public ACLMessage getRequest() {
+    		return (ACLMessage) getDataStore().get(REQUEST_KEY);
+    	}
 
         @Override
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // ProductionAgent reacts on SellingAgent's request
 
-            registerPrepareResultNotification(new ActivityBehaviour(myAgent, request));
+            registerPrepareResultNotification(new ActivityBehaviour(myAgent, this));
 
             orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
@@ -102,17 +106,17 @@ public class Production extends Agent {
     // TODO: REFACTOR THIS
     // TODO: Use DataStore
 
-    public class ActivityBehaviour extends ParallelBehaviour {
+    public class ActivityBehaviour extends SequentialBehaviour {
         /**
          * 
          */
         private static final long serialVersionUID = 887352333041438646L;
 
-        public ActivityBehaviour(Agent a, ACLMessage msg) {
-            super(a, WHEN_ANY);
+        public ActivityBehaviour(Agent a, WaitingTaskMessage owner) {
+            super(a);
 
-            addSubBehaviour(new AskBehaviour(a, msg));
-            addSubBehaviour(new WorkBehaviour(a, msg));
+            addSubBehaviour(new AskBehaviour(owner.getRequest()));
+            addSubBehaviour(new WorkBehaviour(owner.getRequest()));
         }
     }
 
@@ -135,8 +139,7 @@ public class Production extends Agent {
         Work interactor;
         ACLMessage request;
 
-        public WorkBehaviour(Agent a, ACLMessage msg) {
-            this.interactionBehaviour = a;
+        public WorkBehaviour(ACLMessage msg) {
             this.interactor = new Work(msg);
             this.request = msg;
         }
@@ -157,7 +160,7 @@ public class Production extends Agent {
     public class AskBehaviour extends SimpleBehaviour {
         ACLMessage request;
 
-        public AskBehaviour(Agent a, ACLMessage msg) {
+        public AskBehaviour(ACLMessage msg) {
             this.request = msg;
         }
 
