@@ -23,7 +23,6 @@ public class Procurement extends Agent {
      * 
      */
     private static final long serialVersionUID = 2923962894395399488L;
-    public ACLMessage starterMessage;
     public boolean isInMaterialStorage;
 
     // queue for procurement orders
@@ -61,7 +60,6 @@ public class Procurement extends Agent {
 
             // Agent should send agree or refuse
             // TODO: Add refuse answer (some conditions should be added)
-            starterMessage = request;
             ACLMessage agree = request.createReply();
             agree.setContent(request.getContent());
             agree.setPerformative(ACLMessage.AGREE);
@@ -184,7 +182,7 @@ public class Procurement extends Agent {
             }
         }
     }
-    
+
     // TODO: Use OneShot (?)
     class AskForAuction extends TickerBehaviour {
 

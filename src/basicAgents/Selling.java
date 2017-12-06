@@ -28,7 +28,6 @@ public class Selling extends Agent {
      * 
      */
     private static final long serialVersionUID = 7150875080288668056L;
-    public ACLMessage starterMessage;
     public boolean isInWarehouse;
     public boolean isTaken;
 
@@ -63,9 +62,6 @@ public class Selling extends Agent {
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // Selling reacts on SalesMarket's request
 
-            // save this request message to reply on it later
-            starterMessage = request;
-
             orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
             // Agent should send agree or refuse
@@ -80,12 +76,12 @@ public class Selling extends Agent {
             if (request.getConversationId() == "Ask") {
                 System.out.println("SellingAgent: [request] SalesMarket orders a " + orderText);
                 System.out.println("SellingAgent: [agree] I will check warehouse for " + orderText);
-                addBehaviour(new CheckWarehouse(myAgent, response));
+                addBehaviour(new CheckWarehouse(myAgent, request));
             } else if (request.getConversationId() == "Take") {
                 System.out
                         .println("SellingAgent: [request] SalesMarket wants to take " + orderText + " from warehouse");
                 System.out.println("SellingAgent: [agree] I will give you " + orderText + " from warehouse");
-                addBehaviour(new GiveProductToMarket(myAgent, response));
+                addBehaviour(new GiveProductToMarket(myAgent, request));
             }
 
             return response;
@@ -127,18 +123,19 @@ public class Selling extends Agent {
          * 
          */
         private static final long serialVersionUID = 3856126876248315456L;
-        private String requestedOrder;
-        private ACLMessage msgToProduction;
+        private ACLMessage msgToProduction, requestMessage;
 
         public CheckWarehouse(Agent a, ACLMessage msg) {
             super(a);
-            requestedOrder = msg.getContent();
-            msgToProduction = msg;
+            requestMessage = msg;
         }
 
         @Override
         public void action() {
-            Order order = Order.gson.fromJson(requestedOrder, Order.class);
+            // save this request message to reply on it later
+            msgToProduction = requestMessage;
+
+            Order order = Order.gson.fromJson(requestMessage.getContent(), Order.class);
 
             isInWarehouse = true;
             boolean isInQueue = false;
@@ -187,7 +184,7 @@ public class Selling extends Agent {
 
                 System.out.println(
                         "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
-                addBehaviour(new SendInfoToProduction(myAgent, msgToProduction));
+                addBehaviour(new SendInfoToProduction(myAgent, msgToProduction, requestMessage));
             }
         }
     }
@@ -200,10 +197,12 @@ public class Selling extends Agent {
         private static final long serialVersionUID = -6365251601845699295L;
         private String orderToProceed;
         private String orderText;
+        private ACLMessage requestMessage;
 
-        public SendInfoToProduction(Agent a, ACLMessage msg) {
+        public SendInfoToProduction(Agent a, ACLMessage msg, ACLMessage request) {
             super(a);
             orderToProceed = msg.getContent();
+            requestMessage = request;
         }
 
         @Override
@@ -242,12 +241,20 @@ public class Selling extends Agent {
 
             @Override
             protected void handleInform(ACLMessage inform) {
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+                Order order = Order.gson.fromJson(inform.getContent(), Order.class);
+                orderText = order.getTextOfOrder();
                 System.out.println("SellingAgent: received [inform] " + orderText + " is delivered to warehouse");
 
-                ACLMessage reply = starterMessage.createReply();
+                for (Order orderInQueue : SalesMarket.orderQueue) {
+                    if (orderInQueue.id == order.id) {
+                        order = orderInQueue;
+                    }
+                }
+
+                ACLMessage reply = requestMessage.createReply();
                 reply.setPerformative(ACLMessage.INFORM);
-                reply.setContent(starterMessage.getContent());
+                String testGson = Order.gson.toJson(order);
+                reply.setContent(testGson);
                 send(reply);
             }
 

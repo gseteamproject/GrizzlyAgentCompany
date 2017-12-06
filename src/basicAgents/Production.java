@@ -26,7 +26,6 @@ public class Production extends Agent {
      * 
      */
     private static final long serialVersionUID = 9064413910591040008L;
-    public ACLMessage starterMessage;
     public boolean isProduced = false;
 
     @Override
@@ -65,7 +64,6 @@ public class Production extends Agent {
             System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);
             // Agent should send agree or refuse
             // TODO: Add refuse answer (some conditions should be added)
-            starterMessage = request;
             ACLMessage agree = request.createReply();
             agree.setContent(request.getContent());
             agree.setPerformative(ACLMessage.AGREE);
@@ -133,19 +131,19 @@ public class Production extends Agent {
     }
 
     public class WorkBehaviour extends SimpleBehaviour {
-
         Agent interactionBehaviour;
-
         Work interactor;
+        ACLMessage request;
 
         public WorkBehaviour(Agent a, ACLMessage msg) {
             this.interactionBehaviour = a;
             this.interactor = new Work(msg);
+            this.request = msg;
         }
 
         @Override
         public void action() {
-            starterMessage = (interactor.execute(starterMessage));
+            request = (interactor.execute(request));
         }
 
         @Override
@@ -157,13 +155,15 @@ public class Production extends Agent {
     }
 
     public class AskBehaviour extends SimpleBehaviour {
+        ACLMessage request;
 
         public AskBehaviour(Agent a, ACLMessage msg) {
+            this.request = msg;
         }
 
         @Override
         public void action() {
-            addBehaviour(new AskForMaterial(myAgent, 2000, starterMessage));
+            addBehaviour(new AskForMaterial(myAgent, 2000, request));
         }
 
         @Override
@@ -183,14 +183,16 @@ public class Production extends Agent {
         private static final long serialVersionUID = 8495802171064457305L;
         private String materialsToRequest;
         private String orderText;
+        private ACLMessage requestMessage;
 
         public AskForMaterial(Agent a, long period, ACLMessage msg) {
             super(a, period);
-            materialsToRequest = msg.getContent();
+            requestMessage = msg;
         }
 
         @Override
         protected void onTick() {
+            materialsToRequest = requestMessage.getContent();
             orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
 
             System.out.println("ProductionAgent: Asking ProcurementAgent to get materials for " + orderText);
@@ -233,7 +235,7 @@ public class Production extends Agent {
                 System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
                 stop();
 
-                addBehaviour(new GetFromStorage(myAgent, 2000, inform));
+                addBehaviour(new GetFromStorage(myAgent, 2000, inform, requestMessage));
             }
 
             @Override
@@ -255,10 +257,12 @@ public class Production extends Agent {
         private static final long serialVersionUID = 6717167573013445327L;
         private String materialsToTake;
         private String orderText;
+        private ACLMessage requestMessage;
 
-        public GetFromStorage(Agent a, long period, ACLMessage msg) {
+        public GetFromStorage(Agent a, long period, ACLMessage msg, ACLMessage request) {
             super(a, period);
             materialsToTake = msg.getContent();
+            requestMessage = request;
         }
 
         @Override
@@ -309,7 +313,7 @@ public class Production extends Agent {
                         + " will be taken from storage");
                 stop();
 
-                addBehaviour(new DeliverToSelling(myAgent, inform));
+                addBehaviour(new DeliverToSelling(myAgent, inform, requestMessage));
             }
 
             @Override
@@ -331,11 +335,12 @@ public class Production extends Agent {
         private static final long serialVersionUID = 313682933400751868L;
         private String orderToGive;
         private String orderText;
-        private ACLMessage reply;
+        private ACLMessage reply, requestMessage;
 
-        public DeliverToSelling(Agent a, ACLMessage msg) {
+        public DeliverToSelling(Agent a, ACLMessage msg, ACLMessage request) {
             super(a);
             orderToGive = msg.getContent();
+            requestMessage = request;
         }
 
         @Override
@@ -352,7 +357,7 @@ public class Production extends Agent {
             }
             isProduced = true;
 
-            reply = starterMessage.createReply();
+            reply = requestMessage.createReply();
             reply.setPerformative(ACLMessage.INFORM);
             reply.setContent(orderToGive);
             send(reply);
