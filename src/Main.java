@@ -1,11 +1,12 @@
+import communication.Communication;
 import communication.Server;
 import jade.Boot;
 
 public class Main {
-
-    public static Server server;
-
     public static void main(String[] args) {
+        Communication communication = new Communication();
+
+        //todo: maybe start the program, when the client is connected first?
 
         String[] parameters = new String[2];
         parameters[0] = "-gui";
@@ -16,9 +17,5 @@ public class Main {
         // AgentSalesMarket, AgentSelling, AgentFinances, AgentCapitalMarket,
         // AgentProcurement, AgentProcurementMarket, AgentProduction
         Boot.main(parameters);
-
-        server = new Server();
-        Thread serverThread = new Thread(server);
-        serverThread.start();
     }
 }

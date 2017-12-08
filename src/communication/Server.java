@@ -8,6 +8,9 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 
+/*
+    SocketIO implementation to communicate with the client website
+ */
 public class Server implements Runnable {
     private final String server = "localhost";
     private final int port = 9092;
@@ -21,7 +24,7 @@ public class Server implements Runnable {
     just an example of the communication, not finished yet.
      */
     public void run() {
-        System.out.println("SERVER STARTED ON PORT: " + port);
+        System.out.println("[Server] -> Started on port " + port);
         connectionCounter = 0;
 
         conServer = new SocketIOServer(getConfig());
@@ -30,38 +33,35 @@ public class Server implements Runnable {
             get all incoming connections to the server
             allow only one connection
          */
-        conServer.addConnectListener(new ConnectListener() {
-            @Override
-            public void onConnect(SocketIOClient socketIOClient) {
-                // allow only one client connection
-                if (connectionCounter >= 1)
-                    socketIOClient.disconnect();
-
-                // count the connections
-                connectionCounter++;
-
-                // set the client
-                conClient = socketIOClient;
+        conServer.addConnectListener(socketIOClient -> {
+            // allow only one client connection
+            if (connectionCounter >= 1) {
+                socketIOClient.disconnect();
+                return;
             }
+
+            // count the connections
+            connectionCounter++;
+
+            // set the client
+            conClient = socketIOClient;
         });
         /*
             handle all disconnects
          */
-        conServer.addDisconnectListener(new DisconnectListener() {
-            @Override
-            public void onDisconnect(SocketIOClient socketIOClient) {
-                // count connections
+        conServer.addDisconnectListener(socketIOClient -> {
+            // count connections
+            if (connectionCounter >= 1)
                 connectionCounter--;
-            }
         });
 
         /*
             receiving messages from the client
          */
-        conServer.addEventListener("msgevent", MessageObject.class, new DataListener<MessageObject>() {
-            @Override
-            public void onData(SocketIOClient socketIOClient, MessageObject messageObject, AckRequest ackRequest) throws Exception {
-
+        conServer.addEventListener("msgevent", MessageObject.class, (socketIOClient, messageObject, ackRequest) -> {
+            if (messageObject.getMessage() == "stop_server") {
+                System.out.println("[Server] -> Client stopped the server!");
+                stopServer();
             }
         });
 
@@ -73,9 +73,9 @@ public class Server implements Runnable {
             conClient.sendEvent(event, object);
     }
 
-    public void sendMessageToClient(String message) {
+    public void sendMessageToClient(String agent, String message) {
         if (conClient != null)
-            conClient.sendEvent("msgevent", new MessageObject(message));
+            conClient.sendEvent("msgevent", new MessageObject(agent, message));
     }
 
     /*

@@ -10,6 +10,7 @@ import basicClasses.Product;
 import basicClasses.Order;
 import basicClasses.OrderPart;
 import basicClasses.ProductStorage;
+import communication.Communication;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
@@ -75,12 +76,17 @@ public class Selling extends Agent {
 
             if (request.getConversationId() == "Ask") {
                 System.out.println("SellingAgent: [request] SalesMarket orders a " + orderText);
+                Communication.server.sendMessageToClient("SellingAgent", "[request] SalesMarket orders a " + orderText);
+
                 System.out.println("SellingAgent: [agree] I will check warehouse for " + orderText);
+                Communication.server.sendMessageToClient("SellingAgent", "[agree] I will check warehouse for " + orderText);
                 addBehaviour(new CheckWarehouse(myAgent, request));
             } else if (request.getConversationId() == "Take") {
-                System.out
-                        .println("SellingAgent: [request] SalesMarket wants to take " + orderText + " from warehouse");
+                System.out.println("SellingAgent: [request] SalesMarket wants to take " + orderText + " from warehouse");
+                Communication.server.sendMessageToClient("SellingAgent","[request] SalesMarket wants to take " + orderText + " from warehouse");
                 System.out.println("SellingAgent: [agree] I will give you " + orderText + " from warehouse");
+                Communication.server.sendMessageToClient("SellingAgent","[agree] I will give you " + orderText + " from warehouse");
+
                 addBehaviour(new GiveProductToMarket(myAgent, request));
             }
 
@@ -152,6 +158,7 @@ public class Selling extends Agent {
                 int amount = orderPart.amount;
 
                 System.out.println("SellingAgent: Asking warehouse about " + orderPart.getTextOfOrderPart());
+                Communication.server.sendMessageToClient("SellingAgent","Asking warehouse about " + orderPart.getTextOfOrderPart());
 
                 int amountInWH = warehouse.getAmountOfProduct(productToCheck);
 
@@ -159,8 +166,8 @@ public class Selling extends Agent {
                     if (isInWarehouse) {
                         isInWarehouse = true;
                     }
-                    System.out
-                            .println("SellingAgent: I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
+                    System.out.println("SellingAgent: I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
+                    Communication.server.sendMessageToClient("SellingAgent","I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
                 } else {
                     isInWarehouse = false;
 
@@ -182,8 +189,8 @@ public class Selling extends Agent {
                 // add order to queue
                 productionQueue.add(order);
 
-                System.out.println(
-                        "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
+                System.out.println("SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
+                Communication.server.sendMessageToClient("SellingAgent","Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
                 addBehaviour(new SendInfoToProduction(myAgent, msgToProduction, requestMessage));
             }
         }
@@ -209,6 +216,7 @@ public class Selling extends Agent {
         public void action() {
             orderText = Order.gson.fromJson(orderToProceed, Order.class).getTextOfOrder();
             System.out.println("SellingAgent: " + orderText + " is in production");
+            Communication.server.sendMessageToClient("SellingAgent", orderText + " is in production");
 
             String requestedAction = "Produce";
             ACLMessage requestToProduction = new ACLMessage(ACLMessage.REQUEST);
@@ -237,6 +245,7 @@ public class Selling extends Agent {
             protected void handleAgree(ACLMessage agree) {
                 orderText = Order.gson.fromJson(agree.getContent(), Order.class).getTextOfOrder();
                 System.out.println("SellingAgent: received [agree] Producing of " + orderText + " is initiated");
+                Communication.server.sendMessageToClient("SellingAgent","received [agree] Producing of " + orderText + " is initiated");
             }
 
             @Override
@@ -244,6 +253,7 @@ public class Selling extends Agent {
                 Order order = Order.gson.fromJson(inform.getContent(), Order.class);
                 orderText = order.getTextOfOrder();
                 System.out.println("SellingAgent: received [inform] " + orderText + " is delivered to warehouse");
+                Communication.server.sendMessageToClient("SellingAgent","received [inform] " + orderText + " is delivered to warehouse");
 
                 for (Order orderInQueue : SalesMarket.orderQueue) {
                     if (orderInQueue.id == order.id) {
@@ -262,6 +272,7 @@ public class Selling extends Agent {
             protected void handleFailure(ACLMessage failure) {
                 orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
                 System.out.println("SellingAgent: received [failure] is not produced");
+                Communication.server.sendMessageToClient("SellingAgent","received [failure] is not produced");
             }
         }
     }
@@ -291,6 +302,7 @@ public class Selling extends Agent {
             for (OrderPart orderPart : order.orderList) {
                 Product productToGive = orderPart.product;
                 System.out.println("SellingAgent: Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
+                Communication.server.sendMessageToClient("SellingAgent","Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
                 warehouse.remove(productToGive);
                 takeCount += 1;
             }
