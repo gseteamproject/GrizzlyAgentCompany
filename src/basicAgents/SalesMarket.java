@@ -143,14 +143,18 @@ public class SalesMarket extends Agent {
 
             order.addProduct(new Product(10, "red"), 1);
             order.addProduct(new Product(10, "blue"), 2);
-            order.addProduct(new Product(10, "green"), 2);
+            order.addProduct(new Product(10, "green"), 6);
+            
 
             String testGson = Order.gson.toJson(order);
             // {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
 
             testMsg.setContent(testGson);
             send(testMsg);
-
+            
+            /**
+             * THIS IS REALLY ONLY FOR TESTING 
+             */
             // adding stone to warehouse and storage
             Paint paint = new Paint("red");
             Stone stone = new Stone(10);
@@ -162,7 +166,7 @@ public class SalesMarket extends Agent {
             prdct = new Product(stone, paint);
             Selling.warehouse.add(prdct);
             Procurement.materialStorage.add(paint);
-            Procurement.materialStorage.add(stone);
+			Procurement.materialStorage.add(stone);
 
             paint = new Paint("green");
             stone = new Stone(10);

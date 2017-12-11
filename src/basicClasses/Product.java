@@ -2,7 +2,7 @@ package basicClasses;
 
 public class Product extends Good {
     private Stone stone;
-    private Paint paint;
+	private Paint paint;
 
     /*
      * Products are made of 2 Materials: Paint and Stone It can be sold from
@@ -37,13 +37,21 @@ public class Product extends Good {
         this.paint.setColor(color);
     }
 
-    public double getSize() {
+	public double getSize() {
         return this.stone.getSize();
     }
 
     public void setSize(double size) {
         this.stone.setSize(size);
     }
+    
+    public Stone getStone() {
+		return stone;
+	}
+
+	public Paint getPaint() {
+		return paint;
+	}
 
     @Override
     public boolean equals(Object o) {

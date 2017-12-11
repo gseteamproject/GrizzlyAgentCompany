@@ -5,7 +5,7 @@ package basicClasses;
  */
 
 public class Paint extends Good {
-    private String color;
+	private String color;
 
     public Paint(String color){
         this.color = color;

@@ -2,7 +2,9 @@ package basicAgents;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import basicClasses.*;
 import jade.core.AID;
@@ -19,254 +21,257 @@ import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
 
 public class Procurement extends Agent {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 2923962894395399488L;
-    public boolean isInMaterialStorage;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2923962894395399488L;
+	public boolean isInMaterialStorage;
 
-    // queue for procurement orders
-    public static List<Order> procurementQueue = new ArrayList<Order>();
+	// queue for procurement orders
+	public static List<Order> procurementQueue = new ArrayList<Order>();
 
-    // creating storage for raw materials
-    public static MaterialStorage materialStorage = new MaterialStorage();
+	// creating storage for raw materials
+	public static MaterialStorage materialStorage = new MaterialStorage();
 
-    @Override
-    protected void setup() {
-        MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
+	@Override
+	protected void setup() {
+		MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
-        // adding behaviours
-        addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
-    }
+		// adding behaviours
+		addBehaviour(new WaitingForMaterialOrder(this, reqTemp));
+	}
 
-    // this class waits for receiving a message with certain template
-    class WaitingForMaterialOrder extends AchieveREResponder {
+	// this class waits for receiving a message with certain template
+	class WaitingForMaterialOrder extends AchieveREResponder {
 
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -5804509731381843266L;
-        private String orderText;
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -5804509731381843266L;
+		private String orderText;
 
-        public WaitingForMaterialOrder(Agent a, MessageTemplate mt) {
-            super(a, mt);
-        }
+		public WaitingForMaterialOrder(Agent a, MessageTemplate mt) {
+			super(a, mt);
+		}
 
-        @Override
-        protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
-            // Selling reacts on SalesMarket's request
+		@Override
+		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+			// Selling reacts on SalesMarket's request
 
-            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
-            // Agent should send agree or refuse
-            // TODO: Add refuse answer (some conditions should be added)
-            ACLMessage agree = request.createReply();
-            agree.setContent(request.getContent());
-            agree.setPerformative(ACLMessage.AGREE);
+			// Agent should send agree or refuse
+			// TODO: Add refuse answer (some conditions should be added)
+			ACLMessage agree = request.createReply();
+			agree.setContent(request.getContent());
+			agree.setPerformative(ACLMessage.AGREE);
 
-            if (request.getConversationId() == "Materials") {
-                System.out.println("ProcurementAgent: [request] ProductionAgent asks for materials for " + orderText);
-                System.out.println(
-                        "ProcurementAgent: [agree] I will check materialStorage for materials for " + orderText);
-                addBehaviour(new CheckMaterialStorage(myAgent, agree));
-            } else if (request.getConversationId() == "Take") {
-                System.out.println("ProcurementAgent: [request] ProductionAgent wants to get materials for " + orderText
-                        + " from materialStorage");
-                System.out.println("ProcurementAgent: [agree] I will give you materials for " + orderText
-                        + " from materialStorage");
-                addBehaviour(new GiveMaterialToProduction(myAgent, agree));
-            }
+			if (request.getConversationId() == "Materials") {
+				System.out.println("ProcurementAgent: [request] ProductionAgent asks for materials for " + orderText);
+				System.out.println(
+						"ProcurementAgent: [agree] I will check materialStorage for materials for " + orderText);
+				addBehaviour(new CheckMaterialStorage(myAgent, agree));
+			} else if (request.getConversationId() == "Take") {
+				System.out.println("ProcurementAgent: [request] ProductionAgent wants to get materials for " + orderText
+						+ " from materialStorage");
+				System.out.println("ProcurementAgent: [agree] I will give you materials for " + orderText
+						+ " from materialStorage");
+				addBehaviour(new GiveMaterialToProduction(myAgent, agree));
+			}
 
-            return agree;
-        }
+			return agree;
+		}
 
-        @Override
-        protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
-                throws FailureException {
-            // if agent agrees to request
-            // after executing, it should send failure of inform
+		@Override
+		protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
+				throws FailureException {
+			// if agent agrees to request
+			// after executing, it should send failure of inform
 
-            // in case of inform product will be taken from warehouse
-            // in case of failure product will be produced
-            ACLMessage reply = request.createReply();
-            reply.setContent(request.getContent());
+			// in case of inform product will be taken from warehouse
+			// in case of failure product will be produced
+			ACLMessage reply = request.createReply();
+			reply.setContent(request.getContent());
 
-            if (isInMaterialStorage) {
-                reply.setPerformative(ACLMessage.INFORM);
-            } else {
-                reply.setPerformative(ACLMessage.FAILURE);
-            }
-            return reply;
-        }
-    }
+			if (isInMaterialStorage) {
+				reply.setPerformative(ACLMessage.INFORM);
+			} else {
+				reply.setPerformative(ACLMessage.FAILURE);
+			}
+			return reply;
+		}
+	}
 
-    class CheckMaterialStorage extends OneShotBehaviour {
+	class CheckMaterialStorage extends OneShotBehaviour {
 
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -4869963544017982955L;
-        private String requestedMaterial;
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4869963544017982955L;
+		private String requestedMaterial;
 
-        private ACLMessage agree;
+		private ACLMessage agree;
 
-        public CheckMaterialStorage(Agent a, ACLMessage msg) {
-            super(a);
-            requestedMaterial = msg.getContent();
-            agree = msg;
-        }
+		public CheckMaterialStorage(Agent a, ACLMessage msg) {
+			super(a);
+			requestedMaterial = msg.getContent();
+			agree = msg;
+		}
 
-        @Override
-        public void action() {
-            Order order = Order.gson.fromJson(requestedMaterial, Order.class);
+		@Override
+		public void action() {
+			Order order = Order.gson.fromJson(requestedMaterial, Order.class);
 
-            isInMaterialStorage = true;
-            boolean isInQueue = false;
+			isInMaterialStorage = true;
+			boolean isInQueue = false;
 
-            // check if this order is not in queue yet
-            isInQueue = procurementQueue.contains(order);
+			// check if this order is not in queue yet
+			isInQueue = procurementQueue.contains(order);
 
-            // part of order, that needs to be produced
-            Order orderToBuy = new Order();
-            orderToBuy.id = order.id;
+			// part of order, that needs to be produced
+			Order orderToBuy = new Order();
+			orderToBuy.id = order.id;
+			
 
-            for (OrderPart orderPart : order.orderList) {
-                Product productToCheck = orderPart.product;
 
-                String color = productToCheck.getColor();
-                Double size = productToCheck.getSize();
+			for (OrderPart orderPart : order.orderList) {
+				Product productToCheck = orderPart.getProduct();
 
-                int amount = orderPart.amount;
+				String color = productToCheck.getColor();
+				Double size = productToCheck.getSize();
 
-                System.out.println("ProcurementAgent: Asking materialStorage about " + orderPart.getTextOfOrderPart());
+				int amount = orderPart.getAmount();
 
-                int paintAmountInMS = materialStorage.getAmountOfPaint(color);
-                int stoneAmountInMS = materialStorage.getAmountOfStones(size);
+				System.out.println("ProcurementAgent: Asking materialStorage about " + orderPart.getTextOfOrderPart());
 
-                if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
-                    isInMaterialStorage = true;
-                    System.out.println("ProcurementAgent: I say that materials for " + orderPart.getTextOfOrderPart()
-                            + " are in materialStorage");
-                } else {
-                    // need to describe multiple statements to check every material
-                    isInMaterialStorage = false;
+				
+				int paintAmountInMS = materialStorage.getAmountOfPaint(color);
+				int stoneAmountInMS = materialStorage.getAmountOfStones(size);
 
-                    // creating new instance of OrderPart to change its amount
-                    OrderPart newOrderPart = new OrderPart();
-                    newOrderPart.product = orderPart.product;
+				if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
+					isInMaterialStorage = true;
+					System.out.println("ProcurementAgent: I say that materials for " + orderPart.getTextOfOrderPart()
+							+ " are in materialStorage");
+				} else {
+					// need to describe multiple statements to check every material
+					isInMaterialStorage = false;
 
-                    int largerAmount = 0;
-                    if (paintAmountInMS >= stoneAmountInMS) {
-                        largerAmount = paintAmountInMS;
-                    } else {
-                        largerAmount = stoneAmountInMS;
-                    }
+					// creating new instance of OrderPart to change its amount
+					OrderPart paintOrderPart = new OrderPart(orderPart.getProduct().getPaint());
+					OrderPart stoneOrderPart = new OrderPart(orderPart.getProduct().getStone());
 
-                    newOrderPart.amount = orderPart.amount - largerAmount;
-                    if (newOrderPart.amount > 0) {
-                        orderToBuy.orderList.add(newOrderPart);
-                    }
-                }
-            }
+					paintOrderPart.setAmount(amount - paintAmountInMS);
+					stoneOrderPart.setAmount(amount - stoneAmountInMS);
+					
+					System.out.println("paintOrderPart.getAmount() " + paintOrderPart.getAmount());
 
-            if (!isInQueue && orderToBuy.orderList.size() > 0) {
-                String testGson = Order.gson.toJson(orderToBuy);
-                agree.setContent(testGson);
 
-                // add order to queue
-                procurementQueue.add(order);
+					if (paintOrderPart.getAmount() > 0) {
+						orderToBuy.orderList.add(paintOrderPart);
+					}
+					if (stoneOrderPart.getAmount() > 0) {
+						orderToBuy.orderList.add(stoneOrderPart);
+					}
+				}
+			}
 
-                System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
-                        + orderToBuy.getTextOfOrder());
-                addBehaviour(new AskForAuction(myAgent, 2000, agree));
-            }
-        }
-    }
+			if (!isInQueue && orderToBuy.orderList.size() > 0) {
+				String testGson = Order.gson.toJson(orderToBuy);
+				agree.setContent(testGson);
 
-    // TODO: Use OneShot (?)
-    class AskForAuction extends TickerBehaviour {
+				// add order to queue
+				procurementQueue.add(order);
 
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -6100676860519799721L;
-        private String materialToBuy;
-        private String orderText;
+				System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
+						+ orderToBuy.getTextOfOrder());
+				addBehaviour(new AskForAuction(myAgent, 2000, agree));
+			}
+		}
+	}
 
-        public AskForAuction(Agent a, long period, ACLMessage msg) {
-            super(a, period);
-            materialToBuy = msg.getContent();
-        }
+	// TODO: Use OneShot (?)
+	class AskForAuction extends TickerBehaviour {
 
-        @Override
-        protected void onTick() {
-            orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
-            System.out.println(
-                    "ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6100676860519799721L;
+		private String materialToBuy;
+		private String orderText;
 
-            String requestedAction = "Order";
-            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.setConversationId(requestedAction);
-            msg.addReceiver(new AID(("AgentProcurementMarket"), AID.ISLOCALNAME));
-            msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-            msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
-            msg.setContent(materialToBuy);
+		public AskForAuction(Agent a, long period, ACLMessage msg) {
+			super(a, period);
+			materialToBuy = msg.getContent();
+		}
 
-            addBehaviour(new RequestToBuy(myAgent, msg));
-        }
+		@Override
+		protected void onTick() {
+			orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
+			System.out.println(
+					"ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
 
-        @Override
-        public void stop() {
-            orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
-            System.out.println("ProcurementAgent: materials for " + orderText + " are in auction");
-            super.stop();
-        }
+			String requestedAction = "Order";
+			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+			msg.setConversationId(requestedAction);
+			msg.addReceiver(new AID(("AgentProcurementMarket"), AID.ISLOCALNAME));
+			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
+			msg.setContent(materialToBuy);
 
-        class RequestToBuy extends AchieveREInitiator {
+			addBehaviour(new RequestToBuy(myAgent, msg));
+		}
 
-            /**
-             * 
-             */
-            private static final long serialVersionUID = -1322936877118129497L;
+		@Override
+		public void stop() {
+			orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
+			System.out.println("ProcurementAgent: materials for " + orderText + " are in auction");
+			super.stop();
+		}
 
-            public RequestToBuy(Agent a, ACLMessage msg) {
-                super(a, msg);
-            }
+		class RequestToBuy extends AchieveREInitiator {
 
-            @Override
-            protected void handleInform(ACLMessage inform) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -1322936877118129497L;
 
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-                System.out.println("ProcurementAgent: [inform] " + orderText);
-                stop();
-            }
-        }
-    }
+			public RequestToBuy(Agent a, ACLMessage msg) {
+				super(a, msg);
+			}
 
-    class GiveMaterialToProduction extends OneShotBehaviour {
+			@Override
+			protected void handleInform(ACLMessage inform) {
 
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -1386982676634257780L;
-        private String materialsToGive;
-        private String orderText;
+				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+				stop();
+			}
+		}
+	}
 
-        public GiveMaterialToProduction(Agent a, ACLMessage msg) {
-            super(a);
-            materialsToGive = msg.getContent();
-        }
+	class GiveMaterialToProduction extends OneShotBehaviour {
 
-        @Override
-        public void action() {
-            Order order = Order.gson.fromJson(materialsToGive, Order.class);
-            orderText = order.getTextOfOrder();
-            System.out.println("ProcurementAgent: Taking " + orderText + " from materialStorage");
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1386982676634257780L;
+		private String materialsToGive;
+		private String orderText;
 
-            for (Product product : order.getProducts()) {
-                materialStorage.remove(new Paint(product.getColor()));
-                materialStorage.remove(new Stone(product.getSize()));
-            }
-        }
-    }
+		public GiveMaterialToProduction(Agent a, ACLMessage msg) {
+			super(a);
+			materialsToGive = msg.getContent();
+		}
+
+		@Override
+		public void action() {
+			Order order = Order.gson.fromJson(materialsToGive, Order.class);
+			orderText = order.getTextOfOrder();
+			System.out.println("ProcurementAgent: Taking " + orderText + " from materialStorage");
+
+			for (Product product : order.getProducts()) {
+				materialStorage.remove(new Paint(product.getColor()));
+				materialStorage.remove(new Stone(product.getSize()));
+			}
+		}
+	}
 }

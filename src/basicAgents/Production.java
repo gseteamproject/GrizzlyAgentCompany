@@ -353,8 +353,8 @@ public class Production extends Agent {
             System.out.println("ProductionAgent: Delivering " + orderText + " to warehouse");
 
             for (OrderPart orderPart : order.orderList) {
-                Product productToGive = orderPart.product;
-                for (int i = 0; i < orderPart.amount; i++) {
+                Product productToGive = orderPart.getProduct();
+                for (int i = 0; i < orderPart.getAmount(); i++) {
                     Selling.warehouse.add(productToGive);
                 }
             }

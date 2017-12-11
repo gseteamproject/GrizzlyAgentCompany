@@ -140,7 +140,6 @@ public class Selling extends Agent {
         public void action() {
             // save this request message to reply on it later
             msgToProduction = requestMessage;
-
             Order order = Order.gson.fromJson(requestMessage.getContent(), Order.class);
 
             isInWarehouse = true;
@@ -154,8 +153,8 @@ public class Selling extends Agent {
             orderToProduce.id = order.id;
 
             for (OrderPart orderPart : order.orderList) {
-                Product productToCheck = orderPart.product;
-                int amount = orderPart.amount;
+                Product productToCheck = orderPart.getProduct();
+                int amount = orderPart.getAmount();
 
                 System.out.println("SellingAgent: Asking warehouse about " + orderPart.getTextOfOrderPart());
                 Communication.server.sendMessageToClient("SellingAgent","Asking warehouse about " + orderPart.getTextOfOrderPart());
@@ -172,10 +171,9 @@ public class Selling extends Agent {
                     isInWarehouse = false;
 
                     // creating new instance of OrderPart to change its amount
-                    OrderPart newOrderPart = new OrderPart();
-                    newOrderPart.product = orderPart.product;
-                    newOrderPart.amount = orderPart.amount - amountInWH;
-                    if (newOrderPart.amount > 0) {
+					OrderPart newOrderPart = new OrderPart(orderPart.getProduct());
+                    newOrderPart.setAmount(orderPart.getAmount() - amountInWH);
+                    if (newOrderPart.getAmount() > 0) {
                         orderToProduce.orderList.add(newOrderPart);
                     }
                 }
@@ -300,7 +298,7 @@ public class Selling extends Agent {
 
             int takeCount = 0;
             for (OrderPart orderPart : order.orderList) {
-                Product productToGive = orderPart.product;
+                Product productToGive = orderPart.getProduct();
                 System.out.println("SellingAgent: Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
                 Communication.server.sendMessageToClient("SellingAgent","Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
                 warehouse.remove(productToGive);
