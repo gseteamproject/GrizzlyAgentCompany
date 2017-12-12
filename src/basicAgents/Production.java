@@ -8,6 +8,8 @@ import basicClasses.OrderPart;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.FailureException;
@@ -17,7 +19,6 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
-import org.omg.CORBA.PRIVATE_MEMBER;
 
 public class Production extends Agent {
 
@@ -25,7 +26,7 @@ public class Production extends Agent {
      * 
      */
     private static final long serialVersionUID = 9064413910591040008L;
-    public ACLMessage starterMessage;
+    public boolean isProduced = false;
 
     @Override
     protected void setup() {
@@ -51,24 +52,31 @@ public class Production extends Agent {
         public WaitingTaskMessage(Agent a, MessageTemplate mt) {
             super(a, mt);
         }
+        
+        public ACLMessage getRequest() {
+    		return (ACLMessage) getDataStore().get(REQUEST_KEY);
+    	}
 
         @Override
         protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
             // ProductionAgent reacts on SellingAgent's request
 
-            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfProductOrder();
+            registerPrepareResultNotification(new ActivityBehaviour(myAgent, this));
+
+            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
             System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);
             // Agent should send agree or refuse
             // TODO: Add refuse answer (some conditions should be added)
-            starterMessage = request;
             ACLMessage agree = request.createReply();
             agree.setContent(request.getContent());
             agree.setPerformative(ACLMessage.AGREE);
             System.out.println("ProductionAgent: [agree] I will produce " + orderText);
 
             // if agent agrees it starts executing request
-            addBehaviour(new AskForMaterial(myAgent, agree));
+            // addBehaviour(new AskForMaterial(myAgent, 2000, agree));
+
+            // registerPrepareResultNotification(new AskForMaterial(myAgent, 2000, agree));
 
             return agree;
         }
@@ -77,20 +85,100 @@ public class Production extends Agent {
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response)
                 throws FailureException {
 
-            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfProductOrder();
+            orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
             // result of request to ProductionAgent
             // if agent agrees to request
             // after executing, it should send failure of inform
-            ACLMessage inform = request.createReply();
-            inform.setContent(request.getContent());
-            inform.setPerformative(ACLMessage.INFORM);
+            ACLMessage reply = request.createReply();
+            reply.setContent(request.getContent());
 
-            return inform;
+            if (isProduced) {
+                reply.setPerformative(ACLMessage.INFORM);
+            } else {
+                reply.setPerformative(ACLMessage.FAILURE);
+            }
+            return reply;
+
         }
     }
 
-    class AskForMaterial extends OneShotBehaviour {
+    // TODO: REFACTOR THIS
+    // TODO: Use DataStore
+
+    public class ActivityBehaviour extends SequentialBehaviour {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 887352333041438646L;
+
+        public ActivityBehaviour(Agent a, WaitingTaskMessage owner) {
+            super(a);
+
+            addSubBehaviour(new AskBehaviour(owner.getRequest()));
+            addSubBehaviour(new WorkBehaviour(owner.getRequest()));
+        }
+    }
+
+    public class Work {
+
+        public Work(ACLMessage msg) {
+            super();
+        }
+
+        public ACLMessage execute(ACLMessage request) {
+            ACLMessage response = request.createReply();
+            response.setPerformative(ACLMessage.INFORM);
+
+            return response;
+        }
+    }
+
+    public class WorkBehaviour extends SimpleBehaviour {
+        Agent interactionBehaviour;
+        Work interactor;
+        ACLMessage request;
+
+        public WorkBehaviour(ACLMessage msg) {
+            this.interactor = new Work(msg);
+            this.request = msg;
+        }
+
+        @Override
+        public void action() {
+            request = (interactor.execute(request));
+        }
+
+        @Override
+        public boolean done() {
+            return true;
+        }
+
+        private static final long serialVersionUID = -3500469822678572098L;
+    }
+
+    public class AskBehaviour extends SimpleBehaviour {
+        ACLMessage request;
+
+        public AskBehaviour(ACLMessage msg) {
+            this.request = msg;
+        }
+
+        @Override
+        public void action() {
+            addBehaviour(new AskForMaterial(myAgent, 2000, request));
+        }
+
+        @Override
+        public boolean done() {
+            return true;
+        }
+
+        private static final long serialVersionUID = -3500469822678572098L;
+    }
+
+    // TODO: Use OneShot (?)
+    class AskForMaterial extends TickerBehaviour {
 
         /**
          * 
@@ -98,17 +186,17 @@ public class Production extends Agent {
         private static final long serialVersionUID = 8495802171064457305L;
         private String materialsToRequest;
         private String orderText;
+        private ACLMessage requestMessage;
 
-        public AskForMaterial(Agent a, ACLMessage msg) {
-            super(a);
-            materialsToRequest = msg.getContent();
+        public AskForMaterial(Agent a, long period, ACLMessage msg) {
+            super(a, period);
+            requestMessage = msg;
         }
 
         @Override
-        public void action() {
-            orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfProductOrder();
-
-            // TODO: ask for all materials at once
+        protected void onTick() {
+            materialsToRequest = requestMessage.getContent();
+            orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
 
             System.out.println("ProductionAgent: Asking ProcurementAgent to get materials for " + orderText);
 
@@ -123,19 +211,19 @@ public class Production extends Agent {
             addBehaviour(new RequestToGet(myAgent, msg));
         }
 
-        /*@Override
+        @Override
         public void stop() {
 
-            orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfProductOrder();
+            orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
 
             System.out.println("ProductionAgent: Now I know that materials for " + orderText + " are in storage");
             super.stop();
-        }*/
+        }
 
         class RequestToGet extends AchieveREInitiator {
 
             /**
-             *
+             * 
              */
             private static final long serialVersionUID = 1618638159227094879L;
 
@@ -145,46 +233,45 @@ public class Production extends Agent {
 
             @Override
             protected void handleInform(ACLMessage inform) {
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfProductOrder();
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
                 System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
-                //stop();
+                stop();
 
-                addBehaviour(new GetFromStorage(myAgent, 2000, inform));
+                addBehaviour(new GetFromStorage(myAgent, 2000, inform, requestMessage));
             }
 
             @Override
             protected void handleFailure(ACLMessage failure) {
-                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfProductOrder();
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
                 System.out.println(
                         "ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
-                // TODO: may cause infinite loop
-                // stop();
             }
         }
     }
 
-
-
+    // TODO: Use OneShot (?)
     class GetFromStorage extends TickerBehaviour {
 
         /**
-         *
+         * 
          */
         private static final long serialVersionUID = 6717167573013445327L;
         private String materialsToTake;
         private String orderText;
+        private ACLMessage requestMessage;
 
-        public GetFromStorage(Agent a, long period, ACLMessage msg) {
+        public GetFromStorage(Agent a, long period, ACLMessage msg, ACLMessage request) {
             super(a, period);
             materialsToTake = msg.getContent();
+            requestMessage = request;
         }
 
         @Override
         protected void onTick() {
 
-            orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfProductOrder();
+            orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
 
             System.out.println("ProductionAgent: Asking ProcurementAgent to take materials for " + orderText
                     + " from materialStorage");
@@ -203,7 +290,7 @@ public class Production extends Agent {
         @Override
         public void stop() {
 
-            orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfProductOrder();
+            orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
 
             System.out.println("ProductionAgent: Now I have materials for " + orderText);
             super.stop();
@@ -212,7 +299,7 @@ public class Production extends Agent {
         class RequestToTake extends AchieveREInitiator {
 
             /**
-             *
+             * 
              */
             private static final long serialVersionUID = 7996018163076712881L;
 
@@ -223,24 +310,22 @@ public class Production extends Agent {
             @Override
             protected void handleInform(ACLMessage inform) {
 
-                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfProductOrder();
+                orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
                 System.out.println("ProductionAgent: received [inform] materials for " + orderText
                         + " will be taken from storage");
                 stop();
 
-                addBehaviour(new DeliverToSelling(myAgent, inform));
+                addBehaviour(new DeliverToSelling(myAgent, inform, requestMessage));
             }
 
             @Override
             protected void handleFailure(ACLMessage failure) {
 
-                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfProductOrder();
+                orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
                 System.out.println("ProductionAgent: received [failure] materials for " + orderText
                         + " will not be taken from storage");
-                // TODO: may cause infinite loop
-                // stop();
             }
         }
     }
@@ -248,29 +333,37 @@ public class Production extends Agent {
     class DeliverToSelling extends OneShotBehaviour {
 
         /**
-         *
+         * 
          */
         private static final long serialVersionUID = 313682933400751868L;
         private String orderToGive;
         private String orderText;
+        private ACLMessage reply, requestMessage;
 
-        public DeliverToSelling(Agent a, ACLMessage msg) {
+        public DeliverToSelling(Agent a, ACLMessage msg, ACLMessage request) {
             super(a);
             orderToGive = msg.getContent();
+            requestMessage = request;
         }
 
         @Override
         public void action() {
             Order order = Order.gson.fromJson(orderToGive, Order.class);
-            orderText = order.getTextOfProductOrder();
+            orderText = order.getTextOfOrder();
             System.out.println("ProductionAgent: Delivering " + orderText + " to warehouse");
-            Product productToGive;
-            for (OrderPart orderPart : order.productOrderList) {
-                productToGive = (Product) orderPart.good;
-                for (int i = 0; i < orderPart.amount; i++) {
+
+            for (OrderPart orderPart : order.orderList) {
+                Product productToGive = orderPart.getProduct();
+                for (int i = 0; i < orderPart.getAmount(); i++) {
                     Selling.warehouse.add(productToGive);
                 }
             }
+            isProduced = true;
+
+            reply = requestMessage.createReply();
+            reply.setPerformative(ACLMessage.INFORM);
+            reply.setContent(orderToGive);
+            send(reply);
         }
     }
 }
