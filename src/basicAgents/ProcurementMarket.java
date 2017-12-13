@@ -1,6 +1,17 @@
 package basicAgents;
 
+import java.util.Random;
+
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPANames;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.proto.ContractNetResponder;
 
 public class ProcurementMarket extends Agent {
 
@@ -37,13 +48,7 @@ public class ProcurementMarket extends Agent {
 		}
 	}
 
-	class MarketNetResponder extends ContractNetResponder {
 
-		public MarketNetResponder(Agent a) {
-			super(a, createMessageTemplate(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET));
-		}
-
-		@Override
 		class HandleCallForProposal extends CyclicBehaviour {
 			private static final long serialVersionUID = 2429876704345890795L;
 
