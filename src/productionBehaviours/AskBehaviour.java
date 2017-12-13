@@ -19,7 +19,7 @@ public class AskBehaviour extends SimpleBehaviour {
 
     @Override
     public void action() {
-        myAgent.addBehaviour(new AskForMaterialBehaviour(interactionBehaviour, 2000, dataStore));
+        myAgent.addBehaviour(new AskForMaterialBehaviour(interactionBehaviour, dataStore));
 
     }
 

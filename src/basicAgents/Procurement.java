@@ -152,7 +152,9 @@ public class Procurement extends Agent {
                 int stoneAmountInMS = materialStorage.getAmountOfStones(size);
 
                 if (paintAmountInMS >= amount && stoneAmountInMS >= amount) {
-                    isInMaterialStorage = true;
+                    if (isInMaterialStorage) {
+                        isInMaterialStorage = true;
+                    }
                     System.out.println("ProcurementAgent: I say that materials for " + orderPart.getTextOfOrderPart()
                             + " are in materialStorage");
                 } else {
@@ -186,38 +188,32 @@ public class Procurement extends Agent {
 
                 System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
                         + orderToBuy.getTextOfOrder());
-                addBehaviour(new AskForAuction(myAgent, 2000, agree));
+                addBehaviour(new AskForAuction(myAgent, agree));
             }
         }
     }
 
     // TODO: Use OneShot (?)
-    class AskForAuction extends TickerBehaviour {
+    class AskForAuction extends OneShotBehaviour {
 
-        /**
-         * 
-         */
         private static final long serialVersionUID = -6100676860519799721L;
         private String materialToBuy;
         private Order order;
         private String orderText;
 
-        public AskForAuction(Agent a, long period, ACLMessage msg) {
-            super(a, period);
+        public AskForAuction(Agent a, ACLMessage msg) {
+            super(a);
             materialToBuy = msg.getContent();
         }
 
         @Override
-        protected void onTick() {
+        public void action() {
             order = Order.gson.fromJson(materialToBuy, Order.class);
             orderText = order.getTextOfOrder();
             System.out.println(
                     "ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
-
+            
             for (OrderPart orderPart : order.orderList) {
-
-                orderPart.getPartClass().toString();
-
                 String requestedAction = "Order";
                 ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
                 msg.setConversationId(requestedAction);
@@ -225,11 +221,11 @@ public class Procurement extends Agent {
                 msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
                 msg.setContent(orderPart.getTextOfOrderPart());
 
-                System.out.println("\nlooking for agents with procurement service");
-                List<AID> agents = findAgents(orderPart.getClass().toString());
+                System.out.println("\nlooking for agents with procurement service = " + orderPart.getPartClassName());
+                List<AID> agents = findAgents(orderPart.getPartClassName());
                 if (!agents.isEmpty()) {
                     System.out.println("agents providing service are found. trying to get infromation...");
-                    addBehaviour(new RequestToBuy(agents));
+                    addBehaviour(new RequestToBuy(agents, orderPart));
                 } else {
                     System.out.println("no agents providing service are found");
                 }
@@ -262,15 +258,8 @@ public class Procurement extends Agent {
 
             return foundAgents;
         }
-
-        @Override
-        public void stop() {
-            orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
-            System.out.println("ProcurementAgent: materials for " + orderText + " are in auction");
-            super.stop();
-        }
     }
-    
+
     /* possible states of request */
     private static enum RequestState {
         PREPARE_CALL_FOR_PROPOSAL, HANDLE_CALL_FOR_PROPOSAL_REPLY, PREPARE_ACCEPT_PROPOSAL, HANDLE_ACCEPT_PROPOSAL_REPLY, DONE
@@ -285,11 +274,13 @@ public class Procurement extends Agent {
 
         List<AID> procurementAgents;
         RequestState requestState;
+        OrderPart currentOrder;
 
-        public RequestToBuy(List<AID> procurementAgents) {
+        public RequestToBuy(List<AID> procurementAgents, OrderPart currentOrder) {
             this.procurementAgents = procurementAgents;
             /* initial state for behaviour */
             this.requestState = RequestState.PREPARE_CALL_FOR_PROPOSAL;
+            this.currentOrder = currentOrder;
         }
 
         MessageTemplate replyTemplate = null;
@@ -309,14 +300,14 @@ public class Procurement extends Agent {
                 for (AID agentProvidingService : procurementAgents) {
                     msg.addReceiver(agentProvidingService);
                 }
-                msg.setConversationId("printing");
-                msg.setContent("document");
+                msg.setConversationId("buying");
+                msg.setContent("material");
                 msg.setReplyWith(String.valueOf(System.currentTimeMillis()));
 
-                replyTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("printing"),
+                replyTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("buying"),
                         MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
                 repliesLeft = procurementAgents.size();
-
+                System.out.println("ia poprosil kupit'");
                 send(msg);
 
                 requestState = RequestState.HANDLE_CALL_FOR_PROPOSAL_REPLY;
@@ -325,6 +316,7 @@ public class Procurement extends Agent {
             case HANDLE_CALL_FOR_PROPOSAL_REPLY:
                 msg = receive(replyTemplate);
                 if (msg != null) {
+                    System.out.println("vybirau best");
                     int price = Integer.parseInt(msg.getContent());
                     if (bestPrinterAgent == null || price < bestPrice) {
                         bestPrinterAgent = msg.getSender();
@@ -342,14 +334,15 @@ public class Procurement extends Agent {
             case PREPARE_ACCEPT_PROPOSAL:
                 msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                 msg.addReceiver(bestPrinterAgent);
-                msg.setConversationId("printing");
-                msg.setContent("document");
+                msg.setConversationId("buying");
+                msg.setContent("material");
                 msg.setReplyWith(String.valueOf(System.currentTimeMillis()));
 
-                replyTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("printing"),
+                replyTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("buying"),
                         MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
                 repliesLeft = 1;
 
+                System.out.println("ya vybral i send");
                 send(msg);
 
                 requestState = RequestState.HANDLE_ACCEPT_PROPOSAL_REPLY;
@@ -367,6 +360,8 @@ public class Procurement extends Agent {
                 break;
 
             case DONE:
+                Paint paint = new Paint("red");
+                Procurement.materialStorage.add(paint);
                 break;
 
             default:

@@ -20,7 +20,7 @@ public class ProcurementMarket extends Agent {
 	@Override
 	protected void setup() {
 		ServiceDescription serviceDescription = new ServiceDescription();
-		serviceDescription.setName("stone");
+		serviceDescription.setName("paint");
 		serviceDescription.setType("procurement-service");
 		DFAgentDescription agentDescription = new DFAgentDescription();
 		agentDescription.setName(getAID());

@@ -38,7 +38,7 @@ public class CustomerSimulatorBehaviour extends WakerBehaviour {
         Order order = new Order();
         order.id = SalesMarket.orderQueue.size() + 1;
 
-        order.addProduct(new Product(10, "red"), 1);
+        order.addProduct(new Product(10, "red"), 4);
         order.addProduct(new Product(10, "blue"), 2);
         order.addProduct(new Product(10, "green"), 0);
 

@@ -5,12 +5,13 @@ import java.util.Date;
 import basicClasses.Order;
 import jade.core.AID;
 import jade.core.behaviours.DataStore;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
 
-class AskForMaterialBehaviour extends TickerBehaviour {
+class AskForMaterialBehaviour extends OneShotBehaviour {
 
     /**
      * 
@@ -21,15 +22,15 @@ class AskForMaterialBehaviour extends TickerBehaviour {
     private DataStore dataStore;
     private ProductionResponder interactionBehaviour;
 
-    public AskForMaterialBehaviour(ProductionResponder interactionBehaviour, long period,
-            DataStore dataStore) {
-        super(interactionBehaviour.getAgent(), period);
+    public AskForMaterialBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
+        super(interactionBehaviour.getAgent());
         this.interactionBehaviour = interactionBehaviour;
         this.dataStore = dataStore;
     }
 
     @Override
-    protected void onTick() {
+    public void action() {
+        System.out.println("bom bom                   " + materialsToRequest);
         materialsToRequest = interactionBehaviour.getRequest().getContent();
         orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
 
@@ -46,14 +47,14 @@ class AskForMaterialBehaviour extends TickerBehaviour {
         myAgent.addBehaviour(new RequestToGetInitiator(interactionBehaviour, msg, dataStore));
     }
 
-    @Override
-    public void stop() {
-
-        orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
-
-        System.out.println("ProductionAgent: Now I know that materials for " + orderText + " are in storage");
-        super.stop();
-    }
+//    @Override
+//    public void stop() {
+//
+//        orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
+//
+//        System.out.println("ProductionAgent: Now I know that materials for " + orderText + " are in storage");
+//        super.stop();
+//    }
 
     class RequestToGetInitiator extends AchieveREInitiator {
 
@@ -63,8 +64,7 @@ class AskForMaterialBehaviour extends TickerBehaviour {
         private static final long serialVersionUID = 1618638159227094879L;
         private DataStore dataStore;
 
-        public RequestToGetInitiator(ProductionResponder interactionBehaviour, ACLMessage msg,
-                DataStore dataStore) {
+        public RequestToGetInitiator(ProductionResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
             super(interactionBehaviour.getAgent(), msg);
             this.dataStore = dataStore;
         }
@@ -74,7 +74,7 @@ class AskForMaterialBehaviour extends TickerBehaviour {
             orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
             System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
-            stop();
+//            stop();
 
             myAgent.addBehaviour(new GetFromStorageBehaviour(interactionBehaviour, 2000, dataStore));
         }
