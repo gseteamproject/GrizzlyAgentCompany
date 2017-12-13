@@ -131,8 +131,6 @@ public class Procurement extends Agent {
 			// part of order, that needs to be produced
 			Order orderToBuy = new Order();
 			orderToBuy.id = order.id;
-			
-
 
 			for (OrderPart orderPart : order.orderList) {
 				Product productToCheck = orderPart.getProduct();
@@ -144,7 +142,6 @@ public class Procurement extends Agent {
 
 				System.out.println("ProcurementAgent: Asking materialStorage about " + orderPart.getTextOfOrderPart());
 
-				
 				int paintAmountInMS = materialStorage.getAmountOfPaint(color);
 				int stoneAmountInMS = materialStorage.getAmountOfStones(size);
 
@@ -162,9 +159,8 @@ public class Procurement extends Agent {
 
 					paintOrderPart.setAmount(amount - paintAmountInMS);
 					stoneOrderPart.setAmount(amount - stoneAmountInMS);
-					
-					System.out.println("paintOrderPart.getAmount() " + paintOrderPart.getAmount());
 
+					System.out.println("paintOrderPart.getAmount() " + paintOrderPart.getAmount());
 
 					if (paintOrderPart.getAmount() > 0) {
 						orderToBuy.orderList.add(paintOrderPart);
@@ -206,21 +202,67 @@ public class Procurement extends Agent {
 
 		@Override
 		protected void onTick() {
-			orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
+			order = Order.gson.fromJson(materialToBuy, Order.class);
 			System.out.println(
-					"ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
+					"ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + order.getTextOfOrder());
 
-			String requestedAction = "Order";
-			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-			msg.setConversationId(requestedAction);
-			msg.addReceiver(new AID(("AgentProcurementMarket"), AID.ISLOCALNAME));
-			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-			msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
-			msg.setContent(materialToBuy);
-
-			addBehaviour(new RequestToBuy(myAgent, msg));
+			for (Iterator<OrderPart> i = order.iterator(); i.hasNext();) {
+			    OrederPart item = i.next();
+			    
+			}
+			
+			for (int i = 0; i < order.size(); i+=1) {
+				
+				order[i].getClass().toString();
+			
+				String requestedAction = "Order";
+				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+				msg.setConversationId(requestedAction);
+				msg.addReceiver(new AID(("AgentProcurementMarket"), AID.ISLOCALNAME));
+				msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+				msg.setContent(order[i].getTextOfOrderPart());
+			
+				System.out.println("\nlooking for agents with procurement service");
+				List<AID> agents = findAgents(order[i].getClass().toString());
+				if (!agents.isEmpty()) {
+					System.out.println("agents providing service are found. trying to get infromation...");
+					addBehaviour(new LookForActivePrinterRequest(agents));
+				} else {
+					System.out.println("no agents providing service are found");
+				}
+			
+				addBehaviour(new RequestToBuy(myAgent, msg));
+			}
 		}
 
+		private List<AID> findAgents(String serviceName) {
+			/* prepare service-search template */
+			ServiceDescription requiredService = new ServiceDescription();
+			requiredService.setName(serviceName);
+			/*
+			 * prepare agent-search template. agent-search template can have several
+			 * service-search templates
+			 */
+			DFAgentDescription agentDescriptionTemplate = new DFAgentDescription();
+			agentDescriptionTemplate.addServices(requiredService);
+
+			List<AID> foundAgents = new ArrayList<AID>();
+			try {
+				/* perform request to DF-Agent */
+				DFAgentDescription[] agentDescriptions = DFService.search(myAgent, agentDescriptionTemplate);
+				for (DFAgentDescription agentDescription : agentDescriptions) {
+					/* store all found agents in an array for further processing */
+					foundAgents.add(agentDescription.getName());
+				}
+			} catch (FIPAException exception) {
+				exception.printStackTrace();
+			}
+
+			return foundAgents;
+		}
+
+		
+		
 		@Override
 		public void stop() {
 			orderText = Order.gson.fromJson(materialToBuy, Order.class).getTextOfOrder();
@@ -228,25 +270,110 @@ public class Procurement extends Agent {
 			super.stop();
 		}
 
-		class RequestToBuy extends AchieveREInitiator {
+		class RequestToBuy extends Behavior {
 
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = -1322936877118129497L;
 
-			public RequestToBuy(Agent a, ACLMessage msg) {
-				super(a, msg);
+			List<AID> procurementAgents;
+			RequestState requestState;
+
+			public RequestToBuy(List<AID> procurementAgents) {
+				this.procurementAgents = procurementAgents;
+				/* initial state for behaviour */
+				this.requestState = RequestState.PREPARE_CALL_FOR_PROPOSAL;
+			}
+
+			MessageTemplate replyTemplate = null;
+			int repliesLeft = 0;
+
+			AID bestPrinterAgent = null;
+			int bestPrice = 0;
+
+			@Override
+			public void action() {
+				ACLMessage msg = null;
+
+				/* perform actions accordingly to behaviour state */
+				switch (requestState) {
+				case PREPARE_CALL_FOR_PROPOSAL:
+					msg = new ACLMessage(ACLMessage.CFP);
+					for (AID agentProvidingService : printerAgents) {
+						msg.addReceiver(agentProvidingService);
+					}
+					msg.setConversationId("printing");
+					msg.setContent("document");
+					msg.setReplyWith(String.valueOf(System.currentTimeMillis()));
+
+					replyTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("printing"),
+							MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
+					repliesLeft = printerAgents.size();
+
+					send(msg);
+
+					requestState = RequestState.HANDLE_CALL_FOR_PROPOSAL_REPLY;
+					break;
+
+				case HANDLE_CALL_FOR_PROPOSAL_REPLY:
+					msg = receive(replyTemplate);
+					if (msg != null) {
+						int price = Integer.parseInt(msg.getContent());
+						if (bestPrinterAgent == null || price < bestPrice) {
+							bestPrinterAgent = msg.getSender();
+							bestPrice = price;
+						}
+						repliesLeft--;
+						if (repliesLeft == 0) {
+							requestState = RequestState.PREPARE_ACCEPT_PROPOSAL;
+						}
+					} else {
+						block();
+					}
+					break;
+
+				case PREPARE_ACCEPT_PROPOSAL:
+					msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+					msg.addReceiver(bestPrinterAgent);
+					msg.setConversationId("printing");
+					msg.setContent("document");
+					msg.setReplyWith(String.valueOf(System.currentTimeMillis()));
+
+					replyTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("printing"),
+							MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
+					repliesLeft = 1;
+
+					send(msg);
+
+					requestState = RequestState.HANDLE_ACCEPT_PROPOSAL_REPLY;
+					break;
+
+				case HANDLE_ACCEPT_PROPOSAL_REPLY:
+					msg = receive(replyTemplate);
+					if (msg != null) {
+						System.out.println(String.format("document printed (price=%d)", bestPrice));
+						repliesLeft = 0;
+						requestState = RequestState.DONE;
+					} else {
+						block();
+					}
+					break;
+
+				case DONE:
+					break;
+
+				default:
+					break;
+				}
 			}
 
 			@Override
-			protected void handleInform(ACLMessage inform) {
-
-				orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-				stop();
+			public boolean done() {
+				/* behaviour is finished when it reaches DONE state */
+				return requestState == RequestState.DONE;
 			}
 		}
-	}
 
 	class GiveMaterialToProduction extends OneShotBehaviour {
 
