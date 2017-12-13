@@ -54,17 +54,17 @@ public class OrderPart {
         return false;
     }
 
-    public String getPartClassName() {
+    public Good getPart() {
         if (this.product != null) {
-            return "product";
+            return this.product;
         }
         if (this.paint != null) {
-            return "paint";
+            return this.paint;
         }
         if (this.stone != null) {
-            return "stone";
+            return this.stone;
         }
-        return "";
+        return null;
     }
 
     // Getters and Setters for product, paint and stone

@@ -1,106 +1,43 @@
 package basicAgents;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
+import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
-import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-import jade.proto.ContractNetResponder;
+
 
 public class ProcurementMarket extends Agent {
 
 	private static final long serialVersionUID = -7418692714860762106L;
 
-	@Override
-	protected void setup() {
-		ServiceDescription serviceDescription = new ServiceDescription();
-		serviceDescription.setName("paint");
-		serviceDescription.setType("procurement-service");
-		DFAgentDescription agentDescription = new DFAgentDescription();
-		agentDescription.setName(getAID());
-		agentDescription.addServices(serviceDescription);
-		try {
-			DFService.register(this, agentDescription);
-		} catch (FIPAException exception) {
-			exception.printStackTrace();
-		}
+    public static List<AID> findAgents(Agent a, String serviceName) {
+        /* prepare service-search template */
+        ServiceDescription requiredService = new ServiceDescription();
+        requiredService.setName(serviceName);
+        /*
+         * prepare agent-search template. agent-search template can have several
+         * service-search templates
+         */
+        DFAgentDescription agentDescriptionTemplate = new DFAgentDescription();
+        agentDescriptionTemplate.addServices(requiredService);
 
-		/* registering Behaviours to react for different types of messages */
-		addBehaviour(new HandleAcceptProposal());
-		addBehaviour(new HandleCallForProposal());
-		/*
-		 * 
-		 */
-	}
+        List<AID> foundAgents = new ArrayList<AID>();
+        try {
+            /* perform request to DF-Agent */
+            DFAgentDescription[] agentDescriptions = DFService.search(a, agentDescriptionTemplate);
+            for (DFAgentDescription agentDescription : agentDescriptions) {
+                /* store all found agents in an array for further processing */
+                foundAgents.add(agentDescription.getName());
+            }
+        } catch (FIPAException exception) {
+            exception.printStackTrace();
+        }
 
-	@Override
-	protected void takeDown() {
-		try {
-			DFService.deregister(this);
-		} catch (FIPAException exception) {
-			exception.printStackTrace();
-		}
-	}
-
-
-		class HandleCallForProposal extends CyclicBehaviour {
-			private static final long serialVersionUID = 2429876704345890795L;
-
-			@Override
-			public void action() {
-				/*
-				 * only messages containing CALL-FOR-PROPOSAL in "performative" slot will be
-				 * processed
-				 */
-				MessageTemplate msgTemplate = MessageTemplate.MatchPerformative(ACLMessage.CFP);
-				ACLMessage msg = receive(msgTemplate);
-				if (msg != null) {
-					/* create reply for incoming message with price at "content" slot */
-					ACLMessage reply = msg.createReply();
-					reply.setPerformative(ACLMessage.PROPOSE);
-					int price = new Random().nextInt(100);
-					reply.setContent(String.valueOf(price));
-
-					System.out.println(String.format("my price is %d", price));
-					/* send reply for incoming message */
-					send(reply);
-				} else {
-					/* wait till there is message matching template in message-queue */
-					block();
-				}
-			}
-		}
-
-		class HandleAcceptProposal extends CyclicBehaviour {
-			private static final long serialVersionUID = 8759104857697556076L;
-
-			@Override
-			public void action() {
-				/*
-				 * only message containg ACCEPT-PROPOSAL in "performative" slot will be
-				 * processed
-				 */
-				MessageTemplate msgTemplate = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
-				ACLMessage msg = receive(msgTemplate);
-				if (msg != null) {
-					/* create reply for incoming message */
-					ACLMessage reply = msg.createReply();
-					reply.setPerformative(ACLMessage.INFORM);
-
-					System.out.println("delivering...");
-					/* send reply for incoming message */
-					send(reply);
-				} else {
-					/* wait till there is message matching template in message-queue */
-					block();
-				}
-
-			}
-		}
+        return foundAgents;
+    }
 }

@@ -38,9 +38,9 @@ public class CustomerSimulatorBehaviour extends WakerBehaviour {
         Order order = new Order();
         order.id = SalesMarket.orderQueue.size() + 1;
 
-        order.addProduct(new Product(10, "red"), 4);
-        order.addProduct(new Product(10, "blue"), 2);
-        order.addProduct(new Product(10, "green"), 0);
+        order.addProduct(new Product(10, "red"), 1);
+        order.addProduct(new Product(10, "blue"), 1);
+        order.addProduct(new Product(10, "green"), 3);
 
         String testGson = Order.gson.toJson(order);
         // {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
@@ -61,8 +61,8 @@ public class CustomerSimulatorBehaviour extends WakerBehaviour {
         stone = new Stone(10);
         prdct = new Product(stone, paint);
         Selling.warehouse.add(prdct);
-        Procurement.materialStorage.add(paint);
-        Procurement.materialStorage.add(stone);
+//        Procurement.materialStorage.add(paint);
+//        Procurement.materialStorage.add(stone);
 
         paint = new Paint("green");
         stone = new Stone(10);

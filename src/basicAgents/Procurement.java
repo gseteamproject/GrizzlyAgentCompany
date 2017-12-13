@@ -214,6 +214,7 @@ public class Procurement extends Agent {
                     "ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
             
             for (OrderPart orderPart : order.orderList) {
+                System.out.println("mne nado: " + order.orderList);
                 String requestedAction = "Order";
                 ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
                 msg.setConversationId(requestedAction);
@@ -221,8 +222,8 @@ public class Procurement extends Agent {
                 msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
                 msg.setContent(orderPart.getTextOfOrderPart());
 
-                System.out.println("\nlooking for agents with procurement service = " + orderPart.getPartClassName());
-                List<AID> agents = findAgents(orderPart.getPartClassName());
+                System.out.println("\nlooking for agents with procurement service = " + orderPart.getPart().getClass().getSimpleName());
+                List<AID> agents = ProcurementMarket.findAgents(myAgent, orderPart.getPart().getClass().getSimpleName());
                 if (!agents.isEmpty()) {
                     System.out.println("agents providing service are found. trying to get infromation...");
                     addBehaviour(new RequestToBuy(agents, orderPart));
@@ -233,32 +234,7 @@ public class Procurement extends Agent {
             }
         }
 
-        private List<AID> findAgents(String serviceName) {
-            /* prepare service-search template */
-            ServiceDescription requiredService = new ServiceDescription();
-            requiredService.setName(serviceName);
-            /*
-             * prepare agent-search template. agent-search template can have several
-             * service-search templates
-             */
-            DFAgentDescription agentDescriptionTemplate = new DFAgentDescription();
-            agentDescriptionTemplate.addServices(requiredService);
-
-            List<AID> foundAgents = new ArrayList<AID>();
-            try {
-                /* perform request to DF-Agent */
-                DFAgentDescription[] agentDescriptions = DFService.search(myAgent, agentDescriptionTemplate);
-                for (DFAgentDescription agentDescription : agentDescriptions) {
-                    /* store all found agents in an array for further processing */
-                    foundAgents.add(agentDescription.getName());
-                }
-            } catch (FIPAException exception) {
-                exception.printStackTrace();
-            }
-
-            return foundAgents;
-        }
-    }
+ }
 
     /* possible states of request */
     private static enum RequestState {
@@ -354,14 +330,13 @@ public class Procurement extends Agent {
                     System.out.println(String.format("document printed (price=%d)", bestPrice));
                     repliesLeft = 0;
                     requestState = RequestState.DONE;
+                    materialStorage.add(currentOrder.getPart());
                 } else {
                     block();
                 }
                 break;
 
             case DONE:
-                Paint paint = new Paint("red");
-                Procurement.materialStorage.add(paint);
                 break;
 
             default:
