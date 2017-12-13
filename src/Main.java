@@ -12,7 +12,8 @@ public class Main {
         parameters[0] = "-gui";
         parameters[1] = "AgentSalesMarket:basicAgents.SalesMarket;" + "AgentSelling:basicAgents.Selling;"
                 + "AgentFinances:basicAgents.Finances;" + "AgentCapitalMarket:basicAgents.CapitalMarket;"
-                + "AgentProcurement:basicAgents.Procurement;" + "AgentProcurementMarket:basicAgents.ProcurementMarket;"
+                + "AgentProcurement:basicAgents.Procurement;" + "AgentPaintSelling:basicAgents.PaintSeller;" + "AgentStoneSelling:basicAgents.StoneSeller;"
+                + "AgentProcurementMarket:basicAgents.ProcurementMarket;"
                 + "AgentProduction:basicAgents.Production;" + "sniffer:jade.tools.sniffer.Sniffer(Agent*);";
         // AgentSalesMarket, AgentSelling, AgentFinances, AgentCapitalMarket,
         // AgentProcurement, AgentProcurementMarket, AgentProduction

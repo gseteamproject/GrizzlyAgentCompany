@@ -54,15 +54,15 @@ public class OrderPart {
         return false;
     }
 
-    public Object getPartClass() {
+    public Good getPart() {
         if (this.product != null) {
-            return this.product.getClass();
+            return this.product;
         }
         if (this.paint != null) {
-            return this.paint.getClass();
+            return this.paint;
         }
         if (this.stone != null) {
-            return this.stone.getClass();
+            return this.stone;
         }
         return null;
     }
