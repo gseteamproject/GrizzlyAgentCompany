@@ -18,7 +18,6 @@ public class MessageObject {
         this.setSender();
         this.setReceiver();
         this.setReceivedMessage();
-
     }
 
     public MessageObject (String manualSender, String manualMessage){
@@ -85,8 +84,66 @@ public class MessageObject {
     public String getColorForAgent() {
         String color = "";
 
-        if (getSender() == "") {
+        if (this.receiver.equals("AgentProcurement")) {
+            color = "3CAD00";
+        }
+        else if (this.receiver.equals("AgentProcurementMarket")) {
+            color = "52EA00";
+        }
+        else if (this.receiver.equals("AgentCapitalMarket")) {
+            color = "00A6C4";
+        }
+        else if (this.receiver.equals("AgentPaintSelling")) {
+            color = "C40000";
+        }
+        else if (this.receiver.equals("AgentSelling")) {
+            color = "F2EE00";
+        }
+        else if (this.receiver.equals("AgentStoneSelling")) {
+            color = "8EB19D";
+        }
+        else if (this.receiver.equals("AgentSalesMarket")) {
+            color = "BC00BC";
+        }
+        else if (this.receiver.equals("AgentProduction")) {
+            color = "A0AF79";
+        }
+        else if (this.receiver.equals("AgentFinances")) {
+            color = "006863";
+        }
+        else {
+            color = "000000";
+        }
 
+        return color;
+    }
+
+    public String getColorForPerformative() {
+        String color = "";
+
+        if (this.performative.equals("ACCEPT_PROPOSAL")) {
+            color = "3CAD00";
+        }
+        else if (this.performative.equals("AGREE")) {
+            color = "52EA00";
+        }
+        else if (this.performative.equals("CANCEL")) {
+            color = "00A6C4";
+        }
+        else if (this.performative.equals("FAILURE")) {
+            color = "C40000";
+        }
+        else if (this.performative.equals("INFORM")) {
+            color = "F2EE00";
+        }
+        else if (this.performative.equals("REFUSE")) {
+            color = "8EB19D";
+        }
+        else if (this.performative.equals("REQUEST")) {
+            color = "BC00BC";
+        }
+        else {
+            color = "FFFFFF";
         }
 
         return color;
@@ -97,7 +154,7 @@ public class MessageObject {
     }
 
     public void setReceivedMessage() {
-        receivedMessage = this.receiver + " received a Message of Type [" + this.performative + "] from " + this.sender + ". Order: " + this.orderText + "; ";
+        receivedMessage = this.receiver + " received a Message of Type [" + this.performative + "] from " + this.sender;
     }
     public String getReceivedMessage (){
         return receivedMessage;
