@@ -67,7 +67,7 @@ public class PaintSeller extends Agent {
 					int price = new Random().nextInt(100);
 					reply.setContent(String.valueOf(price));
 
-					System.out.println(String.format("my price is %d", price));
+					System.out.println(String.format("Paint: my price is %d", price));
 					/* send reply for incoming message */
 					send(reply);
 				} else {

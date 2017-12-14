@@ -9,6 +9,7 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREInitiator;
 
 class AskForMaterialBehaviour extends OneShotBehaviour {
@@ -63,10 +64,12 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
          */
         private static final long serialVersionUID = 1618638159227094879L;
         private DataStore dataStore;
+        private ProductionResponder interactionBehaviour;
 
         public RequestToGetInitiator(ProductionResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
             super(interactionBehaviour.getAgent(), msg);
             this.dataStore = dataStore;
+            this.interactionBehaviour = interactionBehaviour;
         }
 
         @Override
@@ -75,7 +78,6 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
 
             System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
 //            stop();
-
             myAgent.addBehaviour(new GetFromStorageBehaviour(interactionBehaviour, 2000, dataStore));
         }
 
@@ -85,6 +87,13 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
 
             System.out
                     .println("ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
+
+            MessageTemplate temp = MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+            MessageTemplate infTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+            infTemp = MessageTemplate.and(infTemp, MessageTemplate.MatchConversationId("Materials"));
+
+            // SalesMarket will wait
+            myAgent.addBehaviour(new WaitingProcurementMessageResponder(interactionBehaviour, infTemp, dataStore));
         }
     }
 }

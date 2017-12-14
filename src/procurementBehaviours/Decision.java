@@ -13,7 +13,6 @@ public class Decision {
     }
 
     public ACLMessage execute(ACLMessage request) {
-
         orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
         System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);
@@ -25,14 +24,16 @@ public class Decision {
         System.out.println("ProductionAgent: [agree] I will produce " + orderText);
 
 //        if (request.getConversationId() == "Materials") {
-//            System.out.println("ProcurementAgent: [request] ProductionAgent asks for materials for " + orderText);
-//            System.out.println("ProcurementAgent: [agree] I will check materialStorage for materials for " + orderText);
+//            System.out
+//                    .println("ProcurementAgent: [request] ProductionAgent asks for         materials for " + orderText);
+//            System.out.println(
+//                    "ProcurementAgent: [agree] I will check materialStorage         for materials for " + orderText);
 //            myAgent.addBehaviour(new CheckMaterialStorage(myAgent, agree));
 //        } else if (request.getConversationId() == "Take") {
-//            System.out.println("ProcurementAgent: [request] ProductionAgent wants to get materials for " + orderText
-//                    + " from materialStorage");
-//            System.out.println(
-//                    "ProcurementAgent: [agree] I will give you materials for " + orderText + " from materialStorage");
+//            System.out.println("ProcurementAgent: [request] ProductionAgent wants to get         materials for "
+//                    + orderText + " from materialStorage");
+//            System.out.println("ProcurementAgent: [agree] I will give you materials for " + orderText
+//                    + "         from materialStorage");
 //            myAgent.addBehaviour(new GiveMaterialToProduction(myAgent, agree));
 //        }
 

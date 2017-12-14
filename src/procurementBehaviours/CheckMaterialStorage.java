@@ -5,7 +5,6 @@ import basicClasses.Order;
 import basicClasses.OrderPart;
 import basicClasses.Product;
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
@@ -17,12 +16,12 @@ public class CheckMaterialStorage extends OneShotBehaviour {
     private static final long serialVersionUID = -4869963544017982955L;
     private String requestedMaterial;
 
-    private ACLMessage agree;
+    private ACLMessage request;
 
     public CheckMaterialStorage(Agent a, ACLMessage msg) {
         super(a);
         requestedMaterial = msg.getContent();
-        agree = msg;
+        request = msg;
     }
 
     @Override
@@ -82,14 +81,15 @@ public class CheckMaterialStorage extends OneShotBehaviour {
 
         if (!isInQueue && orderToBuy.orderList.size() > 0) {
             String testGson = Order.gson.toJson(orderToBuy);
-            agree.setContent(testGson);
+            ACLMessage agree = (ACLMessage) request.clone();
+            agree.setContent(testGson);;
 
             // add order to queue
             Procurement.procurementQueue.add(order);
 
             System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
                     + orderToBuy.getTextOfOrder());
-            myAgent.addBehaviour(new AskForAuction(myAgent, agree));
+            myAgent.addBehaviour(new AskForAuction(myAgent, agree, request));
         }
     }
 }

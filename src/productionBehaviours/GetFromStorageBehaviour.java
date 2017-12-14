@@ -22,8 +22,7 @@ class GetFromStorageBehaviour extends TickerBehaviour {
     private DataStore dataStore;
     private ProductionResponder interactionBehaviour;
 
-    public GetFromStorageBehaviour(ProductionResponder interactionBehaviour, long period,
-            DataStore dataStore) {
+    public GetFromStorageBehaviour(ProductionResponder interactionBehaviour, long period, DataStore dataStore) {
         super(interactionBehaviour.getAgent(), period);
         this.dataStore = dataStore;
         this.interactionBehaviour = interactionBehaviour;
@@ -65,10 +64,13 @@ class GetFromStorageBehaviour extends TickerBehaviour {
          * 
          */
         private static final long serialVersionUID = 7996018163076712881L;
+        private ProductionResponder interactionBehaviour;
+        private DataStore dataStore;
 
-        public RequestToTakeInitiator(ProductionResponder interactionBehaviour, ACLMessage msg,
-                DataStore dataStore) {
+        public RequestToTakeInitiator(ProductionResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
             super(interactionBehaviour.getAgent(), msg);
+            this.interactionBehaviour = interactionBehaviour;
+            this.dataStore = dataStore;
         }
 
         @Override
@@ -79,7 +81,6 @@ class GetFromStorageBehaviour extends TickerBehaviour {
             System.out.println(
                     "ProductionAgent: received [inform] materials for " + orderText + " will be taken from storage");
             stop();
-
             myAgent.addBehaviour(new DeliverToSellingBehaviour(interactionBehaviour, dataStore));
         }
 

@@ -25,12 +25,12 @@ class DeliverToSellingBehaviour extends OneShotBehaviour {
         super(interactionBehaviour.getAgent());
         this.interactor = new Work(dataStore);
         this.interactionBehaviour = interactionBehaviour;
-        requestMessage = interactionBehaviour.getRequest();
-        orderToGive = requestMessage.getContent();
     }
 
     @Override
     public void action() {
+        requestMessage = interactionBehaviour.getRequest();
+        orderToGive = requestMessage.getContent();
         Order order = Order.gson.fromJson(orderToGive, Order.class);
         orderText = order.getTextOfOrder();
         System.out.println("ProductionAgent: Delivering " + orderText + " to warehouse");

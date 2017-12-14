@@ -10,7 +10,7 @@ public class DeadlineBehaviour extends WakerBehaviour {
     Work interactor;
 
     public DeadlineBehaviour(ProcurementResponder interactionBehaviour, DataStore dataStore) {
-        super(interactionBehaviour.getAgent(), 20000);
+        super(interactionBehaviour.getAgent(), 5000);
         this.interactionBehaviour = interactionBehaviour;
         this.interactor = new Work(dataStore);
     }

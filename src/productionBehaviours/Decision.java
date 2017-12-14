@@ -13,7 +13,6 @@ public class Decision {
     }
 
     public ACLMessage execute(ACLMessage request) {
-
         orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
         System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);

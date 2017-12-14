@@ -13,10 +13,12 @@ public class AskBehaviour extends SimpleBehaviour {
     private static final long serialVersionUID = -4443443755165652310L;
     private DataStore dataStore;
     private ProcurementResponder interactionBehaviour;
+    Work interactor;
 
     public AskBehaviour(ProcurementResponder interactionBehaviour, DataStore dataStore) {
         this.interactionBehaviour = interactionBehaviour;
         this.dataStore = dataStore;
+        this.interactor = new Work(dataStore);
     }
 
     @Override
@@ -34,7 +36,8 @@ public class AskBehaviour extends SimpleBehaviour {
                     "ProcurementAgent: [agree] I will give you materials for " + orderText + " from materialStorage");
             myAgent.addBehaviour(new GiveMaterialToProduction(myAgent, request));
         }
-        myAgent.addBehaviour(new AskForAuction(interactionBehaviour.getAgent(), interactionBehaviour.getRequest()));
+        
+        interactionBehaviour.setResult(interactor.execute(interactionBehaviour.getRequest()));
 
     }
 

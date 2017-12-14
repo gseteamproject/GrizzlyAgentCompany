@@ -20,10 +20,11 @@ public class RequestToBuy extends Behaviour {
      * 
      */
     private static final long serialVersionUID = -1322936877118129497L;
-
+    public static int buyCount;
+    
     List<AID> procurementAgents;
     RequestState requestState;
-    OrderPart currentOrder;
+    OrderPart currentOrder;    
 
     public RequestToBuy(List<AID> procurementAgents, OrderPart currentOrder) {
         this.procurementAgents = procurementAgents;
@@ -56,7 +57,7 @@ public class RequestToBuy extends Behaviour {
             replyTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("buying"),
                     MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
             repliesLeft = procurementAgents.size();
-            System.out.println("ia poprosil kupit'");
+            System.out.println("ia poprosil kupit' " + currentOrder.getPart().getClass().getSimpleName());
             myAgent.send(msg);
 
             requestState = RequestState.HANDLE_CALL_FOR_PROPOSAL_REPLY;
@@ -100,10 +101,11 @@ public class RequestToBuy extends Behaviour {
         case HANDLE_ACCEPT_PROPOSAL_REPLY:
             msg = myAgent.receive(replyTemplate);
             if (msg != null) {
-                System.out.println(String.format("document printed (price=%d)", bestPrice));
+                System.out.println(String.format(currentOrder.getPart().getClass().getSimpleName() + " is found (price=%d)", bestPrice));
                 repliesLeft = 0;
                 requestState = RequestState.DONE;
                 Procurement.materialStorage.add(currentOrder.getPart());
+                buyCount += 1;
             } else {
                 block();
             }

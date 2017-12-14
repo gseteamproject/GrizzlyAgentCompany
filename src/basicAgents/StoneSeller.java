@@ -66,7 +66,7 @@ public class StoneSeller extends Agent {
                 int price = new Random().nextInt(100);
                 reply.setContent(String.valueOf(price));
 
-                System.out.println(String.format("my price is %d", price));
+                System.out.println(String.format("Stone: my price is %d", price));
                 /* send reply for incoming message */
                 send(reply);
             } else {

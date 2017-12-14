@@ -1,5 +1,9 @@
 package procurementBehaviours;
 
+import java.net.Authenticator.RequestorType;
+
+import org.eclipse.jetty.http.MetaData.Request;
+
 import jade.core.behaviours.DataStore;
 import jade.lang.acl.ACLMessage;
 
@@ -14,8 +18,7 @@ public class Work {
     public ACLMessage execute(ACLMessage request) {
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
-
-        if (GiveMaterialToProduction.isGiven) {
+        if (RequestToBuy.buyCount == AskForAuction.partsCount) {
             response.setPerformative(ACLMessage.INFORM);
         } else {
             response.setPerformative(ACLMessage.FAILURE);

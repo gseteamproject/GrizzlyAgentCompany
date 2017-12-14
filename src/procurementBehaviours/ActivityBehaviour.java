@@ -14,7 +14,7 @@ public class ActivityBehaviour extends SequentialBehaviour {
         super(interactionBehaviour.getAgent());
 
         addSubBehaviour(new AskBehaviour(interactionBehaviour, dataStore));
-        addSubBehaviour(new DeadlineBehaviour(interactionBehaviour, dataStore));
+//        addSubBehaviour(new DeadlineBehaviour(interactionBehaviour, dataStore));
     }
 
 }

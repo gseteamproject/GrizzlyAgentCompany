@@ -16,22 +16,25 @@ import jade.lang.acl.ACLMessage;
 public class AskForAuction extends OneShotBehaviour {
 
     private static final long serialVersionUID = -6100676860519799721L;
-    private String materialToBuy;
+    private ACLMessage materialToBuy, request;
     private Order order;
     private String orderText;
+    public static int partsCount;
 
-    public AskForAuction(Agent a, ACLMessage msg) {
+    public AskForAuction(Agent a, ACLMessage msg, ACLMessage request) {
         super(a);
-        materialToBuy = msg.getContent();
+        this.materialToBuy = msg;
+        this.request = request;
     }
 
     @Override
     public void action() {
-        order = Order.gson.fromJson(materialToBuy, Order.class);
+        order = Order.gson.fromJson(materialToBuy.getContent(), Order.class);
         orderText = order.getTextOfOrder();
+        partsCount = order.orderList.size();
         System.out.println("ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
-
-        for (OrderPart orderPart : order.orderList) {
+      
+        for (OrderPart orderPart : order.orderList) {            
             System.out.println("mne nado: " + orderPart.getTextOfOrderPart());
             String requestedAction = "Order";
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
@@ -46,11 +49,10 @@ public class AskForAuction extends OneShotBehaviour {
             if (!agents.isEmpty()) {
                 System.out.println("agents providing service are found. trying to get infromation...");
                 myAgent.addBehaviour(new RequestToBuy(agents, orderPart));
+                // TODO: Check if material is really bought
             } else {
                 System.out.println("no agents providing service are found");
             }
-
         }
     }
-
 }

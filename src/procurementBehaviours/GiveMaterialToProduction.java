@@ -35,6 +35,5 @@ public class GiveMaterialToProduction extends OneShotBehaviour {
             Procurement.materialStorage.remove(new Paint(product.getColor()));
             Procurement.materialStorage.remove(new Stone(product.getSize()));
         }
-        isGiven = true;
     }
 }
