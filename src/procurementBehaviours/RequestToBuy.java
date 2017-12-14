@@ -57,7 +57,6 @@ public class RequestToBuy extends Behaviour {
             replyTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("buying"),
                     MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
             repliesLeft = procurementAgents.size();
-            System.out.println("ia poprosil kupit' " + currentOrder.getPart().getClass().getSimpleName());
             myAgent.send(msg);
 
             requestState = RequestState.HANDLE_CALL_FOR_PROPOSAL_REPLY;
@@ -66,7 +65,6 @@ public class RequestToBuy extends Behaviour {
         case HANDLE_CALL_FOR_PROPOSAL_REPLY:
             msg = myAgent.receive(replyTemplate);
             if (msg != null) {
-                System.out.println("vybirau best");
                 int price = Integer.parseInt(msg.getContent());
                 if (bestPrinterAgent == null || price < bestPrice) {
                     bestPrinterAgent = msg.getSender();
@@ -92,7 +90,6 @@ public class RequestToBuy extends Behaviour {
                     MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
             repliesLeft = 1;
 
-            System.out.println("ya vybral i send");
             myAgent.send(msg);
 
             requestState = RequestState.HANDLE_ACCEPT_PROPOSAL_REPLY;

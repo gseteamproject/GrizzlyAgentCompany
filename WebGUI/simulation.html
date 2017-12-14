@@ -34,7 +34,7 @@
             output('<span class="agent-msg">' + data.agent + ':</span> ' + data.message);
         });
         socket.on('alcevent', function(data) {
-            output('<span class="agent-msg">NULL:</span> ' + data.message);
+            output('<span style="color: #' + data.color1 + ';">' + data.performative + ':</span> <span style="color: #' + data.color2 + ';">' + data.message + '</span>');
         });
 		socket.on('disconnect', function() {
 			output('<span class="disconnect-msg">The client has disconnected!</span>');
@@ -47,6 +47,9 @@
           var message = $('#msg').val();
           $('#msg').val('');
           //socket.emit('msgevent', {agent: agent, message: message});
+		}
+		function setOutputMessage(color, message) {
+
 		}
 		function output(message) {
             var currentTime = "<span class='time'>" +  moment().format('HH:mm:ss.SSS') + "</span>";
@@ -71,7 +74,7 @@
         </a>
         <h1 id="h1head">Grizzly Agent Company</h1></div>
     <div id="Content">
-            <!--<img src="assets/img/simulation.png">-->
+        <!--<img src="assets/img/simulation.png">-->
         <div id="console"></div>
     </div>
     <div id="Footer">
