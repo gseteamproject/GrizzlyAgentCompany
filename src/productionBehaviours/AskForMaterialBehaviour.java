@@ -3,6 +3,7 @@ package productionBehaviours;
 import java.util.Date;
 
 import basicClasses.Order;
+import communication.MessageObject;
 import jade.core.AID;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
@@ -22,6 +23,7 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
     private String orderText;
     private DataStore dataStore;
     private ProductionResponder interactionBehaviour;
+    public MessageObject msgObj;
 
     public AskForMaterialBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
         super(interactionBehaviour.getAgent());
@@ -31,7 +33,6 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
 
     @Override
     public void action() {
-        System.out.println("bom bom                   " + materialsToRequest);
         materialsToRequest = interactionBehaviour.getRequest().getContent();
         orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
 
@@ -47,15 +48,6 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
 
         myAgent.addBehaviour(new RequestToGetInitiator(interactionBehaviour, msg, dataStore));
     }
-
-//    @Override
-//    public void stop() {
-//
-//        orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
-//
-//        System.out.println("ProductionAgent: Now I know that materials for " + orderText + " are in storage");
-//        super.stop();
-//    }
 
     class RequestToGetInitiator extends AchieveREInitiator {
 
@@ -75,8 +67,11 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
         @Override
         protected void handleInform(ACLMessage inform) {
             orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
+            
+            msgObj = new MessageObject(inform, orderText);
+            System.out.println(msgObj.getReceivedMessage());
 
-            System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
+//            System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
 //            stop();
             myAgent.addBehaviour(new GetFromStorageBehaviour(interactionBehaviour, 2000, dataStore));
         }
@@ -84,9 +79,12 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
         @Override
         protected void handleFailure(ACLMessage failure) {
             orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
+            
+            msgObj = new MessageObject(failure, orderText);
+            System.out.println(msgObj.getReceivedMessage());
 
-            System.out
-                    .println("ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
+//            System.out
+//                    .println("ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
 
             MessageTemplate temp = MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
             MessageTemplate infTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.INFORM));
