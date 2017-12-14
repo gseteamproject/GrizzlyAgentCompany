@@ -44,9 +44,9 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
         msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
         msg.setContent(orderToRequest);
         msg.setSender(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
-      /*  msgObj = new MessageObject(msg, orderText);
+        msgObj = new MessageObject(msg, orderText);
 
-        System.out.println(msgObj.getReceivedMessage());*/
+        System.out.println(msgObj.getReceivedMessage());
 
         myAgent.addBehaviour(new RequestToOrderInitiator(interactionBehaviour, msg, dataStore));
     }

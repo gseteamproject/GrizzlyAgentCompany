@@ -42,7 +42,7 @@ public class SellingResponder extends AchieveREResponder {
 
         // response.setPerformative(ACLMessage.REFUSE);
 
-        System.out.println(msgObj.getReceivedMessage());
+       /* System.out.println(msgObj.getReceivedMessage());*/
 
         if (request.getConversationId() == "Ask") {
 
