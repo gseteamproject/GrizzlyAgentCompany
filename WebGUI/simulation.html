@@ -34,7 +34,7 @@
             output('<span class="agent-msg">' + data.agent + ':</span> ' + data.message);
         });
         socket.on('alcevent', function(data) {
-            output('<span class="agent-msg" style="color: #' + data.color1 + ';">' + data.performative + ':</span> <span style="color: #' + data.color2 + ';">' + data.message + '</span>');
+            output('<span style="color: #' + data.color1 + ';">' + data.performative + ':</span> <span style="color: #' + data.color2 + ';">' + data.message + '</span>');
         });
 		socket.on('disconnect', function() {
 			output('<span class="disconnect-msg">The client has disconnected!</span>');
