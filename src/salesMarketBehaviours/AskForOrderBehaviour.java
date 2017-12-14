@@ -1,6 +1,7 @@
 package salesMarketBehaviours;
 
 import basicClasses.Order;
+import communication.MessageObject;
 import jade.core.AID;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
@@ -20,6 +21,7 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
     private String orderText;
     private DataStore dataStore;
     private SalesMarketResponder interactionBehaviour;
+    private MessageObject msgObj;
 
     public AskForOrderBehaviour(SalesMarketResponder interactionBehaviour, DataStore dataStore) {
         super(interactionBehaviour.getAgent());
@@ -32,7 +34,7 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
     @Override
     public void action() {
         orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
-        System.out.println("SalesMarketAgent: Asking SellingAgent to get " + orderText);
+
 
         String requestedAction = "Ask";
         ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
@@ -41,6 +43,10 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
         msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
         msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
         msg.setContent(orderToRequest);
+        msg.setSender(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
+      /*  msgObj = new MessageObject(msg, orderText);
+
+        System.out.println(msgObj.getReceivedMessage());*/
 
         myAgent.addBehaviour(new RequestToOrderInitiator(interactionBehaviour, msg, dataStore));
     }
@@ -61,7 +67,9 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
         protected void handleInform(ACLMessage inform) {
             orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
-            System.out.println("SalesMarketAgent: received [inform] " + orderText + " is in warehouse");
+            msgObj = new MessageObject(inform, orderText);
+
+            System.out.println(msgObj.getReceivedMessage());
 
             myAgent.addBehaviour(new TakeFromWarehouseBehaviour(interactionBehaviour, inform, dataStore));
         }

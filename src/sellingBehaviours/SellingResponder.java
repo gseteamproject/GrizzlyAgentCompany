@@ -3,6 +3,8 @@ package sellingBehaviours;
 import basicAgents.Selling;
 import basicClasses.Order;
 import communication.Communication;
+import communication.MessageObject;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
@@ -18,6 +20,7 @@ public class SellingResponder extends AchieveREResponder {
      */
     private static final long serialVersionUID = 4671831774439180119L;
     private String orderText;
+    private MessageObject msgObj;
 
     public SellingResponder(Agent a, MessageTemplate mt) {
         super(a, mt);
@@ -28,28 +31,32 @@ public class SellingResponder extends AchieveREResponder {
         // Selling reacts on SalesMarket's request
 
         orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
-
+        msgObj = new MessageObject(request, orderText);
         // Agent should send agree or refuse
         // TODO: Add refuse answer (some conditions should be added)
 
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
         response.setPerformative(ACLMessage.AGREE);
+        response.setSender(new AID(("AgentSelling"), AID.ISLOCALNAME));
 
         // response.setPerformative(ACLMessage.REFUSE);
 
-        if (request.getConversationId() == "Ask") {
-            System.out.println("SellingAgent: [request] SalesMarket orders a " + orderText);
-            Communication.server.sendMessageToClient("SellingAgent", "[request] SalesMarket orders a " + orderText);
+        System.out.println(msgObj.getReceivedMessage());
 
-            System.out.println("SellingAgent: [agree] I will check warehouse for " + orderText);
+        if (request.getConversationId() == "Ask") {
+
+            msgObj = new MessageObject(response, orderText);
+            System.out.println(msgObj.getReceivedMessage());
             Communication.server.sendMessageToClient("SellingAgent", "[agree] I will check warehouse for " + orderText);
             myAgent.addBehaviour(new CheckWarehouseBehaviour(myAgent, request));
         } else if (request.getConversationId() == "Take") {
-            System.out.println("SellingAgent: [request] SalesMarket wants to take " + orderText + " from warehouse");
-            Communication.server.sendMessageToClient("SellingAgent",
-                    "[request] SalesMarket wants to take " + orderText + " from warehouse");
-            System.out.println("SellingAgent: [agree] I will give you " + orderText + " from warehouse");
+
+
+
+
+            msgObj = new MessageObject(response, orderText);
+            System.out.println(msgObj.getReceivedMessage());
             Communication.server.sendMessageToClient("SellingAgent",
                     "[agree] I will give you " + orderText + " from warehouse");
 

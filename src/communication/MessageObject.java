@@ -18,6 +18,7 @@ public class MessageObject {
         this.setSender();
         this.setReceiver();
         this.setReceivedMessage();
+
     }
 
     public MessageObject (String manualSender, String manualMessage){
@@ -96,7 +97,7 @@ public class MessageObject {
     }
 
     public void setReceivedMessage() {
-        receivedMessage = this.receiver + " received a Message of Type [" + this.performative + "] from " + this.sender;
+        receivedMessage = this.receiver + " received a Message of Type [" + this.performative + "] from " + this.sender + ". Order: " + this.orderText + "; ";
     }
     public String getReceivedMessage (){
         return receivedMessage;

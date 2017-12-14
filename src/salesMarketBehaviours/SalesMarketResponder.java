@@ -4,6 +4,7 @@ import basicAgents.SalesMarket;
 import basicClasses.Order;
 import communication.Communication;
 import communication.MessageObject;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.DataStore;
 import jade.domain.FIPAAgentManagement.FailureException;
@@ -24,6 +25,7 @@ public class SalesMarketResponder extends AchieveREResponder {
     private static final long serialVersionUID = 7386418031416044376L;
     private String orderText;
     protected DataStore dataStore;
+    private MessageObject msgObj;
 
     public SalesMarketResponder(Agent a, MessageTemplate mt, DataStore dataStore) {
         super(a, mt, dataStore);
@@ -39,23 +41,29 @@ public class SalesMarketResponder extends AchieveREResponder {
         Order order = Order.gson.fromJson(request.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
-        Communication.server.sendMessageToClient(request, orderText);
-        System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
+        msgObj = new MessageObject(request, orderText);
+        Communication.server.sendMessageToClient(msgObj);
+        System.out.println(msgObj.getReceivedMessage());
 
         // Agent should send agree or refuse
         ACLMessage response;
         response = request.createReply();
         response.setContent(request.getContent());
+        response.setSender(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
+
         if (!SalesMarket.orderQueue.contains(order)) {
             SalesMarket.orderQueue.add(order);
             response.setPerformative(ACLMessage.AGREE);
-            System.out.println("SalesMarketAgent: [agree] I will make an order of " + orderText);
+            msgObj = new MessageObject(response, orderText);
+            System.out.println(msgObj.getReceivedMessage());
 
             // if agent agrees it starts executing request
             myAgent.addBehaviour(new AskForOrderBehaviour(this, dataStore));
         } else {
             response.setPerformative(ACLMessage.REFUSE);
-            System.out.println("SalesMarketAgent: [refuse] Following order is already in queue: " + orderText);
+            msgObj = new MessageObject(response, orderText);
+            System.out.println(msgObj.getReceivedMessage());
+
         }
         return response;
     }
@@ -70,7 +78,9 @@ public class SalesMarketResponder extends AchieveREResponder {
         ACLMessage inform = request.createReply();
         inform.setContent(request.getContent());
         inform.setPerformative(ACLMessage.INFORM);
-        System.out.println("SalesMarketAgent: [inform] I ordered a " + orderText);
+        inform.setSender(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
+        msgObj = new MessageObject(inform, orderText);
+        System.out.println(msgObj.getReceivedMessage());
 
 
         return inform;
