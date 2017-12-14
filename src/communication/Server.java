@@ -7,6 +7,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
+import jade.lang.acl.ACLMessage;
 
 /*
     SocketIO implementation to communicate with the client website
@@ -73,9 +74,13 @@ public class Server implements Runnable {
             conClient.sendEvent(event, object);
     }
 
-    public void sendMessageToClient(String agent, String message) {
+    public void sendMessageToClient(ACLMessage acl, String ordertext) {
         if (conClient != null)
-            conClient.sendEvent("msgevent", new MessageObject(agent, message));
+            conClient.sendEvent("msgevent", new MessageObject(acl, ordertext));
+    }
+    public void sendMessageToClient(String sender, String msg) {
+        if (conClient != null)
+            conClient.sendEvent("msgevent", new MessageObject(sender, msg));
     }
 
     /*

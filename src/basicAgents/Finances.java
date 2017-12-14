@@ -47,7 +47,7 @@ public class Finances extends Agent {
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 			// Finances reacts on Selling's or Procurement's request
 
-			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfProductOrder();
+			orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
 
 			// Agent should send agree or refuse
 			// TODO: Add refuse answer (some conditions should be added)
@@ -99,7 +99,7 @@ public class Finances extends Agent {
 
 		@Override
 		public void action() {
-			orderText = Order.gson.fromJson(orderToSell, Order.class).getTextOfProductOrder();
+			orderText = Order.gson.fromJson(orderToSell, Order.class).getTextOfOrder();
 			System.out.println("FinancesAgent: Transfering money for selling " + orderText + " to Bank");
 
 			// TODO: Do something here
@@ -121,7 +121,7 @@ public class Finances extends Agent {
 
 		@Override
 		public void action() {
-			orderText = Order.gson.fromJson(orderToBuy, Order.class).getTextOfProductOrder();
+			orderText = Order.gson.fromJson(orderToBuy, Order.class).getTextOfOrder();
 			System.out.println("FinancesAgent: Transfering money to buy " + orderText + " from Bank");
 
 			// TODO: Do something here

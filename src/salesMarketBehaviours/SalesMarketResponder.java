@@ -11,6 +11,9 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREResponder;
 
+import java.util.Iterator;
+import java.util.prefs.Preferences;
+
 public class SalesMarketResponder extends AchieveREResponder {
 
     /**
@@ -34,7 +37,11 @@ public class SalesMarketResponder extends AchieveREResponder {
         Order order = Order.gson.fromJson(request.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
+
+
+
         System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
+
 
         // Agent should send agree or refuse
         ACLMessage response;
@@ -65,6 +72,7 @@ public class SalesMarketResponder extends AchieveREResponder {
         inform.setContent(request.getContent());
         inform.setPerformative(ACLMessage.INFORM);
         System.out.println("SalesMarketAgent: [inform] I ordered a " + orderText);
+
 
         return inform;
     }
