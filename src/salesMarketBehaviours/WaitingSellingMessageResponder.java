@@ -2,6 +2,8 @@ package salesMarketBehaviours;
 
 import basicAgents.SalesMarket;
 import basicClasses.Order;
+import communication.MessageObject;
+import jade.core.AID;
 import jade.core.behaviours.DataStore;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
@@ -19,6 +21,7 @@ public class WaitingSellingMessageResponder extends AchieveREResponder {
     private String orderText;
     private DataStore dataStore;
     private SalesMarketResponder interactionBehaviour;
+    private MessageObject msgObj;
 
     public WaitingSellingMessageResponder(SalesMarketResponder interactionBehaviour, MessageTemplate mt,
             DataStore dataStore) {
@@ -34,20 +37,28 @@ public class WaitingSellingMessageResponder extends AchieveREResponder {
         Order order = Order.gson.fromJson(request.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
-        System.out.println(
-                "SalesMarketAgent: received [inform] order " + orderText + " is ready for collection from warehouse");
+        msgObj = new MessageObject(request, orderText);
+        System.out.println(msgObj.getReceivedMessage());
 
+   /*     System.out.println(
+                "SalesMarketAgent: received [inform] order " + orderText + " is ready for collection from warehouse");
+*/
         response = request.createReply();
         response.setContent(request.getContent());
+        response.setSender(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
         if (SalesMarket.orderQueue.contains(order)) {
             response.setPerformative(ACLMessage.AGREE);
-            System.out.println("SalesMarketAgent: [agree] I will take " + orderText);
-
+            msgObj = new MessageObject(response,orderText);
+            System.out.println(msgObj.getReceivedMessage());
+           /* System.out.println("SalesMarketAgent: [agree] I will take " + orderText);
+*/
             myAgent.addBehaviour(new TakeFromWarehouseBehaviour(interactionBehaviour, request, dataStore));
 
         } else {
             response.setPerformative(ACLMessage.REFUSE);
-            System.out.println("SalesMarketAgent: [refuse] I will not take " + orderText);
+            msgObj = new MessageObject(response,orderText);
+            System.out.println(msgObj.getReceivedMessage());
+          //  System.out.println("SalesMarketAgent: [refuse] I will not take " + orderText);
         }
         return response;
     }
@@ -56,11 +67,13 @@ public class WaitingSellingMessageResponder extends AchieveREResponder {
     protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
 
         orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+        msgObj = new MessageObject(request,orderText);
 
         ACLMessage inform = request.createReply();
         inform.setContent(request.getContent());
         inform.setPerformative(ACLMessage.INFORM);
-        System.out.println("SalesMarketAgent: [inform] I asked to take " + orderText);
+        inform.setSender(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
+        /*System.out.println("SalesMarketAgent: [inform] I asked to take " + orderText);*/
 
         return inform;
     }

@@ -79,7 +79,8 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
             Order order = Order.gson.fromJson(failure.getContent(), Order.class);
             orderText = order.getTextOfOrder();
 
-            System.out.println("SalesMarketAgent: received [failure] " + orderText + " is not in warehouse");
+            msgObj = new MessageObject(failure, orderText);
+            System.out.println(msgObj.getReceivedMessage());
 
             MessageTemplate temp = MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
             MessageTemplate infTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.INFORM));
