@@ -9,6 +9,51 @@
     <link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora">
     <link rel="stylesheet" href="assets/css/styles.min.css">
+    <style>
+        #console {
+			height: 400px;
+			overflow: auto;
+		}
+		.agent-msg {color:orange;}
+		.connect-msg {color:green;}
+		.disconnect-msg {color:red;}
+    </style>
+
+    <script src="assets/js/socket.io/socket.io.js"></script>
+    <script src="assets/js/moment.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+    var userID = 'user' + Math.floor((Math.random()*1000)+1);
+		var socket =  io.connect('http://localhost:9092');
+
+		socket.on('connect', function() {
+			output('<span class="connect-msg">Client has connected to the server!</span>');
+		});
+        socket.on('msgevent', function(data) {
+            output('<span class="agent-msg">' + data.agent + ':</span> ' + data.message);
+        });
+        socket.on('alcevent', function(data) {
+            output('<span class="agent-msg">NULL:</span> ' + data.message);
+        });
+		socket.on('disconnect', function() {
+			output('<span class="disconnect-msg">The client has disconnected!</span>');
+		});
+        function sendDisconnect() {
+            socket.disconnect();
+        }
+		function sendMessage() {
+          var agent = "Client";
+          var message = $('#msg').val();
+          $('#msg').val('');
+          //socket.emit('msgevent', {agent: agent, message: message});
+		}
+		function output(message) {
+            var currentTime = "<span class='time'>" +  moment().format('HH:mm:ss.SSS') + "</span>";
+            var element = $("<div>" + currentTime + " " + message + "</div>");
+			$('#console').prepend(element);
+		}
+	</script>
 </head>
 
 <body>
@@ -25,15 +70,14 @@
             <img src="assets/img/Logo.png" alt="Logo" style="width:80px;height:80px;position:fixed;left:10%;top:8px">
         </a>
         <h1 id="h1head">Grizzly Agent Company</h1></div>
-    <div id="Content" align="middle">
-            <img src="assets/img/simulation.png">
+    <div id="Content">
+            <!--<img src="assets/img/simulation.png">-->
+        <div id="console"></div>
     </div>
     <div id="Footer">
         <p id="copyright"> © Grizzly Agent Company 2017</p>
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 
 </html>

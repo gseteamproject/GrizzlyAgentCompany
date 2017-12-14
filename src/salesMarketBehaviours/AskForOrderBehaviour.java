@@ -8,6 +8,7 @@ import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREInitiator;
+import jade.util.leap.Iterator;
 
 public class AskForOrderBehaviour extends OneShotBehaviour {
 
@@ -35,6 +36,7 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
 
         String requestedAction = "Ask";
         ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+
         msg.setConversationId(requestedAction);
         msg.addReceiver(new AID(("AgentSelling"), AID.ISLOCALNAME));
         msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);

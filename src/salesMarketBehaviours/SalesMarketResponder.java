@@ -2,6 +2,8 @@ package salesMarketBehaviours;
 
 import basicAgents.SalesMarket;
 import basicClasses.Order;
+import communication.Communication;
+import communication.MessageObject;
 import jade.core.Agent;
 import jade.core.behaviours.DataStore;
 import jade.domain.FIPAAgentManagement.FailureException;
@@ -37,11 +39,8 @@ public class SalesMarketResponder extends AchieveREResponder {
         Order order = Order.gson.fromJson(request.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
-
-
-
+        Communication.server.sendMessageToClient(request, orderText);
         System.out.println("SalesMarketAgent: [request] Customer orders a " + orderText);
-
 
         // Agent should send agree or refuse
         ACLMessage response;

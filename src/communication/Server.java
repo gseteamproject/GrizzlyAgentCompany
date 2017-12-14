@@ -75,9 +75,12 @@ public class Server implements Runnable {
     }
 
     public void sendMessageToClient(ACLMessage acl, String ordertext) {
+        MessageWrapper wrapper = new MessageWrapper(new MessageObject(acl, ordertext));
+
         if (conClient != null)
-            conClient.sendEvent("msgevent", new MessageObject(acl, ordertext));
+            conClient.sendEvent("alcevent", wrapper);
     }
+
     public void sendMessageToClient(String sender, String msg) {
         if (conClient != null)
             conClient.sendEvent("msgevent", new MessageObject(sender, msg));
