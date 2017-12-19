@@ -1,33 +1,26 @@
-package procurementBehaviours;
+package productionBehaviours;
 
-import java.net.Authenticator.RequestorType;
-
-import org.eclipse.jetty.http.MetaData.Request;
-
+import interactors.RequestResult;
 import jade.core.behaviours.DataStore;
 import jade.lang.acl.ACLMessage;
 
-public class Work {
-    protected DataStore dataStore;
+public class ProductionRequestResult extends RequestResult {
 
-    public Work(DataStore dataStore) {
-        super();
-        this.dataStore = dataStore;
+    public ProductionRequestResult(DataStore dataStore) {
+        super(dataStore);
     }
 
+    @Override
     public ACLMessage execute(ACLMessage request) {
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
-        if (RequestToBuy.buyCount == AskForAuction.partsCount) {
+
+        if (DeliverToSellingBehaviour.isProduced) {
             response.setPerformative(ACLMessage.INFORM);
         } else {
             response.setPerformative(ACLMessage.FAILURE);
         }
 
         return response;
-    }
-
-    public boolean done() {
-        return true;
     }
 }

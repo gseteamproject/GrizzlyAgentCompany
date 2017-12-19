@@ -1,6 +1,5 @@
-package productionBehaviours;
+package interactors;
 
-import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
 
 public class DecisionBehaviour extends OneShotBehaviour {
@@ -8,15 +7,14 @@ public class DecisionBehaviour extends OneShotBehaviour {
     /**
      * 
      */
-    private static final long serialVersionUID = -5138036682748995317L;
+    private static final long serialVersionUID = 5281539625153081963L;
 
-    ProductionResponder interactionBehaviour;
+    protected ResponderBehaviour interactionBehaviour;
 
-    Decision interactor;
+    protected Decision interactor;
 
-    public DecisionBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
+    public DecisionBehaviour(ResponderBehaviour interactionBehaviour) {
         this.interactionBehaviour = interactionBehaviour;
-        this.interactor = new Decision(dataStore);
     }
 
     @Override

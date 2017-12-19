@@ -1,7 +1,7 @@
 package productionBehaviours;
 
+import interactors.DeadlineBehaviour;
 import jade.core.behaviours.DataStore;
-import jade.core.behaviours.WakerBehaviour;
 
 //public class DeadlineBehaviour extends SimpleBehaviour {
 //	ProductionResponderBehaviour interactionBehaviour;
@@ -30,21 +30,11 @@ import jade.core.behaviours.WakerBehaviour;
 //    private static final long serialVersionUID = -3500469822678572098L;
 //}
 
-public class DeadlineBehaviour extends WakerBehaviour {
+public class ProductionDeadlineBehaviour extends DeadlineBehaviour {
 
-    ProductionResponder interactionBehaviour;
-
-    Work interactor;
-
-    public DeadlineBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
-        super(interactionBehaviour.getAgent(), 10000);
-        this.interactionBehaviour = interactionBehaviour;
-        this.interactor = new Work(dataStore);
-    }
-
-    @Override
-    protected void onWake() {
-        interactionBehaviour.setResult(interactor.execute(interactionBehaviour.getRequest()));
+    public ProductionDeadlineBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
+        super(interactionBehaviour, 6000);
+        this.interactor = new ProductionRequestResult(dataStore);
     }
 
     private static final long serialVersionUID = 9050743659839198854L;

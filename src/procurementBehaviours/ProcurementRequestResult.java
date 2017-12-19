@@ -1,30 +1,25 @@
-package productionBehaviours;
+package procurementBehaviours;
 
+import interactors.RequestResult;
 import jade.core.behaviours.DataStore;
 import jade.lang.acl.ACLMessage;
 
-public class Work {
-    protected DataStore dataStore;
+public class ProcurementRequestResult extends RequestResult {
 
-    public Work(DataStore dataStore) {
-        super();
-        this.dataStore = dataStore;
+    public ProcurementRequestResult(DataStore dataStore) {
+        super(dataStore);
     }
-
+    
+    @Override
     public ACLMessage execute(ACLMessage request) {
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
-
-        if (DeliverToSellingBehaviour.isProduced) {
+        if (RequestToBuy.buyCount == AskForAuction.partsCount) {
             response.setPerformative(ACLMessage.INFORM);
         } else {
             response.setPerformative(ACLMessage.FAILURE);
         }
 
         return response;
-    }
-
-    public boolean done() {
-        return true;
     }
 }
