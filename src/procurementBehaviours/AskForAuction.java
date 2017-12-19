@@ -33,9 +33,9 @@ public class AskForAuction extends OneShotBehaviour {
         orderText = order.getTextOfOrder();
         partsCount = order.orderList.size();
         System.out.println("ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
-      
-        for (OrderPart orderPart : order.orderList) {            
-//            System.out.println("mne nado: " + orderPart.getTextOfOrderPart());
+
+        for (OrderPart orderPart : order.orderList) {
+            // System.out.println("mne nado: " + orderPart.getTextOfOrderPart());
             String requestedAction = "Order";
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
             msg.setConversationId(requestedAction);

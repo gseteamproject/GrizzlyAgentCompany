@@ -1,16 +1,14 @@
 package productionBehaviours;
 
-import java.util.Date;
-
 import basicClasses.Order;
 import jade.core.AID;
 import jade.core.behaviours.DataStore;
-import jade.core.behaviours.TickerBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
 
-class GetFromStorageBehaviour extends TickerBehaviour {
+class GetFromStorageBehaviour extends OneShotBehaviour {
 
     /**
      * 
@@ -22,8 +20,8 @@ class GetFromStorageBehaviour extends TickerBehaviour {
     private DataStore dataStore;
     private ProductionResponder interactionBehaviour;
 
-    public GetFromStorageBehaviour(ProductionResponder interactionBehaviour, long period, DataStore dataStore) {
-        super(interactionBehaviour.getAgent(), period);
+    public GetFromStorageBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
+        super(interactionBehaviour.getAgent());
         this.dataStore = dataStore;
         this.interactionBehaviour = interactionBehaviour;
         requestMessage = interactionBehaviour.getRequest();
@@ -31,7 +29,7 @@ class GetFromStorageBehaviour extends TickerBehaviour {
     }
 
     @Override
-    protected void onTick() {
+    public void action() {
 
         orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
 
@@ -43,19 +41,11 @@ class GetFromStorageBehaviour extends TickerBehaviour {
         msg.setConversationId(requestedAction);
         msg.addReceiver(new AID(("AgentProcurement"), AID.ISLOCALNAME));
         msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-        msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
+        // msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
         msg.setContent(materialsToTake);
 
+        System.out.println(interactionBehaviour.getRequest());
         myAgent.addBehaviour(new RequestToTakeInitiator(interactionBehaviour, msg, dataStore));
-    }
-
-    @Override
-    public void stop() {
-
-        orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
-
-        System.out.println("ProductionAgent: Now I have materials for " + orderText);
-        super.stop();
     }
 
     class RequestToTakeInitiator extends AchieveREInitiator {
@@ -69,8 +59,8 @@ class GetFromStorageBehaviour extends TickerBehaviour {
 
         public RequestToTakeInitiator(ProductionResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
             super(interactionBehaviour.getAgent(), msg);
-            this.interactionBehaviour = interactionBehaviour;
             this.dataStore = dataStore;
+            this.interactionBehaviour = interactionBehaviour;
         }
 
         @Override
@@ -80,7 +70,8 @@ class GetFromStorageBehaviour extends TickerBehaviour {
 
             System.out.println(
                     "ProductionAgent: received [inform] materials for " + orderText + " will be taken from storage");
-            stop();
+
+            System.out.println("ProductionAgent: Now I have materials for " + orderText);
             myAgent.addBehaviour(new DeliverToSellingBehaviour(interactionBehaviour, dataStore));
         }
 

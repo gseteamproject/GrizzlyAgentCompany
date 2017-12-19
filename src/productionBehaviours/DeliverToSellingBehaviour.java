@@ -19,11 +19,9 @@ class DeliverToSellingBehaviour extends OneShotBehaviour {
     private ACLMessage requestMessage;
     public static boolean isProduced = false;
     private ProductionResponder interactionBehaviour;
-    private Work interactor;
 
     public DeliverToSellingBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
         super(interactionBehaviour.getAgent());
-        this.interactor = new Work(dataStore);
         this.interactionBehaviour = interactionBehaviour;
     }
 
@@ -42,8 +40,5 @@ class DeliverToSellingBehaviour extends OneShotBehaviour {
             }
         }
         isProduced = true;
-        // System.out.println(requestMessage.getContent());
-        // System.out.println(interactor.execute(requestMessage));
-        // interactionBehaviour.setResult(interactor.execute(requestMessage));
     }
 }

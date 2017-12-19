@@ -39,7 +39,7 @@ public class CustomerSimulatorBehaviour extends WakerBehaviour {
         order.id = SalesMarket.orderQueue.size() + 1;
 
         order.addProduct(new Product(10, "red"), 1);
-        order.addProduct(new Product(10, "blue"), 1);
+        order.addProduct(new Product(10, "blue"), 2);
         order.addProduct(new Product(10, "green"), 3);
 
         String testGson = Order.gson.toJson(order);
@@ -61,8 +61,8 @@ public class CustomerSimulatorBehaviour extends WakerBehaviour {
         stone = new Stone(10);
         prdct = new Product(stone, paint);
         Selling.warehouse.add(prdct);
-//        Procurement.materialStorage.add(paint);
-//        Procurement.materialStorage.add(stone);
+        // Procurement.materialStorage.add(paint);
+        // Procurement.materialStorage.add(stone);
 
         paint = new Paint("green");
         stone = new Stone(10);
@@ -76,6 +76,6 @@ public class CustomerSimulatorBehaviour extends WakerBehaviour {
         // 1 red stone will be taken from warehouse
         // 1 blue stone will be taken from warehouse
         // 1 blue stone will be produced
-        // 2 green stone will be produced
+        // 3 green stones will be produced
     }
 }

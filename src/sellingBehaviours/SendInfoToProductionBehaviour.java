@@ -1,10 +1,12 @@
 package sellingBehaviours;
 
 import basicAgents.SalesMarket;
+import basicAgents.Selling;
 import basicClasses.Order;
 import communication.Communication;
+import communication.MessageObject;
 import jade.core.AID;
-import jade.core.Agent;
+import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
@@ -19,11 +21,16 @@ public class SendInfoToProductionBehaviour extends OneShotBehaviour {
     private String orderToProceed;
     private String orderText;
     private ACLMessage requestMessage;
+    private DataStore dataStore;
+    private SellingResponder interactionBehaviour;
+    private MessageObject msgObj;
 
-    public SendInfoToProductionBehaviour(Agent a, ACLMessage msg, ACLMessage request) {
-        super(a);
+    public SendInfoToProductionBehaviour(SellingResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
+        super(interactionBehaviour.getAgent());
         orderToProceed = msg.getContent();
-        requestMessage = request;
+        requestMessage = interactionBehaviour.getRequest();
+        this.interactionBehaviour = interactionBehaviour;
+        this.dataStore = dataStore;
     }
 
     @Override
@@ -41,7 +48,7 @@ public class SendInfoToProductionBehaviour extends OneShotBehaviour {
         requestToProduction.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
         requestToProduction.setContent(orderToProceed);
 
-        myAgent.addBehaviour(new RequestToFinanceInitiator(myAgent, requestToProduction));
+        myAgent.addBehaviour(new RequestToFinanceInitiator(interactionBehaviour, requestToProduction, dataStore));
     }
 
     class RequestToFinanceInitiator extends AchieveREInitiator {
@@ -50,9 +57,16 @@ public class SendInfoToProductionBehaviour extends OneShotBehaviour {
          * 
          */
         private static final long serialVersionUID = 994161564616428958L;
+        private DataStore dataStore;
+        private SellingResponder interactionBehaviour;
+        SellingRequestResult interactor;
+        private MessageObject msgObj;
 
-        public RequestToFinanceInitiator(Agent a, ACLMessage msg) {
-            super(a, msg);
+        public RequestToFinanceInitiator(SellingResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
+            super(interactionBehaviour.getAgent(), msg);
+            this.interactionBehaviour = interactionBehaviour;
+            this.dataStore = dataStore;
+            this.interactor = new SellingRequestResult(dataStore);
         }
 
         @Override
@@ -70,18 +84,18 @@ public class SendInfoToProductionBehaviour extends OneShotBehaviour {
             System.out.println("SellingAgent: received [inform] " + orderText + " is delivered to warehouse");
             Communication.server.sendMessageToClient("SellingAgent",
                     "received [inform] " + orderText + " is delivered to warehouse");
-
+            Selling.isInWarehouse = true;
             for (Order orderInQueue : SalesMarket.orderQueue) {
                 if (orderInQueue.id == order.id) {
                     order = orderInQueue;
                 }
             }
 
-            ACLMessage reply = requestMessage.createReply();
-            reply.setPerformative(ACLMessage.INFORM);
-            String testGson = Order.gson.toJson(order);
-            reply.setContent(testGson);
-            myAgent.send(reply);
+            // ACLMessage reply = requestMessage.createReply();
+            // reply.setPerformative(ACLMessage.INFORM);
+            // String testGson = Order.gson.toJson(order);
+            // reply.setContent(testGson);
+            // myAgent.send(reply);
         }
 
         @Override

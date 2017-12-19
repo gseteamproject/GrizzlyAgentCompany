@@ -82,7 +82,8 @@ public class CheckMaterialStorage extends OneShotBehaviour {
         if (!isInQueue && orderToBuy.orderList.size() > 0) {
             String testGson = Order.gson.toJson(orderToBuy);
             ACLMessage agree = (ACLMessage) request.clone();
-            agree.setContent(testGson);;
+            agree.setContent(testGson);
+            ;
 
             // add order to queue
             Procurement.procurementQueue.add(order);

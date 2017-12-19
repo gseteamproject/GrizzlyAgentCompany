@@ -4,6 +4,7 @@ import basicAgents.SalesMarket;
 import basicClasses.Order;
 import communication.Communication;
 import communication.MessageObject;
+import interactors.ResponderBehaviour;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.DataStore;
@@ -12,12 +13,8 @@ import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.proto.AchieveREResponder;
 
-import java.util.Iterator;
-import java.util.prefs.Preferences;
-
-public class SalesMarketResponder extends AchieveREResponder {
+public class SalesMarketResponder extends ResponderBehaviour {
 
     /**
      * 
@@ -82,19 +79,6 @@ public class SalesMarketResponder extends AchieveREResponder {
         msgObj = new MessageObject(inform, orderText);
         System.out.println(msgObj.getReceivedMessage());
 
-
         return inform;
-    }
-
-    public ACLMessage getRequest() {
-        return (ACLMessage) getDataStore().get(REQUEST_KEY);
-    }
-
-    public void setResponse(ACLMessage response) {
-        getDataStore().put(RESPONSE_KEY, response);
-    }
-
-    public void setResult(ACLMessage result) {
-        getDataStore().put(RESULT_NOTIFICATION_KEY, result);
     }
 }

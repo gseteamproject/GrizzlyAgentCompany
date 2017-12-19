@@ -23,8 +23,7 @@ public class TakeFromWarehouseBehaviour extends OneShotBehaviour {
     private SalesMarketResponder interactionBehaviour;
     private MessageObject msgObj;
 
-    public TakeFromWarehouseBehaviour(SalesMarketResponder interactionBehaviour, ACLMessage msg,
-            DataStore dataStore) {
+    public TakeFromWarehouseBehaviour(SalesMarketResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
         super(interactionBehaviour.getAgent());
         this.interactionBehaviour = interactionBehaviour;
         this.dataStore = dataStore;
@@ -36,7 +35,8 @@ public class TakeFromWarehouseBehaviour extends OneShotBehaviour {
     public void action() {
         orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
 
-        //System.out.println("SalesMarketAgent: Asking SellingAgent to take " + orderText + " from warehouse");
+        // System.out.println("SalesMarketAgent: Asking SellingAgent to take " +
+        // orderText + " from warehouse");
 
         String requestedAction = "Take";
         ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
@@ -49,19 +49,18 @@ public class TakeFromWarehouseBehaviour extends OneShotBehaviour {
         msgObj = new MessageObject(msg, orderText);
         System.out.println(msgObj.getReceivedMessage());
 
-
-        myAgent.addBehaviour(new RequestToTake(myAgent, msg));
+        myAgent.addBehaviour(new RequestToTakeInitiator(interactionBehaviour, msg, dataStore));
     }
 
-    class RequestToTake extends AchieveREInitiator {
+    class RequestToTakeInitiator extends AchieveREInitiator {
 
         /**
          * 
          */
         private static final long serialVersionUID = -2624609588724924573L;
 
-        public RequestToTake(Agent a, ACLMessage msg) {
-            super(a, msg);
+        public RequestToTakeInitiator(SalesMarketResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
+            super(interactionBehaviour.getAgent(), msg);
         }
 
         @Override
@@ -69,13 +68,13 @@ public class TakeFromWarehouseBehaviour extends OneShotBehaviour {
             Order order = Order.gson.fromJson(inform.getContent(), Order.class);
             orderText = order.getTextOfOrder();
 
-            /*System.out.println("SalesMarketAgent: received [inform] " + orderText + " will be taken from warehouse");
-            System.out.println("SalesMarketAgent: Now I have a " + orderText);*/
+            /*
+             * System.out.println("SalesMarketAgent: received [inform] " + orderText +
+             * " will be taken from warehouse");
+             * System.out.println("SalesMarketAgent: Now I have a " + orderText);
+             */
 
             msgObj = new MessageObject(inform, orderText);
-
-
-
 
             if (SalesMarket.orderQueue.remove(order)) {
                 System.out.println("SalesMarketAgent: " + orderText + " is removed from Orderqueue.");
@@ -88,8 +87,10 @@ public class TakeFromWarehouseBehaviour extends OneShotBehaviour {
 
             msgObj = new MessageObject(failure, orderText);
             System.out.println(msgObj.getReceivedMessage());
-          /*  System.out
-                    .println("SalesMarketAgent: received [failure] " + orderText + " will not be taken from warehouse");*/
+            /*
+             * System.out .println("SalesMarketAgent: received [failure] " + orderText +
+             * " will not be taken from warehouse");
+             */
         }
     }
 }

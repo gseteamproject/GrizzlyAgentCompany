@@ -1,13 +1,10 @@
 package productionBehaviours;
 
-import java.util.Date;
-
 import basicClasses.Order;
 import communication.MessageObject;
 import jade.core.AID;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -43,16 +40,13 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
         msg.setConversationId(requestedAction);
         msg.addReceiver(new AID(("AgentProcurement"), AID.ISLOCALNAME));
         msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-        msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
         msg.setContent(materialsToRequest);
-
         myAgent.addBehaviour(new RequestToGetInitiator(interactionBehaviour, msg, dataStore));
     }
 
     class RequestToGetInitiator extends AchieveREInitiator {
 
         /**
-         * 
          */
         private static final long serialVersionUID = 1618638159227094879L;
         private DataStore dataStore;
@@ -62,36 +56,38 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
             super(interactionBehaviour.getAgent(), msg);
             this.dataStore = dataStore;
             this.interactionBehaviour = interactionBehaviour;
+            // System.out.println("1" + interactionBehaviour.getRequest());
         }
 
         @Override
         protected void handleInform(ACLMessage inform) {
+
+            // System.out.println("2" + interactionBehaviour.getRequest());
             orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-            
+
             msgObj = new MessageObject(inform, orderText);
             System.out.println(msgObj.getReceivedMessage());
 
-//            System.out.println("ProductionAgent: received [inform] materials for " + orderText + " are in storage");
-//            stop();
-            myAgent.addBehaviour(new GetFromStorageBehaviour(interactionBehaviour, 2000, dataStore));
+            // System.out.println("ProductionAgent: received [inform] materials for " +
+            // orderText + " are in storage");
+            // stop();
+            myAgent.addBehaviour(new GetFromStorageBehaviour(interactionBehaviour, dataStore));
         }
 
         @Override
         protected void handleFailure(ACLMessage failure) {
             orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-            
+
             msgObj = new MessageObject(failure, orderText);
             System.out.println(msgObj.getReceivedMessage());
 
-//            System.out
-//                    .println("ProductionAgent: received [failure] materials for " + orderText + " are not in storage");
+            // System.out
+            // .println("ProductionAgent: received [failure] materials for " + orderText + "
+            // are not in storage");
 
             MessageTemplate temp = MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
             MessageTemplate infTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.INFORM));
             infTemp = MessageTemplate.and(infTemp, MessageTemplate.MatchConversationId("Materials"));
-
-            // SalesMarket will wait
-            myAgent.addBehaviour(new WaitingProcurementMessageResponder(interactionBehaviour, infTemp, dataStore));
         }
     }
 }

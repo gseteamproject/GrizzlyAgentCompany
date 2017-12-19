@@ -35,7 +35,6 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
     public void action() {
         orderText = Order.gson.fromJson(orderToRequest, Order.class).getTextOfOrder();
 
-
         String requestedAction = "Ask";
         ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 
@@ -58,8 +57,7 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
          */
         private static final long serialVersionUID = -6945741747877024833L;
 
-        public RequestToOrderInitiator(SalesMarketResponder interactionBehaviour, ACLMessage msg,
-                DataStore dataStore) {
+        public RequestToOrderInitiator(SalesMarketResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
             super(interactionBehaviour.getAgent(), msg, dataStore);
         }
 
@@ -87,7 +85,9 @@ public class AskForOrderBehaviour extends OneShotBehaviour {
             infTemp = MessageTemplate.and(infTemp, MessageTemplate.MatchConversationId("Ask"));
 
             // SalesMarket will wait
-            myAgent.addBehaviour(new WaitingSellingMessageResponder(interactionBehaviour, infTemp, dataStore));
+            // TODO: Do not use this
+            // myAgent.addBehaviour(new WaitingSellingMessageResponder(interactionBehaviour,
+            // infTemp, dataStore));
         }
     }
 }

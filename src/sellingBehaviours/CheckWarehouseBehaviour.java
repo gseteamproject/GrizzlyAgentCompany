@@ -5,7 +5,8 @@ import basicClasses.Order;
 import basicClasses.OrderPart;
 import basicClasses.Product;
 import communication.Communication;
-import jade.core.Agent;
+import communication.MessageObject;
+import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
@@ -16,10 +17,15 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
      */
     private static final long serialVersionUID = 3856126876248315456L;
     private ACLMessage msgToProduction, requestMessage;
+    private DataStore dataStore;
+    private SellingResponder interactionBehaviour;
+    private MessageObject msgObj;
 
-    public CheckWarehouseBehaviour(Agent a, ACLMessage msg) {
-        super(a);
-        requestMessage = msg;
+    public CheckWarehouseBehaviour(SellingResponder interactionBehaviour, DataStore dataStore) {
+        super(interactionBehaviour.getAgent());
+        requestMessage = interactionBehaviour.getRequest();
+        this.interactionBehaviour = interactionBehaviour;
+        this.dataStore = dataStore;
     }
 
     @Override
@@ -79,7 +85,7 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
                     "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
             Communication.server.sendMessageToClient("SellingAgent",
                     "Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
-            myAgent.addBehaviour(new SendInfoToProductionBehaviour(myAgent, msgToProduction, requestMessage));
+            myAgent.addBehaviour(new SendInfoToProductionBehaviour(interactionBehaviour, msgToProduction, dataStore));
         }
     }
 }
