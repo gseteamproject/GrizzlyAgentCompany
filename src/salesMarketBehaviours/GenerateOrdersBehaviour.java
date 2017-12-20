@@ -11,7 +11,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 
-class GenerateOrdersBehaviour extends TickerBehaviour {
+public class GenerateOrdersBehaviour extends TickerBehaviour {
 
     /**
      * 

@@ -10,6 +10,7 @@ import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import salesMarketBehaviours.CustomerSimulatorBehaviour;
+import salesMarketBehaviours.GenerateOrdersBehaviour;
 import salesMarketBehaviours.SalesMarketResponder;
 
 public class SalesMarket extends Agent {
@@ -33,7 +34,7 @@ public class SalesMarket extends Agent {
         // adding behaviours
         addBehaviour(new SalesMarketResponder(this, reqTemp, dataStore));
 
-        // addBehaviour(new GenerateOrders(this, 15000));
+//        addBehaviour(new GenerateOrdersBehaviour(this, 15000));
 
         addBehaviour(new CustomerSimulatorBehaviour(this, 4000));
     }
