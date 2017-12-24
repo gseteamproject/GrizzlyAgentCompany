@@ -1,7 +1,7 @@
-package salesMarketBehaviours;
+package customerBehaviours;
 
-import basicAgents.SalesMarket;
 import basicAgents.Procurement;
+import basicAgents.SalesMarket;
 import basicAgents.Selling;
 import basicClasses.Order;
 import basicClasses.Paint;
@@ -13,14 +13,14 @@ import jade.core.behaviours.WakerBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 
-public class CustomerSimulatorBehaviour extends WakerBehaviour {
+public class OneOrderBehaviour extends WakerBehaviour {
 
     /**
      * 
      */
     private static final long serialVersionUID = 3327849748177688933L;
 
-    public CustomerSimulatorBehaviour(Agent a, long timeout) {
+    public OneOrderBehaviour(Agent a, long timeout) {
         super(a, timeout);
     }
 
@@ -28,11 +28,12 @@ public class CustomerSimulatorBehaviour extends WakerBehaviour {
     public void onWake() {
         // THIS MESSAGE IS FOR TESTING
         ACLMessage testMsg = new ACLMessage(ACLMessage.REQUEST);
+        testMsg.setConversationId("Order");
         testMsg.addReceiver(new AID(("AgentSalesMarket"), AID.ISLOCALNAME));
         testMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
         // improvised customer
-        testMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
+//         testMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
 
         // it is an example of order
         Order order = new Order();

@@ -1,4 +1,4 @@
-package salesMarketBehaviours;
+package customerBehaviours;
 
 import java.util.Random;
 
@@ -29,7 +29,7 @@ public class GenerateOrdersBehaviour extends TickerBehaviour {
         orderMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
         // improvised customer
-        orderMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
+        // orderMsg.setSender(new AID(("Customer"), AID.ISLOCALNAME));
 
         Order order = new Order();
         order.id = SalesMarket.orderQueue.size() + 1;
