@@ -1,16 +1,10 @@
 package productionBehaviours;
 
 import basicClasses.Order;
-import communication.MessageObject;
-import jade.core.AID;
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.domain.FIPANames;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-import jade.proto.AchieveREInitiator;
 
-class AskForMaterialBehaviour extends OneShotBehaviour {
+public class AskForMaterialsBehaviour extends OneShotBehaviour {
 
     /**
      * 
@@ -18,11 +12,10 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
     private static final long serialVersionUID = 8495802171064457305L;
     private String materialsToRequest;
     private String orderText;
-    private DataStore dataStore;
+    private OrderDataStore dataStore;
     private ProductionResponder interactionBehaviour;
-    public MessageObject msgObj;
 
-    public AskForMaterialBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
+    public AskForMaterialsBehaviour(ProductionResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
         this.interactionBehaviour = interactionBehaviour;
         this.dataStore = dataStore;
@@ -32,62 +25,8 @@ class AskForMaterialBehaviour extends OneShotBehaviour {
     public void action() {
         materialsToRequest = interactionBehaviour.getRequest().getContent();
         orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
-
+        dataStore.setRequestMessage(interactionBehaviour.getRequest());
         System.out.println("ProductionAgent: Asking ProcurementAgent to get materials for " + orderText);
-
-        String requestedAction = "Materials";
-        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-        msg.setConversationId(requestedAction);
-        msg.addReceiver(new AID(("AgentProcurement"), AID.ISLOCALNAME));
-        msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-        msg.setContent(materialsToRequest);
-        myAgent.addBehaviour(new RequestToGetInitiator(interactionBehaviour, msg, dataStore));
-    }
-
-    class RequestToGetInitiator extends AchieveREInitiator {
-
-        /**
-         */
-        private static final long serialVersionUID = 1618638159227094879L;
-        private DataStore dataStore;
-        private ProductionResponder interactionBehaviour;
-
-        public RequestToGetInitiator(ProductionResponder interactionBehaviour, ACLMessage msg, DataStore dataStore) {
-            super(interactionBehaviour.getAgent(), msg);
-            this.dataStore = dataStore;
-            this.interactionBehaviour = interactionBehaviour;
-            // System.out.println("1" + interactionBehaviour.getRequest());
-        }
-
-        @Override
-        protected void handleInform(ACLMessage inform) {
-
-            // System.out.println("2" + interactionBehaviour.getRequest());
-            orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-
-            msgObj = new MessageObject(inform, orderText);
-            System.out.println(msgObj.getReceivedMessage());
-
-            // System.out.println("ProductionAgent: received [inform] materials for " +
-            // orderText + " are in storage");
-            // stop();
-            myAgent.addBehaviour(new GetFromStorageBehaviour(interactionBehaviour, dataStore));
-        }
-
-        @Override
-        protected void handleFailure(ACLMessage failure) {
-            orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-
-            msgObj = new MessageObject(failure, orderText);
-            System.out.println(msgObj.getReceivedMessage());
-
-            // System.out
-            // .println("ProductionAgent: received [failure] materials for " + orderText + "
-            // are not in storage");
-
-            MessageTemplate temp = MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-            MessageTemplate infTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-            infTemp = MessageTemplate.and(infTemp, MessageTemplate.MatchConversationId("Materials"));
-        }
+        myAgent.addBehaviour(new AskForMaterialsInitiatorBehaviour(interactionBehaviour, dataStore));
     }
 }

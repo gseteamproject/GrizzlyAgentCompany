@@ -5,7 +5,7 @@ import java.util.List;
 import basicAgents.Procurement;
 import basicClasses.OrderPart;
 import jade.core.AID;
-import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
@@ -14,7 +14,7 @@ enum RequestState {
     PREPARE_CALL_FOR_PROPOSAL, HANDLE_CALL_FOR_PROPOSAL_REPLY, PREPARE_ACCEPT_PROPOSAL, HANDLE_ACCEPT_PROPOSAL_REPLY, DONE
 };
 
-public class RequestToBuy extends Behaviour {
+public class RequestToBuy extends SimpleBehaviour {
 
     /**
      * 
