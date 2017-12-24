@@ -1,7 +1,7 @@
 package basicAgents;
 
+import interactors.OrderDataStore;
 import jade.core.Agent;
-import jade.core.behaviours.DataStore;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -14,7 +14,7 @@ public class Production extends Agent {
      */
     private static final long serialVersionUID = 9064413910591040008L;
     // public boolean isProduced = false;
-    protected DataStore dataStore;
+    protected OrderDataStore dataStore;
 
     @Override
     protected void setup() {
@@ -23,7 +23,7 @@ public class Production extends Agent {
                 MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
                 MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 
-        dataStore = new DataStore();
+        dataStore = new OrderDataStore();
 
         addBehaviour(new ProductionResponder(this, reqTemp, dataStore));
     }

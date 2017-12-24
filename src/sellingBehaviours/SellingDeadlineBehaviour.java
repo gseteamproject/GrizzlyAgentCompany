@@ -1,7 +1,7 @@
 package sellingBehaviours;
 
 import interactors.DeadlineBehaviour;
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 
 public class SellingDeadlineBehaviour extends DeadlineBehaviour {
 
@@ -10,9 +10,8 @@ public class SellingDeadlineBehaviour extends DeadlineBehaviour {
      */
     private static final long serialVersionUID = 3277018524589680071L;
 
-    public SellingDeadlineBehaviour(SellingResponder interactionBehaviour, DataStore dataStore) {
+    public SellingDeadlineBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour, 8000);
-        this.interactionBehaviour = interactionBehaviour;
         this.interactor = new SellingRequestResult(dataStore);
     }
 }

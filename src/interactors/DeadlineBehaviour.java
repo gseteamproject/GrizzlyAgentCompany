@@ -12,8 +12,8 @@ public class DeadlineBehaviour extends WakerBehaviour {
 
     protected RequestResult interactor;
 
-    public DeadlineBehaviour(ResponderBehaviour interactionBehaviour, long period) {
-        super(interactionBehaviour.getAgent(), period);
+    public DeadlineBehaviour(ResponderBehaviour interactionBehaviour, long wakeTime) {
+        super(interactionBehaviour.getAgent(), wakeTime);
         this.interactionBehaviour = interactionBehaviour;
     }
 

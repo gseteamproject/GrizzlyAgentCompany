@@ -1,7 +1,6 @@
 package basicClasses;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /* This Class contains only finished Products and cannot contain Material
    It is used by Selling.

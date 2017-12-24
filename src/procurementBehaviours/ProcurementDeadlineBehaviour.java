@@ -1,11 +1,11 @@
 package procurementBehaviours;
 
 import interactors.DeadlineBehaviour;
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 
 public class ProcurementDeadlineBehaviour extends DeadlineBehaviour {
 
-    public ProcurementDeadlineBehaviour(ProcurementResponder interactionBehaviour, DataStore dataStore) {
+    public ProcurementDeadlineBehaviour(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour, 2000);
         this.interactor = new ProcurementRequestResult(dataStore);
     }

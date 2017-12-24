@@ -4,13 +4,13 @@ import basicClasses.Order;
 import communication.Communication;
 import communication.MessageObject;
 import interactors.Decision;
+import interactors.OrderDataStore;
 import jade.core.AID;
-import jade.core.behaviours.DataStore;
 import jade.lang.acl.ACLMessage;
 
 public class SellingDecision extends Decision {
 
-    public SellingDecision(DataStore dataStore) {
+    public SellingDecision(OrderDataStore dataStore) {
         super(dataStore);
     }
 

@@ -1,19 +1,19 @@
 package procurementBehaviours;
 
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 import jade.core.behaviours.SequentialBehaviour;
 
-public class ActivityBehaviour extends SequentialBehaviour {
+public class ProcurementActivityBehaviour extends SequentialBehaviour {
 
     /**
      * 
      */
     private static final long serialVersionUID = -6703040253614653144L;
 
-    public ActivityBehaviour(ProcurementResponder interactionBehaviour, DataStore dataStore) {
+    public ProcurementActivityBehaviour(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
 
-        addSubBehaviour(new AskBehaviour(interactionBehaviour, dataStore));
+        addSubBehaviour(new ProcurementAskBehaviour(interactionBehaviour, dataStore));
         addSubBehaviour(new ProcurementDeadlineBehaviour(interactionBehaviour, dataStore));
     }
 

@@ -6,7 +6,6 @@ import basicClasses.Paint;
 import basicClasses.Product;
 import basicClasses.Stone;
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 

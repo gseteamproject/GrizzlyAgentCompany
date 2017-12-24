@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import basicClasses.Order;
+import interactors.OrderDataStore;
 import jade.core.Agent;
-import jade.core.behaviours.DataStore;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import salesMarketBehaviours.CustomerSimulatorBehaviour;
-import salesMarketBehaviours.GenerateOrdersBehaviour;
 import salesMarketBehaviours.SalesMarketResponder;
 
 public class SalesMarket extends Agent {
@@ -22,20 +20,16 @@ public class SalesMarket extends Agent {
 
     // creating list of orders
     public static List<Order> orderQueue = new ArrayList<Order>();
-    protected DataStore dataStore;
+    protected OrderDataStore dataStore;
 
     @Override
     protected void setup() {
         MessageTemplate temp = MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
         MessageTemplate reqTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 
-        dataStore = new DataStore();
+        dataStore = new OrderDataStore();
 
         // adding behaviours
         addBehaviour(new SalesMarketResponder(this, reqTemp, dataStore));
-
-//        addBehaviour(new GenerateOrdersBehaviour(this, 15000));
-
-        addBehaviour(new CustomerSimulatorBehaviour(this, 4000));
     }
 }

@@ -1,20 +1,20 @@
 package procurementBehaviours;
 
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 
-public class AskBehaviour extends SimpleBehaviour {
+public class ProcurementAskBehaviour extends SimpleBehaviour {
 
     /**
      * 
      */
     private static final long serialVersionUID = -4443443755165652310L;
-    private DataStore dataStore;
+    private OrderDataStore dataStore;
     private ProcurementResponder interactionBehaviour;
     ProcurementRequestResult interactor;
 
-    public AskBehaviour(ProcurementResponder interactionBehaviour, DataStore dataStore) {
+    public ProcurementAskBehaviour(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
         this.interactionBehaviour = interactionBehaviour;
         this.dataStore = dataStore;
         this.interactor = new ProcurementRequestResult(dataStore);

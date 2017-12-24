@@ -4,9 +4,8 @@ import basicAgents.Selling;
 import basicClasses.Order;
 import basicClasses.OrderPart;
 import basicClasses.Product;
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.lang.acl.ACLMessage;
 
 class DeliverToSellingBehaviour extends OneShotBehaviour {
 
@@ -16,19 +15,19 @@ class DeliverToSellingBehaviour extends OneShotBehaviour {
     private static final long serialVersionUID = 313682933400751868L;
     private String orderToGive;
     private String orderText;
-    private ACLMessage requestMessage;
-    public static boolean isProduced = false;
+    private OrderDataStore dataStore;
     private ProductionResponder interactionBehaviour;
+    public static boolean isProduced = false;
 
-    public DeliverToSellingBehaviour(ProductionResponder interactionBehaviour, DataStore dataStore) {
+    public DeliverToSellingBehaviour(ProductionResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
+        this.dataStore = dataStore;
         this.interactionBehaviour = interactionBehaviour;
     }
 
     @Override
     public void action() {
-        requestMessage = interactionBehaviour.getRequest();
-        orderToGive = requestMessage.getContent();
+        orderToGive = interactionBehaviour.getRequest().getContent();
         Order order = Order.gson.fromJson(orderToGive, Order.class);
         orderText = order.getTextOfOrder();
         System.out.println("ProductionAgent: Delivering " + orderText + " to warehouse");

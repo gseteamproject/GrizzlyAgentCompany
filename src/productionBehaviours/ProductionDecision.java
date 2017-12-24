@@ -2,12 +2,12 @@ package productionBehaviours;
 
 import basicClasses.Order;
 import interactors.Decision;
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 import jade.lang.acl.ACLMessage;
 
 public class ProductionDecision extends Decision {
 
-    public ProductionDecision(DataStore dataStore) {
+    public ProductionDecision(OrderDataStore dataStore) {
         super(dataStore);
     }
 
@@ -18,9 +18,11 @@ public class ProductionDecision extends Decision {
         System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);
         // Agent should send agree or refuse
         // TODO: Add refuse answer (some conditions should be added)
+
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
         response.setPerformative(ACLMessage.AGREE);
+        
         System.out.println("ProductionAgent: [agree] I will produce " + orderText);
 
         return response;

@@ -1,12 +1,11 @@
 package interactors;
 
-import jade.core.behaviours.DataStore;
 import jade.lang.acl.ACLMessage;
 
 public class RequestResult {
-    protected DataStore dataStore;
+    protected OrderDataStore dataStore;
 
-    public RequestResult(DataStore dataStore) {
+    public RequestResult(OrderDataStore dataStore) {
         super();
         this.dataStore = dataStore;
     }

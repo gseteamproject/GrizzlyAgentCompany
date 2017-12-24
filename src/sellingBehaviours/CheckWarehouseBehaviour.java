@@ -6,7 +6,7 @@ import basicClasses.OrderPart;
 import basicClasses.Product;
 import communication.Communication;
 import communication.MessageObject;
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
@@ -16,12 +16,12 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
      * 
      */
     private static final long serialVersionUID = 3856126876248315456L;
-    private ACLMessage msgToProduction, requestMessage;
-    private DataStore dataStore;
+    private ACLMessage requestMessage;
+    private OrderDataStore dataStore;
     private SellingResponder interactionBehaviour;
     private MessageObject msgObj;
 
-    public CheckWarehouseBehaviour(SellingResponder interactionBehaviour, DataStore dataStore) {
+    public CheckWarehouseBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
         requestMessage = interactionBehaviour.getRequest();
         this.interactionBehaviour = interactionBehaviour;
@@ -31,8 +31,8 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
     @Override
     public void action() {
         // save this request message to reply on it later
-        msgToProduction = requestMessage;
         Order order = Order.gson.fromJson(requestMessage.getContent(), Order.class);
+        System.out.println("3.1" + interactionBehaviour.getRequest());
 
         Selling.isInWarehouse = true;
         boolean isInQueue = false;
@@ -72,10 +72,12 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
                 }
             }
         }
+        System.out.println("3.2" + interactionBehaviour.getRequest());
 
         // productToCheck needs to be produced
         if (!isInQueue && (orderToProduce.orderList.size() > 0)) {
             String testGson = Order.gson.toJson(orderToProduce);
+            ACLMessage msgToProduction = (ACLMessage) requestMessage.clone();
             msgToProduction.setContent(testGson);
 
             // add order to queue
@@ -85,7 +87,9 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
                     "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
             Communication.server.sendMessageToClient("SellingAgent",
                     "Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
-            myAgent.addBehaviour(new SendInfoToProductionBehaviour(interactionBehaviour, msgToProduction, dataStore));
+
+            System.out.println("3.3" + interactionBehaviour.getRequest());
+            myAgent.addBehaviour(new AskToProduceBehaviour(interactionBehaviour, msgToProduction, dataStore));
         }
     }
 }

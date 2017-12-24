@@ -3,14 +3,14 @@ package procurementBehaviours;
 import basicClasses.Order;
 import communication.MessageObject;
 import interactors.Decision;
-import jade.core.behaviours.DataStore;
+import interactors.OrderDataStore;
 import jade.lang.acl.ACLMessage;
 
 public class ProcurementDecision extends Decision {
     private String orderText;
     private MessageObject msgObj;
 
-    public ProcurementDecision(DataStore dataStore) {
+    public ProcurementDecision(OrderDataStore dataStore) {
         super(dataStore);
     }
 

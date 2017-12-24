@@ -1,12 +1,12 @@
 package productionBehaviours;
 
+import interactors.OrderDataStore;
 import interactors.RequestResult;
-import jade.core.behaviours.DataStore;
 import jade.lang.acl.ACLMessage;
 
 public class ProductionRequestResult extends RequestResult {
 
-    public ProductionRequestResult(DataStore dataStore) {
+    public ProductionRequestResult(OrderDataStore dataStore) {
         super(dataStore);
     }
 
@@ -20,7 +20,7 @@ public class ProductionRequestResult extends RequestResult {
         } else {
             response.setPerformative(ACLMessage.FAILURE);
         }
-
+        
         return response;
     }
 }
