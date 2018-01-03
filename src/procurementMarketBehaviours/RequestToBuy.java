@@ -1,4 +1,4 @@
-package procurementBehaviours;
+package procurementMarketBehaviours;
 
 import java.util.List;
 
@@ -20,17 +20,24 @@ public class RequestToBuy extends SimpleBehaviour {
      * 
      */
     private static final long serialVersionUID = -1322936877118129497L;
+
+    private ProcurementMarketResponder interactionBehaviour;
+    private ProcurementMarketRequestResult interactor;
+
     public static int buyCount;
 
     List<AID> procurementAgents;
     RequestState requestState;
     OrderPart currentOrder;
 
-    public RequestToBuy(List<AID> procurementAgents, OrderPart currentOrder) {
+    public RequestToBuy(List<AID> procurementAgents, ProcurementMarketResponder interactionBehaviour,
+            OrderPart currentOrder) {
         this.procurementAgents = procurementAgents;
         /* initial state for behaviour */
         this.requestState = RequestState.PREPARE_CALL_FOR_PROPOSAL;
         this.currentOrder = currentOrder;
+        this.interactionBehaviour = interactionBehaviour;
+        this.interactor = ProcurementMarketActivityBehaviour.interactor;
     }
 
     MessageTemplate replyTemplate = null;
@@ -120,6 +127,9 @@ public class RequestToBuy extends SimpleBehaviour {
     @Override
     public boolean done() {
         /* behaviour is finished when it reaches DONE state */
+        if (buyCount == AuctionInitiator.partsCount) {
+            interactor.execute(interactionBehaviour.getRequest());
+        }
         return requestState == RequestState.DONE;
     }
 }
