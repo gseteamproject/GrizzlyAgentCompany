@@ -18,6 +18,7 @@ public class Procurement extends Agent {
      */
     private static final long serialVersionUID = 2923962894395399488L;
     public static boolean isInMaterialStorage;
+    public static boolean isGiven;
     protected OrderDataStore dataStore;
 
     // queue for procurement orders

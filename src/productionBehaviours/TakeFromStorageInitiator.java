@@ -51,6 +51,8 @@ public class TakeFromStorageInitiator extends RequestInteractor implements Achie
 
     @Override
     public void handleInform(ACLMessage inform) {
+        // TODO if deadline was called earlier than inform received message appears to be null. Try to fix this
+        
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 

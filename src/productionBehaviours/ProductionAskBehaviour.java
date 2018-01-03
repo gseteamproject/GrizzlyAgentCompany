@@ -1,30 +1,25 @@
 package productionBehaviours;
 
+import interactors.AskBehaviour;
 import interactors.OrderDataStore;
-import jade.core.behaviours.SimpleBehaviour;
 
-public class ProductionAskBehaviour extends SimpleBehaviour {
+public class ProductionAskBehaviour extends AskBehaviour {
 
     /**
      * 
      */
     private static final long serialVersionUID = -4443443755165652310L;
-    private OrderDataStore dataStore;
-    private ProductionResponder interactionBehaviour;
 
-    public ProductionAskBehaviour(ProductionResponder interactionBehaviour, OrderDataStore dataStore) {
-        this.interactionBehaviour = interactionBehaviour;
-        this.dataStore = dataStore;
+    public ProductionAskBehaviour(ProductionResponder interactionBehaviour, ProductionRequestResult interactor,
+            OrderDataStore dataStore) {
+        super(interactionBehaviour, interactor, dataStore);
     }
 
     @Override
     public void action() {
-        myAgent.addBehaviour(new AskForMaterialsBehaviour(interactionBehaviour, dataStore));
+        if (!this.isStarted) {
+            myAgent.addBehaviour(new AskForMaterialsBehaviour((ProductionResponder) interactionBehaviour, dataStore));
+        }
+        this.isStarted = true;
     }
-
-    @Override
-    public boolean done() {
-        return true;
-    }
-
 }

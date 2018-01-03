@@ -4,7 +4,7 @@ import basicAgents.Procurement;
 import basicClasses.Order;
 import basicClasses.OrderPart;
 import basicClasses.Product;
-import jade.core.Agent;
+import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
@@ -15,13 +15,17 @@ public class CheckMaterialStorage extends OneShotBehaviour {
      */
     private static final long serialVersionUID = -4869963544017982955L;
     private String requestedMaterial;
+    private OrderDataStore dataStore;
+    private ProcurementResponder interactionBehaviour;
 
     private ACLMessage request;
 
-    public CheckMaterialStorage(Agent a, ACLMessage msg) {
-        super(a);
-        requestedMaterial = msg.getContent();
-        request = msg;
+    public CheckMaterialStorage(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
+        super(interactionBehaviour.getAgent());
+        requestedMaterial = interactionBehaviour.getRequest().getContent();
+        request = interactionBehaviour.getRequest();
+        this.interactionBehaviour = interactionBehaviour;
+        this.dataStore = dataStore;
     }
 
     @Override
@@ -83,14 +87,15 @@ public class CheckMaterialStorage extends OneShotBehaviour {
             String testGson = Order.gson.toJson(orderToBuy);
             ACLMessage agree = (ACLMessage) request.clone();
             agree.setContent(testGson);
-            ;
 
             // add order to queue
             Procurement.procurementQueue.add(order);
 
             System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
                     + orderToBuy.getTextOfOrder());
-            myAgent.addBehaviour(new AskForAuction(myAgent, agree, request));
+            // TODO: create another Set method
+            dataStore.setRequestMessage(agree);
+            myAgent.addBehaviour(new AskForAuction(interactionBehaviour, dataStore));
         }
     }
 }

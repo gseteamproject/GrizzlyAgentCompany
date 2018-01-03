@@ -1,7 +1,6 @@
 package interactors;
 
 import jade.core.Agent;
-import jade.core.behaviours.DataStore;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREResponder;
@@ -20,7 +19,7 @@ public class ResponderBehaviour extends AchieveREResponder {
         getDataStore().put(RESULT_NOTIFICATION_KEY, result);
     }
 
-    public ResponderBehaviour(Agent a, MessageTemplate mt, DataStore dataStore) {
+    public ResponderBehaviour(Agent a, MessageTemplate mt, OrderDataStore dataStore) {
         super(a, mt);
     }
 

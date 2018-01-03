@@ -15,12 +15,14 @@ import jade.lang.acl.ACLMessage;
 public class TakeFromWarehouseInitiator extends RequestInteractor implements AchieveREInitiatorInteractor {
 
     private SalesMarketResponder interactionBehaviour;
+    private SalesMarketRequestResult interactor;
     private String orderText;
     public MessageObject msgObj;
 
     public TakeFromWarehouseInitiator(SalesMarketResponder interactionBehaviour, OrderDataStore dataStore) {
         super(dataStore);
         this.interactionBehaviour = interactionBehaviour;
+        this.interactor = SalesMarketActivityBehaviour.interactor;
     }
 
     @Override
@@ -58,8 +60,10 @@ public class TakeFromWarehouseInitiator extends RequestInteractor implements Ach
 
         msgObj = new MessageObject(inform, orderText);
 
+        // TODO: add function to deliver order to customer
         if (SalesMarket.orderQueue.remove(order)) {
             System.out.println("SalesMarketAgent: " + orderText + " is removed from Orderqueue.");
+            interactor.execute(interactionBehaviour.getRequest());
         }
     }
 

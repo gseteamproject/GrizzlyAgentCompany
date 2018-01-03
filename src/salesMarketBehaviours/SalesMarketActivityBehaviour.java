@@ -1,23 +1,23 @@
 package salesMarketBehaviours;
 
 import interactors.OrderDataStore;
-import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
 
-public class SalesMarketActivityBehaviour extends SequentialBehaviour {
+public class SalesMarketActivityBehaviour extends ParallelBehaviour {
 
     /**
      * 
      */
     private static final long serialVersionUID = -3030187281731033803L;
 
-    public SalesMarketActivityBehaviour(SalesMarketResponder interactionBehaviour, OrderDataStore dataStore) {
-        super(interactionBehaviour.getAgent());
-        // super(interactionBehaviour.getAgent(), WHEN_ANY);
+    public static SalesMarketRequestResult interactor;
 
-        // TODO: Remove Ask
-        addSubBehaviour(new SalesMarketAskBehaviour(interactionBehaviour, dataStore));
-        // addSubBehaviour(new AskForOrderBehaviour(interactionBehaviour, dataStore));
-        addSubBehaviour(new SalesMarketDeadlineBehaviour(interactionBehaviour, dataStore));
+    public SalesMarketActivityBehaviour(SalesMarketResponder interactionBehaviour, OrderDataStore dataStore) {
+        super(interactionBehaviour.getAgent(), WHEN_ANY);
+        interactor = new SalesMarketRequestResult(dataStore);
+
+        addSubBehaviour(new SalesMarketAskBehaviour(interactionBehaviour, interactor, dataStore));
+        addSubBehaviour(new SalesMarketDeadlineBehaviour(interactionBehaviour, interactor, dataStore));
     }
 
 }

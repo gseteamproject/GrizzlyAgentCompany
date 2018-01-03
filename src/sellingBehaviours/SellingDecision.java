@@ -44,6 +44,7 @@ public class SellingDecision extends Decision {
             Communication.server.sendMessageToClient("SellingAgent",
                     "[agree] I will give you " + orderText + " from warehouse");
         }
+        
         return response;
     }
 }

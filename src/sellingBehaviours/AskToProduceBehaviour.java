@@ -30,7 +30,6 @@ public class AskToProduceBehaviour extends OneShotBehaviour {
         orderText = Order.gson.fromJson(orderToProceed, Order.class).getTextOfOrder();
         System.out.println("SellingAgent: " + orderText + " is in production");
         Communication.server.sendMessageToClient("SellingAgent", orderText + " is in production");
-        System.out.println("4" + interactionBehaviour.getRequest());
         myAgent.addBehaviour(new AskToProduceInitiatorBehaviour(interactionBehaviour, dataStore));
     }
 }

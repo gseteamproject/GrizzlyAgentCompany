@@ -19,6 +19,7 @@ public class DeadlineBehaviour extends WakerBehaviour {
 
     @Override
     protected void onWake() {
+        System.out.println("Deadline of " + interactionBehaviour.getAgent().getLocalName());
         interactionBehaviour.setResult(interactor.execute(interactionBehaviour.getRequest()));
     }
 }

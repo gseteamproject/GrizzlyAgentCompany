@@ -18,18 +18,18 @@ public class GiveProductToMarketBehaviour extends OneShotBehaviour {
      * 
      */
     private static final long serialVersionUID = -6498277261596869382L;
-    private String orderToGive;
-    private OrderDataStore dataStore;
     private SellingResponder interactionBehaviour;
-    SellingRequestResult interactor;
+    private SellingRequestResult interactor;
+    private OrderDataStore dataStore;
+    private String orderToGive;
     private MessageObject msgObj;
 
     public GiveProductToMarketBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
-        orderToGive = interactionBehaviour.getRequest().getContent();
         this.interactionBehaviour = interactionBehaviour;
+        this.interactor = SellingActivityBehaviour.interactor;
         this.dataStore = dataStore;
-        this.interactor = new SellingRequestResult(dataStore);
+        orderToGive = interactionBehaviour.getRequest().getContent();
     }
 
     @Override
@@ -51,6 +51,7 @@ public class GiveProductToMarketBehaviour extends OneShotBehaviour {
         }
         if (takeCount == order.orderList.size()) {
             Selling.isTaken = true;
+            interactor.execute(interactionBehaviour.getRequest());
         }
     }
 }

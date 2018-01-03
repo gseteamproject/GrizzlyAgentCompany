@@ -15,6 +15,7 @@ public class SalesMarketRequestResult extends RequestResult {
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
         response.setPerformative(ACLMessage.INFORM);
+        this.isDone = true;
         // response.setPerformative(ACLMessage.FAILURE);
 
         return response;

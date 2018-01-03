@@ -17,19 +17,20 @@ import jade.lang.acl.ACLMessage;
 public class AskToProduceInitiator extends RequestInteractor implements AchieveREInitiatorInteractor {
 
     private SellingResponder interactionBehaviour;
+    private SellingRequestResult interactor;
     private String orderText;
     public MessageObject msgObj;
 
     public AskToProduceInitiator(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
         super(dataStore);
         this.interactionBehaviour = interactionBehaviour;
+        this.interactor = SellingActivityBehaviour.interactor;
     }
 
     @Override
     public Vector<ACLMessage> prepareRequests(ACLMessage request) {
         request = new ACLMessage(ACLMessage.REQUEST);
 
-        System.out.println("5" + interactionBehaviour.getRequest());
         String requestedAction = "Produce";
         request.setConversationId(requestedAction);
         request.addReceiver(new AID(("AgentProduction"), AID.ISLOCALNAME));
@@ -60,7 +61,6 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
     public void handleInform(ACLMessage inform) {
         // TODO Auto-generated method stub
 
-        System.out.println("6" + interactionBehaviour.getRequest());
         Order order = Order.gson.fromJson(inform.getContent(), Order.class);
         orderText = order.getTextOfOrder();
         System.out.println("SellingAgent: received [inform] " + orderText + " is delivered to warehouse");
@@ -72,6 +72,7 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
                 order = orderInQueue;
             }
         }
+        interactor.execute(interactionBehaviour.getRequest());
     }
 
     @Override

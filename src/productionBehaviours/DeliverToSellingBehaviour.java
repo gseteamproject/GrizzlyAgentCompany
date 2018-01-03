@@ -1,5 +1,6 @@
 package productionBehaviours;
 
+import basicAgents.Production;
 import basicAgents.Selling;
 import basicClasses.Order;
 import basicClasses.OrderPart;
@@ -17,12 +18,13 @@ class DeliverToSellingBehaviour extends OneShotBehaviour {
     private String orderText;
     private OrderDataStore dataStore;
     private ProductionResponder interactionBehaviour;
-    public static boolean isProduced = false;
+    private ProductionRequestResult interactor;
 
     public DeliverToSellingBehaviour(ProductionResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
         this.dataStore = dataStore;
         this.interactionBehaviour = interactionBehaviour;
+        this.interactor = ProductionActivityBehaviour.interactor;
     }
 
     @Override
@@ -38,6 +40,7 @@ class DeliverToSellingBehaviour extends OneShotBehaviour {
                 Selling.warehouse.add(productToGive);
             }
         }
-        isProduced = true;
+        Production.isProduced = true;
+        interactor.execute(interactionBehaviour.getRequest());
     }
 }

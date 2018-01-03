@@ -3,22 +3,18 @@ package sellingBehaviours;
 import basicClasses.Order;
 import communication.Communication;
 import communication.MessageObject;
+import interactors.AskBehaviour;
 import interactors.OrderDataStore;
-import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 
-public class SellingAskBehaviour extends SimpleBehaviour {
+public class SellingAskBehaviour extends AskBehaviour {
 
     private static final long serialVersionUID = -4443443755165652310L;
-    private OrderDataStore dataStore;
-    private SellingResponder interactionBehaviour;
-    SellingRequestResult interactor;
     private MessageObject msgObj;
 
-    public SellingAskBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
-        this.interactionBehaviour = interactionBehaviour;
-        this.dataStore = dataStore;
-        this.interactor = new SellingRequestResult(dataStore);
+    public SellingAskBehaviour(SellingResponder interactionBehaviour, SellingRequestResult interactor,
+            OrderDataStore dataStore) {
+        super(interactionBehaviour, interactor, dataStore);
     }
 
     @Override
@@ -26,26 +22,27 @@ public class SellingAskBehaviour extends SimpleBehaviour {
         ACLMessage request = interactionBehaviour.getRequest();
         String orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
         if (request.getConversationId() == "Ask") {
-
-            System.out.println("1" + interactionBehaviour.getRequest());
-            msgObj = new MessageObject(request, orderText);
-            System.out.println(msgObj.getReceivedMessage());
-            Communication.server.sendMessageToClient("SellingAgent", "[agree] I will check warehouse for " + orderText);
-            myAgent.addBehaviour(new CheckWarehouseBehaviour(interactionBehaviour, dataStore));
+            if (!this.isStarted) {
+                this.interactor.isDone = false;
+                msgObj = new MessageObject(request, orderText);
+                System.out.println(msgObj.getReceivedMessage());
+                Communication.server.sendMessageToClient("SellingAgent",
+                        "[agree] I will check warehouse for " + orderText);
+                myAgent.addBehaviour(new CheckWarehouseBehaviour((SellingResponder) interactionBehaviour, dataStore));
+            }
+            this.isStarted = true;
         } else if (request.getConversationId() == "Take") {
 
-            System.out.println("2" + interactionBehaviour.getRequest());
-            msgObj = new MessageObject(request, orderText);
-            System.out.println(msgObj.getReceivedMessage());
-            Communication.server.sendMessageToClient("SellingAgent",
-                    "[agree] I will give you " + orderText + " from warehouse");
-            myAgent.addBehaviour(new GiveProductToMarketBehaviour(interactionBehaviour, dataStore));
+            if (this.isStarted) {
+                this.interactor.isDone = false;
+                msgObj = new MessageObject(request, orderText);
+                System.out.println(msgObj.getReceivedMessage());
+                Communication.server.sendMessageToClient("SellingAgent",
+                        "[agree] I will give you " + orderText + " from warehouse");
+                myAgent.addBehaviour(
+                        new GiveProductToMarketBehaviour((SellingResponder) interactionBehaviour, dataStore));
+            }
+            this.isStarted = false;
         }
     }
-
-    @Override
-    public boolean done() {
-        return true;
-    }
-
 }

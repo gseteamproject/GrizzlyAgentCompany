@@ -13,7 +13,7 @@ public class Production extends Agent {
      * 
      */
     private static final long serialVersionUID = 9064413910591040008L;
-    // public boolean isProduced = false;
+    public static boolean isProduced = false;
     protected OrderDataStore dataStore;
 
     @Override

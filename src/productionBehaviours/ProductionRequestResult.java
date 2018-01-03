@@ -1,5 +1,6 @@
 package productionBehaviours;
 
+import basicAgents.Production;
 import interactors.OrderDataStore;
 import interactors.RequestResult;
 import jade.lang.acl.ACLMessage;
@@ -15,12 +16,14 @@ public class ProductionRequestResult extends RequestResult {
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
 
-        if (DeliverToSellingBehaviour.isProduced) {
+        if (Production.isProduced) {
             response.setPerformative(ACLMessage.INFORM);
+            this.isDone = true;
         } else {
             response.setPerformative(ACLMessage.FAILURE);
+            this.isDone = false;
         }
-        
+
         return response;
     }
 }

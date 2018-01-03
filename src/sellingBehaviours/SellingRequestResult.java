@@ -19,14 +19,18 @@ public class SellingRequestResult extends RequestResult {
         if (request.getConversationId() == "Ask") {
             if (Selling.isInWarehouse) {
                 response.setPerformative(ACLMessage.INFORM);
+                this.isDone = true;
             } else {
                 response.setPerformative(ACLMessage.FAILURE);
+                this.isDone = false;
             }
         } else if (request.getConversationId() == "Take") {
             if (Selling.isTaken) {
                 response.setPerformative(ACLMessage.INFORM);
+                this.isDone = true;
             } else {
                 response.setPerformative(ACLMessage.FAILURE);
+                this.isDone = false;
             }
         }
 

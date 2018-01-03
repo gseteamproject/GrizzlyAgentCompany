@@ -1,20 +1,24 @@
 package sellingBehaviours;
 
 import interactors.OrderDataStore;
-import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
 
-public class SellingActivityBehaviour extends SequentialBehaviour {
+public class SellingActivityBehaviour extends ParallelBehaviour {
 
     /**
      * 
      */
     private static final long serialVersionUID = 5504974627813962693L;
 
-    public SellingActivityBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
-        super(interactionBehaviour.getAgent());
+    // TODO: put this into DataStore
+    public static SellingRequestResult interactor;
 
-        addSubBehaviour(new SellingAskBehaviour(interactionBehaviour, dataStore));
-        addSubBehaviour(new SellingDeadlineBehaviour(interactionBehaviour, dataStore));
+    public SellingActivityBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
+        super(interactionBehaviour.getAgent(), WHEN_ANY);
+        interactor = new SellingRequestResult(dataStore);
+
+        addSubBehaviour(new SellingAskBehaviour(interactionBehaviour, interactor, dataStore));
+        addSubBehaviour(new SellingDeadlineBehaviour(interactionBehaviour, interactor, dataStore));
     }
 
 }

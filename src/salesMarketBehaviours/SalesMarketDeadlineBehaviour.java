@@ -10,8 +10,9 @@ public class SalesMarketDeadlineBehaviour extends DeadlineBehaviour {
      */
     private static final long serialVersionUID = -7011771949303737555L;
 
-    public SalesMarketDeadlineBehaviour(SalesMarketResponder interactionBehaviour, OrderDataStore dataStore) {
-        super(interactionBehaviour, 18000);
-        this.interactor = new SalesMarketRequestResult(dataStore);
+    public SalesMarketDeadlineBehaviour(SalesMarketResponder interactionBehaviour, SalesMarketRequestResult interactor,
+            OrderDataStore dataStore) {
+        super(interactionBehaviour, 40000);
+        this.interactor = interactor;
     }
 }

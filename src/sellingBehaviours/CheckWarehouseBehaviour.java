@@ -32,7 +32,6 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
     public void action() {
         // save this request message to reply on it later
         Order order = Order.gson.fromJson(requestMessage.getContent(), Order.class);
-        System.out.println("3.1" + interactionBehaviour.getRequest());
 
         Selling.isInWarehouse = true;
         boolean isInQueue = false;
@@ -72,7 +71,6 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
                 }
             }
         }
-        System.out.println("3.2" + interactionBehaviour.getRequest());
 
         // productToCheck needs to be produced
         if (!isInQueue && (orderToProduce.orderList.size() > 0)) {
@@ -88,7 +86,6 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
             Communication.server.sendMessageToClient("SellingAgent",
                     "Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
 
-            System.out.println("3.3" + interactionBehaviour.getRequest());
             myAgent.addBehaviour(new AskToProduceBehaviour(interactionBehaviour, msgToProduction, dataStore));
         }
     }
