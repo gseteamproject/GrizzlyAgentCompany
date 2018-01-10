@@ -10,9 +10,12 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora">
     <link rel="stylesheet" href="assets/css/styles.min.css">
     <style>
-        #console {
+        .console {
 			height: 400px;
+			width: 1000px;
 			overflow: auto;
+			margin: auto;
+            display: block;
 		}
 		.agent-msg {color:orange;}
 		.connect-msg {color:green;}
@@ -23,8 +26,9 @@
     <script src="assets/js/moment.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="assets/js/go.js"></script>
     <script>
-    var userID = 'user' + Math.floor((Math.random()*1000)+1);
+        var userID = 'user' + Math.floor((Math.random()*1000)+1);
 		var socket =  io.connect('http://localhost:9092');
 
 		socket.on('connect', function() {
@@ -54,12 +58,47 @@
 		function output(message) {
             var currentTime = "<span class='time'>" +  moment().format('HH:mm:ss.SSS') + "</span>";
             var element = $("<div>" + currentTime + " " + message + "</div>");
-			$('#console').prepend(element);
+			$('#myCanvas').prepend(element);
 		}
 	</script>
+    <script id="code">
+      function init() {
+        var $ = go.GraphObject.make;  // for conciseness in defining templates
+        myDiagram = $(go.Diagram, "myDiagramDiv",  // create a Diagram for the DIV HTML element
+                      {
+                        initialContentAlignment: go.Spot.Center,  // center the content
+                        "undoManager.isEnabled": true
+                      });
+        // define a simple Node template
+        myDiagram.nodeTemplate =
+          $(go.Node, "Auto",
+            new go.Binding("location", "loc"),
+            $(go.Shape, "RoundedRectangle", { strokeWidth: 0}, new go.Binding("fill", "color")),
+            $(go.TextBlock, { margin: 8 }, new go.Binding("text", "key"))
+          );
+        myDiagram.linkTemplate = $(go.Link,
+                                    $(go.Shape, new go.Binding("stroke", "color")),
+                                    $(go.Shape, {fromArrow: ""}, new go.Binding("stroke", "color")),
+                                    $(go.Shape, {toArrow: "Triangle"}, new go.Binding("fill", "color"))
+                                    );
+
+        myDiagram.model = new go.GraphLinksModel(
+        [
+          { key: "Procurement Market", color: "lightblue", loc: new go.Point(20, 175) },
+          { key: "Procurement", color: "orange", loc: new go.Point(200, 175) },
+          { key: "Production", color: "lightgreen", loc: new go.Point(400, 50) },
+          { key: "Selling", color: "pink", loc: new go.Point(600, 175) },
+          { key: "Sales Market", color: "red", loc: new go.Point(750, 175) },
+          { key: "Finances", color: "yellow", loc: new go.Point(400, 300) }
+        ],
+        [
+            { from: "Procurement", to: "Selling", color: "red" }
+        ]);
+      }
+    </script>
 </head>
 
-<body>
+<body onload="init()">
 <div id="Maincontainer">
     <div id="Head">
         <div style="width:100%;height:auto;background-color:#368FA8;position:absolute;bottom:0px;padding-left:10%;">
@@ -72,10 +111,10 @@
         <a href="index.html">
             <img src="assets/img/Logo.png" alt="Logo" style="width:80px;height:80px;position:fixed;left:10%;top:8px">
         </a>
-        <h1 id="h1head">Grizzly Agent Company</h1></div>
+        <h1 id="h1head">Grizzly Agent Company</h1>
+    </div>
     <div id="Content">
-        <!--<img src="assets/img/simulation.png">-->
-        <div id="console"></div>
+        <div id="myDiagramDiv" class="console"></div>
     </div>
     <div id="Footer">
         <p id="copyright"> © Grizzly Agent Company 2017</p>
