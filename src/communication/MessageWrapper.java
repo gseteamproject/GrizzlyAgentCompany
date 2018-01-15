@@ -6,11 +6,18 @@ public class MessageWrapper {
     public String color1;
     public String color2;
 
-    public MessageWrapper(MessageObject obj) {
-        this.message = obj.getReceivedMessage();
-        this.color1 = obj.getColorForPerformative();
-        this.color2 = obj.getColorForAgent();
-        this.performative = obj.getPerformative();
+    public MessageWrapper(MessageObject msgObj) {
+
+        if (msgObj.getActingAgent()==null) {
+            this.message = msgObj.getReceivedMessage();
+            this.color1 = msgObj.getColorForPerformative();
+            this.color2 = msgObj.getColorForAgent();
+            this.performative = msgObj.getPerformative();
+        } else{
+            this.message = msgObj.getActionMessage();
+            this.color2 = msgObj.getColorForAction();
+
+        }
     }
 
     public String getMessage() {

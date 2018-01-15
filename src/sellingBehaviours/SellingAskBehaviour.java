@@ -25,9 +25,11 @@ public class SellingAskBehaviour extends AskBehaviour {
             if (!this.isStarted) {
                 this.interactor.isDone = false;
                 msgObj = new MessageObject(request, orderText);
-                System.out.println(msgObj.getReceivedMessage());
+                Communication.server.sendMessageToClient(msgObj);
+
+                /*System.out.println(msgObj.getReceivedMessage());
                 Communication.server.sendMessageToClient("SellingAgent",
-                        "[agree] I will check warehouse for " + orderText);
+                        "[agree] I will check warehouse for " + orderText);*/
                 myAgent.addBehaviour(new CheckWarehouseBehaviour((SellingResponder) interactionBehaviour, dataStore));
             }
             this.isStarted = true;
@@ -36,9 +38,11 @@ public class SellingAskBehaviour extends AskBehaviour {
             if (this.isStarted) {
                 this.interactor.isDone = false;
                 msgObj = new MessageObject(request, orderText);
-                System.out.println(msgObj.getReceivedMessage());
+                Communication.server.sendMessageToClient(msgObj);
+
+                /*System.out.println(msgObj.getReceivedMessage());
                 Communication.server.sendMessageToClient("SellingAgent",
-                        "[agree] I will give you " + orderText + " from warehouse");
+                        "[agree] I will give you " + orderText + " from warehouse");*/
                 myAgent.addBehaviour(
                         new GiveProductToMarketBehaviour((SellingResponder) interactionBehaviour, dataStore));
             }

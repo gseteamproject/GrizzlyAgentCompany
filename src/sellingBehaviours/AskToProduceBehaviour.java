@@ -2,6 +2,7 @@ package sellingBehaviours;
 
 import basicClasses.Order;
 import communication.Communication;
+import communication.MessageObject;
 import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -16,6 +17,7 @@ public class AskToProduceBehaviour extends OneShotBehaviour {
     private String orderText;
     private OrderDataStore dataStore;
     private SellingResponder interactionBehaviour;
+    private MessageObject msgObj;
 
     public AskToProduceBehaviour(SellingResponder interactionBehaviour, ACLMessage msg, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
@@ -28,8 +30,14 @@ public class AskToProduceBehaviour extends OneShotBehaviour {
     @Override
     public void action() {
         orderText = Order.gson.fromJson(orderToProceed, Order.class).getTextOfOrder();
-        System.out.println("SellingAgent: " + orderText + " is in production");
-        Communication.server.sendMessageToClient("SellingAgent", orderText + " is in production");
+
+        msgObj = new MessageObject("AgentSelling", orderText +  " is in production\"");
+        Communication.server.sendMessageToClient(msgObj);
+
+       /* System.out.println("SellingAgent: " + orderText + " is in production");
+        Communication.server.sendMessageToClient("SellingAgent", orderText + " is in production");*/
+
+
         myAgent.addBehaviour(new AskToProduceInitiatorBehaviour(interactionBehaviour, dataStore));
     }
 }

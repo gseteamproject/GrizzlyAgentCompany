@@ -43,9 +43,13 @@ public class GiveProductToMarketBehaviour extends OneShotBehaviour {
         int takeCount = 0;
         for (OrderPart orderPart : order.orderList) {
             Product productToGive = orderPart.getProduct();
-            System.out.println("SellingAgent: Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
+
+            msgObj = new MessageObject("AgentSelling", "Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
+            Communication.server.sendMessageToClient(msgObj);
+
+           /* System.out.println("SellingAgent: "Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
             Communication.server.sendMessageToClient("SellingAgent",
-                    "Taking " + orderPart.getTextOfOrderPart() + " from warehouse");
+                    "Taking " + orderPart.getTextOfOrderPart() + " from warehouse");*/
             Selling.warehouse.remove(productToGive);
             takeCount += 1;
         }

@@ -57,9 +57,13 @@ public class AskForAuctionInitiator extends RequestInteractor implements Achieve
     public void handleInform(ACLMessage inform) {
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-        System.out.println("ProcurementAgent: received [inform] " + orderText + " is delivered to materialStorage");
+        msgObj = new MessageObject(inform, orderText);
+        Communication.server.sendMessageToClient(msgObj);
+
+       /* System.out.println("ProcurementAgent: received [inform] " + orderText + " is delivered to materialStorage");
         Communication.server.sendMessageToClient("ProcurementAgent",
-                "received [inform] " + orderText + " is delivered to materialStorage");
+                "received [inform] " + orderText + " is delivered to materialStorage");*/
+
         Procurement.isInMaterialStorage = true;
         interactor.execute(interactionBehaviour.getRequest());
     }
@@ -68,8 +72,11 @@ public class AskForAuctionInitiator extends RequestInteractor implements Achieve
     public void handleFailure(ACLMessage failure) {
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-        System.out.println("ProcurementAgent: received [failure] were not purchased");
-        Communication.server.sendMessageToClient("ProcurementAgent", "received [failure] were not purchased");
+        msgObj = new MessageObject(failure, orderText);
+        Communication.server.sendMessageToClient(msgObj);
+
+       /* System.out.println("ProcurementAgent: received [failure] were not purchased");
+        Communication.server.sendMessageToClient("ProcurementAgent", "received [failure] were not purchased");*/
 
     }
 
