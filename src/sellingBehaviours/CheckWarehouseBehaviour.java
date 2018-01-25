@@ -46,9 +46,9 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
         for (OrderPart orderPart : order.orderList) {
             Product productToCheck = orderPart.getProduct();
             int amount = orderPart.getAmount();
-            msgObj = new MessageObject("AgentSelling", "Asking warehouse about " + orderPart.getTextOfOrderPart());
+           /* msgObj = new MessageObject("AgentSelling", "Asking warehouse about " + orderPart.getTextOfOrderPart());
 
-            /*System.out.println("SellingAgent: Asking warehouse about " + orderPart.getTextOfOrderPart());
+            System.out.println("SellingAgent: Asking warehouse about " + orderPart.getTextOfOrderPart());
             Communication.server.sendMessageToClient("SellingAgent",
                     "Asking warehouse about " + orderPart.getTextOfOrderPart());*/
 
@@ -59,9 +59,9 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
                     Selling.isInWarehouse = true;
                 }
 
-                msgObj = new MessageObject("AgentSelling", "I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
+              /*  msgObj = new MessageObject("AgentSelling", "I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
 
-                /*System.out.println("SellingAgent: I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
+                System.out.println("SellingAgent: I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
                 Communication.server.sendMessageToClient("SellingAgent",
                         "I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");*/
             } else {
