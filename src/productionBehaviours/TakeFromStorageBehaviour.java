@@ -1,6 +1,8 @@
 package productionBehaviours;
 
 import basicClasses.Order;
+import communication.Communication;
+import communication.MessageObject;
 import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
 
@@ -14,6 +16,7 @@ public class TakeFromStorageBehaviour extends OneShotBehaviour {
     private String orderText;
     private OrderDataStore dataStore;
     private ProductionResponder interactionBehaviour;
+    private MessageObject msgObj;
 
     public TakeFromStorageBehaviour(ProductionResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
@@ -26,8 +29,13 @@ public class TakeFromStorageBehaviour extends OneShotBehaviour {
         materialsToTake = interactionBehaviour.getRequest().getContent();
         orderText = Order.gson.fromJson(materialsToTake, Order.class).getTextOfOrder();
         dataStore.setRequestMessage(interactionBehaviour.getRequest());
-        System.out.println("ProductionAgent: Asking ProcurementAgent to take materials for " + orderText
-                + " from materialStorage");
+
+        msgObj = new MessageObject("AgentProduction", "Asking ProcurementAgent to take materials for " + orderText + " from materialStorage");
+        Communication.server.sendMessageToClient(msgObj);
+
+    /*    System.out.println("ProductionAgent: Asking ProcurementAgent to take materials for " + orderText
+                + " from materialStorage");*/
+
         myAgent.addBehaviour(new TakeFromStorageInitiatorBehaviour(interactionBehaviour, dataStore));
     }
 }

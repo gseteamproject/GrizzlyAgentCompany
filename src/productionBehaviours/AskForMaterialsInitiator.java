@@ -3,6 +3,7 @@ package productionBehaviours;
 import java.util.Vector;
 
 import basicClasses.Order;
+import communication.Communication;
 import communication.MessageObject;
 import interactors.AchieveREInitiatorInteractor;
 import interactors.OrderDataStore;
@@ -33,6 +34,8 @@ public class AskForMaterialsInitiator extends RequestInteractor implements Achie
         request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
         request.setContent(dataStore.getRequestMessage().getContent());
 
+
+
         Vector<ACLMessage> l = new Vector<ACLMessage>(1);
         l.addElement(request);
         return l;
@@ -56,7 +59,9 @@ public class AskForMaterialsInitiator extends RequestInteractor implements Achie
         orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
         msgObj = new MessageObject(inform, orderText);
-        System.out.println(msgObj.getReceivedMessage());
+        Communication.server.sendMessageToClient(msgObj);
+
+/*        System.out.println(msgObj.getReceivedMessage());*/
 
         // System.out.println("ProductionAgent: received [inform] materials for " +
         // orderText + " are in storage");
@@ -71,7 +76,8 @@ public class AskForMaterialsInitiator extends RequestInteractor implements Achie
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
         msgObj = new MessageObject(failure, orderText);
-        System.out.println(msgObj.getReceivedMessage());
+        Communication.server.sendMessageToClient(msgObj);
+       /* System.out.println(msgObj.getReceivedMessage());*/
 
         // System.out
         // .println("ProductionAgent: received [failure] materials for " + orderText + "
