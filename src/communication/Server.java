@@ -89,6 +89,14 @@ public class Server implements Runnable {
             conClient.sendEvent("msgevent", new MessageObject(sender, msg));
     }
 
+    public void sendJson(ACLMessage acl, String ordertext, String from, String to) {
+        MessageWrapper wrapper = new MessageWrapper(new MessageObject(acl, ordertext));
+
+        if (conClient != null) {
+            wrapper.setMessage("{\"from\": \"" + from + "\", \"to\": \"" + to + "\", \"color\": \"red\", \"text\": \"" + ordertext + "\"}");
+            conClient.sendEvent("jsonevent", wrapper);
+        }
+    }
     /*
     setup configuration
      */

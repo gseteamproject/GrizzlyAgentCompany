@@ -24,6 +24,8 @@ public class SalesMarketDecision extends Decision {
         MessageObject msgObj = new MessageObject(request, orderText);
         Communication.server.sendMessageToClient(msgObj);
         Communication.server.sendJson(request, "lol", "Procurement", "Selling");
+        Communication.server.sendJson(request, "halz maul ohren", "Selling", "Sales Market");
+
         System.out.println(msgObj.getReceivedMessage());
 
         // Agent should send agree or refuse

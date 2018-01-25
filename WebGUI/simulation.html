@@ -78,10 +78,10 @@
 
 		socket.on('connect', function() {
 			output('<span class="connect-msg">Client has connected to the server!</span>');
-			console.log("connected");
+			//console.log("connected");
 		});
         socket.on('alcevent', function(data) {
-            console.log(data.message);
+            //console.log(data.message);
         });
         socket.on('jsonevent', function(data) {
             loadJson(data.message);
