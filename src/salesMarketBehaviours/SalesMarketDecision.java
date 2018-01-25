@@ -23,11 +23,11 @@ public class SalesMarketDecision extends Decision {
 
         MessageObject msgObj = new MessageObject(request, orderText);
         Communication.server.sendMessageToClient(msgObj);
-        Communication.server.sendJson(request, "lol", "Procurement", "Selling");
+    /*    Communication.server.sendJson(request, "lol", "Procurement", "Selling");
         Communication.server.sendJson(request, "halz maul ohren", "Selling", "Sales Market");
-        Communication.server.sendJson(request, "rofl", "Production", "Finances");
+        Communication.server.sendJson(request, "rofl", "Production", "Finances");*/
 
-        System.out.println(msgObj.getReceivedMessage());
+    /*    System.out.println(msgObj.getReceivedMessage());*/
 
         // Agent should send agree or refuse
         ACLMessage response = request.createReply();
@@ -36,11 +36,16 @@ public class SalesMarketDecision extends Decision {
         if (!SalesMarket.orderQueue.contains(order)) {
             response.setPerformative(ACLMessage.AGREE);
             msgObj = new MessageObject(response, orderText);
-            System.out.println(msgObj.getReceivedMessage());
+            Communication.server.sendMessageToClient(msgObj);
+
+ /*           System.out.println(msgObj.getReceivedMessage());*/
+
         } else {
             response.setPerformative(ACLMessage.REFUSE);
             msgObj = new MessageObject(response, orderText);
-            System.out.println(msgObj.getReceivedMessage());
+            Communication.server.sendMessageToClient(msgObj);
+
+          /*  System.out.println(msgObj.getReceivedMessage());*/
         }
         return response;
     }

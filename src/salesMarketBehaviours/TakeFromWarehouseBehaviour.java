@@ -1,6 +1,7 @@
 package salesMarketBehaviours;
 
 import basicClasses.Order;
+import communication.Communication;
 import communication.MessageObject;
 import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
@@ -31,7 +32,11 @@ public class TakeFromWarehouseBehaviour extends OneShotBehaviour {
 
     @Override
     public void action() {
+
+        Communication.server.sendMessageToClient(msgObj);
+/*
         System.out.println(msgObj.getReceivedMessage());
+*/
         myAgent.addBehaviour(new TakeFromWarehouseInitiatorBehaviour(interactionBehaviour, dataStore));
     }
 }

@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import basicAgents.SalesMarket;
 import basicClasses.Order;
+import communication.Communication;
 import communication.MessageObject;
 import interactors.AchieveREInitiatorInteractor;
 import interactors.OrderDataStore;
@@ -59,10 +60,16 @@ public class TakeFromWarehouseInitiator extends RequestInteractor implements Ach
         orderText = order.getTextOfOrder();
 
         msgObj = new MessageObject(inform, orderText);
+        Communication.server.sendMessageToClient(msgObj);
 
         // TODO: add function to deliver order to customer
         if (SalesMarket.orderQueue.remove(order)) {
+            msgObj = new MessageObject("AgentSalesMarket" , orderText + " is removed from Orderqueue.");
+            Communication.server.sendMessageToClient(msgObj);
+
+/*
             System.out.println("SalesMarketAgent: " + orderText + " is removed from Orderqueue.");
+*/
             interactor.execute(interactionBehaviour.getRequest());
         }
     }
@@ -73,7 +80,10 @@ public class TakeFromWarehouseInitiator extends RequestInteractor implements Ach
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
         msgObj = new MessageObject(failure, orderText);
+        Communication.server.sendMessageToClient(msgObj);
+/*
         System.out.println(msgObj.getReceivedMessage());
+*/
     }
 
     @Override

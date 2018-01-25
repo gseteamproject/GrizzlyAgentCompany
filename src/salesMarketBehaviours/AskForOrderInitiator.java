@@ -3,6 +3,7 @@ package salesMarketBehaviours;
 import java.util.Vector;
 
 import basicClasses.Order;
+import communication.Communication;
 import communication.MessageObject;
 import interactors.AchieveREInitiatorInteractor;
 import interactors.OrderDataStore;
@@ -56,8 +57,9 @@ public class AskForOrderInitiator extends RequestInteractor implements AchieveRE
         orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
         msgObj = new MessageObject(inform, orderText);
+        Communication.server.sendMessageToClient(msgObj);
 
-        System.out.println(msgObj.getReceivedMessage());
+       /* System.out.println(msgObj.getReceivedMessage());*/
 
         interactionBehaviour.getAgent()
                 .addBehaviour(new TakeFromWarehouseBehaviour(interactionBehaviour, inform, dataStore));
@@ -70,7 +72,9 @@ public class AskForOrderInitiator extends RequestInteractor implements AchieveRE
         orderText = order.getTextOfOrder();
 
         msgObj = new MessageObject(failure, orderText);
-        System.out.println(msgObj.getReceivedMessage());
+        Communication.server.sendMessageToClient(msgObj);
+
+     /*   System.out.println(msgObj.getReceivedMessage());*/
 
         MessageTemplate temp = MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
         MessageTemplate infTemp = MessageTemplate.and(temp, MessageTemplate.MatchPerformative(ACLMessage.INFORM));
