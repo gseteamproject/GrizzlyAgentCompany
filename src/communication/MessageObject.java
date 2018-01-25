@@ -7,9 +7,9 @@ public class MessageObject {
     private String sender;
     private String receiver;
     private String orderText;
-    private String performative;
-    private String message;
-    private String receivedMessage;
+    public String performative;
+    public String message;
+    public String receivedMessage;
 
     public MessageObject (ACLMessage acl, String orderText){
         this.aclmsg = acl;
@@ -20,8 +20,13 @@ public class MessageObject {
         this.setReceivedMessage();
     }
 
-    public MessageObject (String manualSender, String manualMessage){
-        this.message = manualSender + manualMessage;
+    public MessageObject (String manualSender, String manualMessage) {
+        this.orderText = "";
+        this.message = manualSender + ": " + manualMessage;
+        this.setPerformative();
+        this.setSender();
+        this.setReceiver();
+        this.setReceivedMessage();
     }
 
     public ACLMessage getAclmsg() {
@@ -156,6 +161,11 @@ public class MessageObject {
     public void setReceivedMessage() {
         receivedMessage = this.receiver + " received a Message of Type [" + this.performative + "] from " + this.sender + ". Order: " + this.orderText + "; ";
     }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public String getReceivedMessage (){
         return receivedMessage;
     }

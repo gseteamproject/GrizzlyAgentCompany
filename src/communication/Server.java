@@ -66,10 +66,6 @@ public class Server implements Runnable {
         conServer.start();
     }
 
-    public void sendDataToClient(String event, MessageObject object) {
-        if (conClient != null)
-            conClient.sendEvent(event, object);
-    }
     public void sendMessageToClient(MessageObject msgObj) {
         MessageWrapper wrapper = new MessageWrapper(msgObj);
 
@@ -83,10 +79,17 @@ public class Server implements Runnable {
         if (conClient != null)
             conClient.sendEvent("alcevent", wrapper);
     }
+    public void sendMessageToClient(String one, String two) {
 
-    public void sendMessageToClient(String sender, String msg) {
-        if (conClient != null)
-            conClient.sendEvent("msgevent", new MessageObject(sender, msg));
+    }
+
+    public void sendJson(ACLMessage acl, String ordertext, String from, String to) {
+        MessageWrapper wrapper = new MessageWrapper(new MessageObject(acl, ordertext));
+
+        if (conClient != null) {
+            wrapper.setMessage("{ \"from\": \"" + from + "\", \"to\": \"" + to + "\", \"color\": \"red\", \"text\": \"" + wrapper.getMessage() + "\" }");
+            conClient.sendEvent("jsonevent", wrapper);
+        }
     }
 
     /*

@@ -49,6 +49,7 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
         System.out.println("SellingAgent: received [agree] Producing of " + orderText + " is initiated");
         Communication.server.sendMessageToClient("SellingAgent",
                 "received [agree] Producing of " + orderText + " is initiated");
+        Communication.server.sendMessageToClient(agree, orderText);
     }
 
     @Override

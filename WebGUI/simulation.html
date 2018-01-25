@@ -27,40 +27,6 @@
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="assets/js/go.js"></script>
-    <script>
-        var userID = 'user' + Math.floor((Math.random()*1000)+1);
-		var socket =  io.connect('http://localhost:9092');
-
-		socket.on('connect', function() {
-			output('<span class="connect-msg">Client has connected to the server!</span>');
-		});
-        socket.on('msgevent', function(data) {
-            output('<span class="agent-msg">' + data.agent + ':</span> ' + data.message);
-        });
-        socket.on('alcevent', function(data) {
-            output('<span style="color: #' + data.color1 + ';">' + data.performative + ':</span> <span style="color: #' + data.color2 + ';">' + data.message + '</span>');
-        });
-		socket.on('disconnect', function() {
-			output('<span class="disconnect-msg">The client has disconnected!</span>');
-		});
-        function sendDisconnect() {
-            socket.disconnect();
-        }
-		function sendMessage() {
-          var agent = "Client";
-          var message = $('#msg').val();
-          $('#msg').val('');
-          //socket.emit('msgevent', {agent: agent, message: message});
-		}
-		function setOutputMessage(color, message) {
-
-		}
-		function output(message) {
-            var currentTime = "<span class='time'>" +  moment().format('HH:mm:ss.SSS') + "</span>";
-            var element = $("<div>" + currentTime + " " + message + "</div>");
-			$('#myCanvas').prepend(element);
-		}
-	</script>
     <script id="code">
       function init() {
         var $ = go.GraphObject.make;  // for conciseness in defining templates
@@ -79,7 +45,8 @@
         myDiagram.linkTemplate = $(go.Link,
                                     $(go.Shape, new go.Binding("stroke", "color")),
                                     $(go.Shape, {fromArrow: ""}, new go.Binding("stroke", "color")),
-                                    $(go.Shape, {toArrow: "Triangle"}, new go.Binding("fill", "color"))
+                                    $(go.Shape, {toArrow: "Triangle"}, new go.Binding("fill", "color")),
+                                    $(go.TextBlock, new go.Binding("text", "text"), { segmentOffset: new go.Point(0, -10) })
                                     );
 
         myDiagram.model = new go.GraphLinksModel(
@@ -90,12 +57,53 @@
           { key: "Selling", color: "pink", loc: new go.Point(600, 175) },
           { key: "Sales Market", color: "red", loc: new go.Point(750, 175) },
           { key: "Finances", color: "yellow", loc: new go.Point(400, 300) }
-        ],
-        [
-            { from: "Procurement", to: "Selling", color: "red" }
         ]);
       }
+
+      function loadJson(json) {
+        var model = myDiagram.model;
+        var obj = jQuery.parseJSON(json);
+
+        myDiagram.startTransaction("start transaction");
+        model.addLinkData(obj);
+        myDiagram.commitTransaction("commit transaction");
+
+        myDiagram.updateAllTargetBindings();
+      }
+
     </script>
+    <script>
+        var userID = 'user' + Math.floor((Math.random()*1000)+1);
+		var socket =  io.connect('http://localhost:9092');
+
+		socket.on('connect', function() {
+			output('<span class="connect-msg">Client has connected to the server!</span>');
+			console.log("connected");
+		});
+        socket.on('alcevent', function(data) {
+            console.log(data.message);
+        });
+        socket.on('jsonevent', function(data) {
+            loadJson(data.message);
+        });
+		socket.on('disconnect', function() {
+			output('<span class="disconnect-msg">The client has disconnected!</span>');
+		});
+        function sendDisconnect() {
+            socket.disconnect();
+        }
+		function sendMessage() {
+          var agent = "Client";
+          var message = $('#msg').val();
+          $('#msg').val('');
+          //socket.emit('msgevent', {agent: agent, message: message});
+		}
+		function output(message) {
+            var currentTime = "<span class='time'>" +  moment().format('HH:mm:ss.SSS') + "</span>";
+            var element = $("<div>" + currentTime + " " + message + "</div>");
+			$('#myDiagramDiv').prepend(element);
+		}
+	</script>
 </head>
 
 <body onload="init()">
