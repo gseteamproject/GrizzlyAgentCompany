@@ -46,13 +46,10 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
     public void handleAgree(ACLMessage agree) {
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(agree.getContent(), Order.class).getTextOfOrder();
-        msgObj = new MessageObject(agree,orderText);
-        Communication.server.sendMessageToClient(msgObj);
-
-
-        /*System.out.println("SellingAgent: received [agree] Producing of " + orderText + " is initiated");
+        System.out.println("SellingAgent: received [agree] Producing of " + orderText + " is initiated");
         Communication.server.sendMessageToClient("SellingAgent",
-                "received [agree] Producing of " + orderText + " is initiated");*/
+                "received [agree] Producing of " + orderText + " is initiated");
+        Communication.server.sendMessageToClient(agree, orderText);
     }
 
     @Override
@@ -67,14 +64,9 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
 
         Order order = Order.gson.fromJson(inform.getContent(), Order.class);
         orderText = order.getTextOfOrder();
-
-        msgObj = new MessageObject(inform, orderText);
-        Communication.server.sendMessageToClient(msgObj);
-
-        /*System.out.println("SellingAgent: received [inform] " + orderText + " is delivered to warehouse");
+        System.out.println("SellingAgent: received [inform] " + orderText + " is delivered to warehouse");
         Communication.server.sendMessageToClient("SellingAgent",
-                "received [inform] " + orderText + " is delivered to warehouse");*/
-
+                "received [inform] " + orderText + " is delivered to warehouse");
         Selling.isInWarehouse = true;
         for (Order orderInQueue : SalesMarket.orderQueue) {
             if (orderInQueue.id == order.id) {
@@ -88,11 +80,8 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
     public void handleFailure(ACLMessage failure) {
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-        msgObj = new MessageObject(failure, orderText);
-        Communication.server.sendMessageToClient(msgObj);
-
-        /*System.out.println("SellingAgent: received [failure] is not produced");
-        Communication.server.sendMessageToClient("SellingAgent", "received [failure] is not produced");*/
+        System.out.println("SellingAgent: received [failure] is not produced");
+        Communication.server.sendMessageToClient("SellingAgent", "received [failure] is not produced");
     }
 
     @Override
