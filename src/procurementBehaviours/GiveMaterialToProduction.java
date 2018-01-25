@@ -5,6 +5,8 @@ import basicClasses.Order;
 import basicClasses.Paint;
 import basicClasses.Product;
 import basicClasses.Stone;
+import communication.Communication;
+import communication.MessageObject;
 import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
 
@@ -19,6 +21,7 @@ public class GiveMaterialToProduction extends OneShotBehaviour {
     private OrderDataStore dataStore;
     private String materialsToGive;
     private String orderText;
+    private MessageObject msgObj;
 
     public GiveMaterialToProduction(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
@@ -32,7 +35,15 @@ public class GiveMaterialToProduction extends OneShotBehaviour {
     public void action() {
         Order order = Order.gson.fromJson(materialsToGive, Order.class);
         orderText = order.getTextOfOrder();
+
+        msgObj = new MessageObject("AgentProcurement" , "Taking "
+                + orderText + " from materialStorage.");
+        Communication.server.sendMessageToClient(msgObj);
+
+
+/*
         System.out.println("ProcurementAgent: Taking " + orderText + " from materialStorage");
+*/
 
         Procurement.isGiven = false;
 

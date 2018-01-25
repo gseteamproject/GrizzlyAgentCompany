@@ -1,6 +1,8 @@
 package procurementBehaviours;
 
 import basicClasses.Order;
+import communication.Communication;
+import communication.MessageObject;
 import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
 
@@ -14,6 +16,7 @@ public class AskForAuction extends OneShotBehaviour {
     private String orderText;
     private OrderDataStore dataStore;
     private ProcurementResponder interactionBehaviour;
+    private MessageObject msgObj;
 
     public AskForAuction(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
@@ -26,7 +29,13 @@ public class AskForAuction extends OneShotBehaviour {
         materialsToRequest = interactionBehaviour.getRequest().getContent();
         orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
 //        dataStore.setRequestMessage(interactionBehaviour.getRequest());
+
+        msgObj = new MessageObject("AgentProduction", "Asking to get materials for " + orderText);
+        Communication.server.sendMessageToClient(msgObj);
+
+/*
         System.out.println("ProductionAgent: Asking ProcurementAgent to get materials for " + orderText);
+*/
         myAgent.addBehaviour(new AskForAuctionInitiatorBehaviour(interactionBehaviour, dataStore));
     }
 }

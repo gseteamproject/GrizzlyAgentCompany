@@ -1,6 +1,7 @@
 package procurementBehaviours;
 
 import basicClasses.Order;
+import communication.Communication;
 import communication.MessageObject;
 import interactors.Decision;
 import interactors.OrderDataStore;
@@ -24,16 +25,27 @@ public class ProcurementDecision extends Decision {
         response.setPerformative(ACLMessage.AGREE);
 
         msgObj = new MessageObject(request, orderText);
+        Communication.server.sendMessageToClient(msgObj);
+/*
         System.out.println(msgObj.getReceivedMessage());
+*/
 
         if (request.getConversationId() == "Materials") {
-            System.out.println("ProcurementAgent: [request] ProductionAgent asks for materials for " + orderText);
-            System.out.println("ProcurementAgent: [agree] I will check materialStorage for materials for " + orderText);
+            msgObj = new MessageObject("AgentProcurement" , "I will check materialStorage for materials for "
+                    + orderText);
+            Communication.server.sendMessageToClient(msgObj);
+
+            /*System.out.println("ProcurementAgent: [request] ProductionAgent asks for materials for " + orderText);
+            System.out.println("ProcurementAgent: [agree] I will check materialStorage for materials for " + orderText);*/
         } else if (request.getConversationId() == "Take") {
-            System.out.println("ProcurementAgent: [request] ProductionAgent wants to get materials for " + orderText
+            msgObj = new MessageObject("AgentProcurement" , "I will give materials for "
+                    + orderText + " from materialStorage");
+            Communication.server.sendMessageToClient(msgObj);
+
+    /*        System.out.println("ProcurementAgent: [request] ProductionAgent wants to get materials for " + orderText
                     + " from materialStorage");
             System.out.println(
-                    "ProcurementAgent: [agree] I will give you materials for " + orderText + " from materialStorage");
+                    "ProcurementAgent: [agree] I will give you materials for " + orderText + " from materialStorage");*/
         }
 
         return response;

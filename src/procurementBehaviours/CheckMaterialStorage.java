@@ -4,6 +4,8 @@ import basicAgents.Procurement;
 import basicClasses.Order;
 import basicClasses.OrderPart;
 import basicClasses.Product;
+import communication.Communication;
+import communication.MessageObject;
 import interactors.OrderDataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -17,7 +19,7 @@ public class CheckMaterialStorage extends OneShotBehaviour {
     private String requestedMaterial;
     private OrderDataStore dataStore;
     private ProcurementResponder interactionBehaviour;
-
+    private MessageObject msgObj;
     private ACLMessage request;
 
     public CheckMaterialStorage(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
@@ -50,7 +52,11 @@ public class CheckMaterialStorage extends OneShotBehaviour {
 
             int amount = orderPart.getAmount();
 
+            msgObj = new MessageObject("AgentProcurement", "Asking about " + orderPart.getTextOfOrderPart());
+            Communication.server.sendMessageToClient(msgObj);
+/*
             System.out.println("ProcurementAgent: Asking materialStorage about " + orderPart.getTextOfOrderPart());
+*/
 
             int paintAmountInMS = Procurement.materialStorage.getAmountOfPaint(color);
             int stoneAmountInMS = Procurement.materialStorage.getAmountOfStones(size);
@@ -59,8 +65,14 @@ public class CheckMaterialStorage extends OneShotBehaviour {
                 if (Procurement.isInMaterialStorage) {
                     Procurement.isInMaterialStorage = true;
                 }
+
+                msgObj = new MessageObject("AgentProcurement", "I say that materials for "
+                        + orderPart.getTextOfOrderPart() + " are in materialStorage. ");
+                Communication.server.sendMessageToClient(msgObj);
+
+                /*
                 System.out.println("ProcurementAgent: I say that materials for " + orderPart.getTextOfOrderPart()
-                        + " are in materialStorage");
+                        + " are in materialStorage");*/
             } else {
                 // need to describe multiple statements to check every material
                 Procurement.isInMaterialStorage = false;
@@ -72,7 +84,9 @@ public class CheckMaterialStorage extends OneShotBehaviour {
                 paintOrderPart.setAmount(amount - paintAmountInMS);
                 stoneOrderPart.setAmount(amount - stoneAmountInMS);
 
+/*
                 System.out.println("paintOrderPart.getAmount() " + paintOrderPart.getAmount());
+*/
 
                 if (paintOrderPart.getAmount() > 0) {
                     orderToBuy.orderList.add(paintOrderPart);
@@ -91,8 +105,12 @@ public class CheckMaterialStorage extends OneShotBehaviour {
             // add order to queue
             Procurement.procurementQueue.add(order);
 
+            msgObj = new MessageObject("AgentProcurement" , "senr info to ProcurementMarket to buy materials for "
+                + orderToBuy.getTextOfOrder());
+            Communication.server.sendMessageToClient(msgObj);
+          /*
             System.out.println("ProcurementAgent: send info to ProcurementMarket to buy materials for "
-                    + orderToBuy.getTextOfOrder());
+                    + orderToBuy.getTextOfOrder());*/
             // TODO: create another Set method
             dataStore.setRequestMessage(agree);
             myAgent.addBehaviour(new AskForAuction(interactionBehaviour, dataStore));
