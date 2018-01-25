@@ -25,6 +25,7 @@ public class SalesMarketDecision extends Decision {
         Communication.server.sendMessageToClient(msgObj);
         Communication.server.sendJson(request, "lol", "Procurement", "Selling");
         Communication.server.sendJson(request, "halz maul ohren", "Selling", "Sales Market");
+        Communication.server.sendJson(request, "rofl", "Production", "Finances");
 
         System.out.println(msgObj.getReceivedMessage());
 
