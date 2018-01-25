@@ -51,11 +51,11 @@
 
         myDiagram.model = new go.GraphLinksModel(
         [
-          { key: "Procurement Market", color: "lightblue", loc: new go.Point(20, 175) },
+          { key: "ProcurementMarket", color: "lightblue", loc: new go.Point(20, 175) },
           { key: "Procurement", color: "orange", loc: new go.Point(200, 175) },
           { key: "Production", color: "lightgreen", loc: new go.Point(400, 50) },
           { key: "Selling", color: "pink", loc: new go.Point(600, 175) },
-          { key: "Sales Market", color: "red", loc: new go.Point(750, 175) },
+          { key: "SalesMarket", color: "red", loc: new go.Point(750, 175) },
           { key: "Finances", color: "yellow", loc: new go.Point(400, 300) }
         ]);
       }
@@ -81,6 +81,7 @@
 			//console.log("connected");
 		});
         socket.on('alcevent', function(data) {
+            output('<span style="color: ' + data.color2 + '">' + data.message + '</span>');
             //console.log(data.message);
         });
         socket.on('jsonevent', function(data) {
@@ -101,7 +102,7 @@
 		function output(message) {
             var currentTime = "<span class='time'>" +  moment().format('HH:mm:ss.SSS') + "</span>";
             var element = $("<div>" + currentTime + " " + message + "</div>");
-			$('#myDiagramDiv').prepend(element);
+			$('#box-output').prepend(element);
 		}
 	</script>
 </head>
@@ -123,6 +124,7 @@
     </div>
     <div id="Content">
         <div id="myDiagramDiv" class="console"></div>
+        <div id="box-output" class="console" style="margin-top: 20px; margin-bottom: 40px;"></div>
     </div>
     <div id="Footer">
         <p id="copyright"> © Grizzly Agent Company 2017</p>

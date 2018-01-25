@@ -5,9 +5,14 @@
 	position:absolute
 }
 #Content,
-#Footer,
 #Head{
 	position:absolute
+}
+#Footer {
+    position: fixed;
+    height: 100%;
+    bottom: 0;
+    width: 100%;
 }
 #Content,
 body,
@@ -89,7 +94,7 @@ html{
 	min-height:100%;
 	width:100%;
 	margin:0 auto;
-	background-color:silver
+	background-color:white;
 }
 #Footer{
 	bottom:0;

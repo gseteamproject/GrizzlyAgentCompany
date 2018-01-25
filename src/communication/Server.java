@@ -73,8 +73,18 @@ public class Server implements Runnable {
     public void sendMessageToClient(MessageObject msgObj) {
         MessageWrapper wrapper = new MessageWrapper(msgObj);
 
-        if (conClient != null)
-            conClient.sendEvent("alcevent", wrapper);
+        if (conClient != null){
+                if (msgObj.getReceiver()!=null) {
+                String from = msgObj.getSender().replace("Agent", "");
+                String to = msgObj.getReceiver().replace("Agent", "");
+
+                wrapper.setMessage("{\"from\": \"" + from + "\", \"to\": \"" + to + "\", \"color\": \"red\", \"text\": \"" + msgObj.getOrderText() + "\"}");
+                conClient.sendEvent("jsonevent", wrapper);
+            } else {
+                    conClient.sendEvent("alcevent", wrapper);
+                }
+        }
+
     }
 
     public void sendMessageToClient(ACLMessage acl, String ordertext) {

@@ -16,7 +16,6 @@ public class MessageWrapper {
         } else{
             this.message = msgObj.getActionMessage();
             this.color2 = msgObj.getColorForAction();
-
         }
     }
 

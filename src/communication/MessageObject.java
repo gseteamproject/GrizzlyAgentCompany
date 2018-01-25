@@ -129,31 +129,31 @@ public class MessageObject {
         String color = "";
 
         if (this.actingAgent.equals("AgentProcurement")) {
-            color = "3CAD00";
+            color = "orange";
         }
         else if (this.actingAgent.equals("AgentProcurementMarket")) {
-            color = "52EA00";
+            color = "lightblue";
         }
         else if (this.actingAgent.equals("AgentCapitalMarket")) {
-            color = "00A6C4";
+            color = "#00A6C4";
         }
         else if (this.actingAgent.equals("AgentPaintSelling")) {
-            color = "C40000";
+            color = "#C40000";
         }
         else if (this.actingAgent.equals("AgentSelling")) {
-            color = "F2EE00";
+            color = "pink";
         }
         else if (this.actingAgent.equals("AgentStoneSelling")) {
-            color = "8EB19D";
+            color = "#8EB19D";
         }
         else if (this.actingAgent.equals("AgentSalesMarket")) {
-            color = "BC00BC";
+            color = "red";
         }
         else if (this.actingAgent.equals("AgentProduction")) {
-            color = "A0AF79";
+            color = "lightgreen";
         }
         else if (this.actingAgent.equals("AgentFinances")) {
-            color = "006863";
+            color = "yellow";
         }
         else {
             color = "000000";
