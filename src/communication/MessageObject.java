@@ -7,9 +7,13 @@ public class MessageObject {
     private String sender;
     private String receiver;
     private String orderText;
-    public String performative;
-    public String message;
-    public String receivedMessage;
+    private String performative;
+    private String message;
+    private String receivedMessage;
+
+
+    private String actingAgent;
+    private String actionMessage;
 
     public MessageObject (ACLMessage acl, String orderText){
         this.aclmsg = acl;
@@ -20,14 +24,12 @@ public class MessageObject {
         this.setReceivedMessage();
     }
 
-    public MessageObject (String manualSender, String manualMessage) {
-        this.orderText = "";
-        this.message = manualSender + ": " + manualMessage;
-        this.setPerformative();
-        this.setSender();
-        this.setReceiver();
-        this.setReceivedMessage();
+    public MessageObject(String actingAgent, String actionMessage){
+        this.actingAgent = actingAgent;
+        this.actionMessage = actingAgent + ": " + actionMessage;
     }
+
+   // public MessageObject (String manualSender, String manualMessage){this.message = manualSender + manualMessage;}
 
     public ACLMessage getAclmsg() {
         return aclmsg;
@@ -123,6 +125,43 @@ public class MessageObject {
         return color;
     }
 
+    public String getColorForAction() {
+        String color = "";
+
+        if (this.actingAgent.equals("AgentProcurement")) {
+            color = "3CAD00";
+        }
+        else if (this.actingAgent.equals("AgentProcurementMarket")) {
+            color = "52EA00";
+        }
+        else if (this.actingAgent.equals("AgentCapitalMarket")) {
+            color = "00A6C4";
+        }
+        else if (this.actingAgent.equals("AgentPaintSelling")) {
+            color = "C40000";
+        }
+        else if (this.actingAgent.equals("AgentSelling")) {
+            color = "F2EE00";
+        }
+        else if (this.actingAgent.equals("AgentStoneSelling")) {
+            color = "8EB19D";
+        }
+        else if (this.actingAgent.equals("AgentSalesMarket")) {
+            color = "BC00BC";
+        }
+        else if (this.actingAgent.equals("AgentProduction")) {
+            color = "A0AF79";
+        }
+        else if (this.actingAgent.equals("AgentFinances")) {
+            color = "006863";
+        }
+        else {
+            color = "000000";
+        }
+
+        return color;
+    }
+
     public String getColorForPerformative() {
         String color = "";
 
@@ -158,28 +197,26 @@ public class MessageObject {
         return this.message;
     }
 
-    public void setReceivedMessage() {
-        receivedMessage = this.receiver + " received a Message of Type [" + this.performative + "] from " + this.sender + ". Order: " + this.orderText + "; ";
-    }
-
-    public void setMessage(String message) {
+    public void setMessage(String message){
         this.message = message;
     }
 
+    public void setReceivedMessage() {
+        receivedMessage = this.receiver + " received a Message of Type [" + this.performative + "] from " + this.sender + ". Order: " + this.orderText + "; ";
+    }
     public String getReceivedMessage (){
         return receivedMessage;
     }
 
-    //TODO
-    public String actionMessage(){
-        String msg;
-        msg = this.receiver + ": ";
-        switch (this.performative){
-            case "AGREE": msg+= " SOME MORE INFORMATION THAT SOME AGENT AGREES WITH SOMETHING";
-                break;
-            default: break;
-        }
-
-        return msg;
+    public String getActingAgent() {
+        return actingAgent;
     }
+    public String getActionMessage() {
+        return actionMessage;
+    }
+
+  /*  public String actionMessage(){
+       String msg = this.actingAgent + " " + this.actionMessage;
+        return msg;
+    }*/
 }
