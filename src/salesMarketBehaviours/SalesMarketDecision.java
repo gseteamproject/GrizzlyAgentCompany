@@ -17,7 +17,9 @@ public class SalesMarketDecision extends Decision {
 
     @Override
     public ACLMessage execute(ACLMessage request) {
+/*
         System.out.println("request " + request.getContent());
+*/
         Order order = Order.gson.fromJson(request.getContent(), Order.class);
         String orderText = order.getTextOfOrder();
 

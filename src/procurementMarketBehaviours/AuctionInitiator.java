@@ -5,9 +5,12 @@ import java.util.List;
 
 import basicClasses.Order;
 import basicClasses.OrderPart;
+import communication.Communication;
+import communication.MessageObject;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.event.MessageAdapter;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
@@ -22,6 +25,7 @@ public class AuctionInitiator extends OneShotBehaviour {
     private Order order;
     private String orderText;
     private ProcurementMarketResponder interactionBehaviour;
+    private MessageObject msgObj;
     public static int partsCount;
 
     public AuctionInitiator(ProcurementMarketResponder interactionBehaviour) {
@@ -61,7 +65,14 @@ public class AuctionInitiator extends OneShotBehaviour {
         order = Order.gson.fromJson(materialToBuy.getContent(), Order.class);
         orderText = order.getTextOfOrder();
         partsCount = order.orderList.size();
+
+
+        msgObj = new MessageObject(materialToBuy, orderText);
+        Communication.server.sendMessageToClient(msgObj);
+
+/*
         System.out.println("ProcurementAgent: Sending an info to ProcurementMarket to buy materials for " + orderText);
+*/
 
         for (OrderPart orderPart : order.orderList) {
             // System.out.println("mne nado: " + orderPart.getTextOfOrderPart());
@@ -72,15 +83,29 @@ public class AuctionInitiator extends OneShotBehaviour {
             msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
             msg.setContent(orderPart.getTextOfOrderPart());
 
-            System.out.println("\nlooking for agents with procurement service = "
+            msgObj = new MessageObject("AgentProcurementMarket", "looking for agents with procurement service "
                     + orderPart.getPart().getClass().getSimpleName());
+            Communication.server.sendMessageToClient(msgObj);
+
+          /*  System.out.println("\nlooking for agents with procurement service = "
+                    + orderPart.getPart().getClass().getSimpleName());*/
             List<AID> agents = findAgents(myAgent, orderPart.getPart().getClass().getSimpleName());
             if (!agents.isEmpty()) {
+
+                msgObj = new MessageObject("AgentProcurementMarket", "agents providing service are found. Trying to get infromation...");
+                Communication.server.sendMessageToClient(msgObj);
+/*
                 System.out.println("agents providing service are found. trying to get infromation...");
+*/
                 myAgent.addBehaviour(new RequestToBuy(agents, interactionBehaviour, orderPart));
                 // TODO: Check if material is really bought
             } else {
+                msgObj = new MessageObject("AgentProcurementMarket", "No agents providing service are found.");
+                Communication.server.sendMessageToClient(msgObj);
+
+/*
                 System.out.println("no agents providing service are found");
+*/
             }
         }
     }

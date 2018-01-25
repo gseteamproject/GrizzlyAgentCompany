@@ -37,7 +37,9 @@ class DeliverToSellingBehaviour extends OneShotBehaviour {
         orderToGive = interactionBehaviour.getRequest().getContent();
         Order order = Order.gson.fromJson(orderToGive, Order.class);
         orderText = order.getTextOfOrder();
+/*
         System.out.println("ProductionAgent: Delivering " + orderText + " to warehouse");
+*/
 
         msgObj = new MessageObject("AgentProduction" , "Delivering " + orderText + " to warehouse");
         Communication.server.sendMessageToClient(msgObj);

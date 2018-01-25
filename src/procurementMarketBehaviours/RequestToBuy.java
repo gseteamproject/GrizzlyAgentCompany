@@ -4,6 +4,8 @@ import java.util.List;
 
 import basicAgents.Procurement;
 import basicClasses.OrderPart;
+import communication.Communication;
+import communication.MessageObject;
 import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -23,7 +25,7 @@ public class RequestToBuy extends SimpleBehaviour {
 
     private ProcurementMarketResponder interactionBehaviour;
     private ProcurementMarketRequestResult interactor;
-
+    private MessageObject msgObj;
     public static int buyCount;
 
     List<AID> procurementAgents;
@@ -105,8 +107,14 @@ public class RequestToBuy extends SimpleBehaviour {
         case HANDLE_ACCEPT_PROPOSAL_REPLY:
             msg = myAgent.receive(replyTemplate);
             if (msg != null) {
-                System.out.println(String
-                        .format(currentOrder.getPart().getClass().getSimpleName() + " is found (price=%d)", bestPrice));
+
+                msgObj = new MessageObject("AgentProcurementMarket", currentOrder.getPart().getClass().getSimpleName()
+                        + " is found with " + bestPrice);
+                Communication.server.sendMessageToClient(msgObj);
+
+            /*    System.out.println(String
+                        .format(currentOrder.getPart().getClass().getSimpleName() + " is found (price=%d)", bestPrice));*/
+
                 repliesLeft = 0;
                 requestState = RequestState.DONE;
                 Procurement.materialStorage.add(currentOrder.getPart());

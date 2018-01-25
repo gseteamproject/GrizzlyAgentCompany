@@ -2,6 +2,8 @@ package basicAgents;
 
 import java.util.Random;
 
+import communication.Communication;
+import communication.MessageObject;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -14,6 +16,7 @@ import jade.lang.acl.MessageTemplate;
 public class StoneSeller extends Agent {
 
     private static final long serialVersionUID = -7418692714860762106L;
+    private MessageObject msgObj;
 
     @Override
     protected void setup() {
@@ -64,7 +67,12 @@ public class StoneSeller extends Agent {
                 int price = new Random().nextInt(100);
                 reply.setContent(String.valueOf(price));
 
+                msgObj = new MessageObject("AgentProcurementMarket", "Stone price is "+ price);
+                Communication.server.sendMessageToClient(msgObj);
+
+/*
                 System.out.println(String.format("Stone: my price is %d", price));
+*/
                 /* send reply for incoming message */
                 send(reply);
             } else {
@@ -90,7 +98,12 @@ public class StoneSeller extends Agent {
                 ACLMessage reply = msg.createReply();
                 reply.setPerformative(ACLMessage.INFORM);
 
+                msgObj = new MessageObject("AgentProcurementMarket" , "Delivering stone(s).");
+                Communication.server.sendMessageToClient(msgObj);
+
+/*
                 System.out.println("delivering...");
+*/
                 /* send reply for incoming message */
                 send(reply);
             } else {

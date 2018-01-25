@@ -1,9 +1,11 @@
 package procurementMarketBehaviours;
 
 import basicClasses.Order;
+import communication.Communication;
 import communication.MessageObject;
 import interactors.Decision;
 import interactors.OrderDataStore;
+import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 
 public class ProcurementMarketDecision extends Decision {
@@ -23,10 +25,14 @@ public class ProcurementMarketDecision extends Decision {
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
         response.setPerformative(ACLMessage.AGREE);
+        response.setSender(new AID(("AgentProcurementMarket"), AID.ISLOCALNAME));
 
         msgObj = new MessageObject(request, orderText);
+        Communication.server.sendMessageToClient(msgObj);
+/*
         System.out.println(msgObj.getReceivedMessage());
-        
+*/
+
         return response;
     }
 }
