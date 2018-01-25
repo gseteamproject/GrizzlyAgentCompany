@@ -2,7 +2,8 @@ import communication.Communication;
 import communication.Server;
 import jade.Boot;
 
-public class Main {
+public class
+Main {
     public static void main(String[] args) {
         Communication communication = new Communication();
         // todo: maybe start the program, when the client is connected first?

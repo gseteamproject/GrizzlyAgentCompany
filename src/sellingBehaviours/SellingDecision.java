@@ -35,14 +35,18 @@ public class SellingDecision extends Decision {
         if (request.getConversationId() == "Ask") {
 
             msgObj = new MessageObject(response, orderText);
-            System.out.println(msgObj.getReceivedMessage());
-            Communication.server.sendMessageToClient("SellingAgent", "[agree] I will check warehouse for " + orderText);
+            Communication.server.sendMessageToClient(msgObj);
+
+            /*System.out.println(msgObj.getReceivedMessage());
+            Communication.server.sendMessageToClient("SellingAgent", "[agree] I will check warehouse for " + orderText);*/
         } else if (request.getConversationId() == "Take") {
 
             msgObj = new MessageObject(response, orderText);
-            System.out.println(msgObj.getReceivedMessage());
+            Communication.server.sendMessageToClient(msgObj);
+
+            /*System.out.println(msgObj.getReceivedMessage());
             Communication.server.sendMessageToClient("SellingAgent",
-                    "[agree] I will give you " + orderText + " from warehouse");
+                    "[agree] I will give you " + orderText + " from warehouse");*/
         }
         
         return response;

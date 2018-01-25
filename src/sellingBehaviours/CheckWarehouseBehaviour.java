@@ -46,10 +46,11 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
         for (OrderPart orderPart : order.orderList) {
             Product productToCheck = orderPart.getProduct();
             int amount = orderPart.getAmount();
+            msgObj = new MessageObject("AgentSelling", "Asking warehouse about " + orderPart.getTextOfOrderPart());
 
-            System.out.println("SellingAgent: Asking warehouse about " + orderPart.getTextOfOrderPart());
+            /*System.out.println("SellingAgent: Asking warehouse about " + orderPart.getTextOfOrderPart());
             Communication.server.sendMessageToClient("SellingAgent",
-                    "Asking warehouse about " + orderPart.getTextOfOrderPart());
+                    "Asking warehouse about " + orderPart.getTextOfOrderPart());*/
 
             int amountInWH = Selling.warehouse.getAmountOfProduct(productToCheck);
 
@@ -57,9 +58,12 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
                 if (Selling.isInWarehouse) {
                     Selling.isInWarehouse = true;
                 }
-                System.out.println("SellingAgent: I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
+
+                msgObj = new MessageObject("AgentSelling", "I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
+
+                /*System.out.println("SellingAgent: I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
                 Communication.server.sendMessageToClient("SellingAgent",
-                        "I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");
+                        "I say that " + orderPart.getTextOfOrderPart() + " is in warehouse");*/
             } else {
                 Selling.isInWarehouse = false;
 
@@ -81,10 +85,13 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
             // add order to queue
             Selling.productionQueue.add(order);
 
-            System.out.println(
+            msgObj = new MessageObject("AgentSelling", "Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
+            Communication.server.sendMessageToClient(msgObj);
+
+            /*System.out.println(
                     "SellingAgent: Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
             Communication.server.sendMessageToClient("SellingAgent",
-                    "Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
+                    "Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());*/
 
             myAgent.addBehaviour(new AskToProduceBehaviour(interactionBehaviour, msgToProduction, dataStore));
         }
