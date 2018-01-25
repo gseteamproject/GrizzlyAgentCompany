@@ -216,7 +216,7 @@ public class MessageObject {
     }
 
   /*  public String actionMessage(){
-       String msg = this.actingAgent + ": " + this.actionMessage;
+       String msg = this.actingAgent + " " + this.actionMessage;
         return msg;
     }*/
 }
