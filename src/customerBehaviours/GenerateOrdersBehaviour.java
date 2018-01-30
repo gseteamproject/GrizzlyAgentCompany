@@ -64,7 +64,6 @@ public class GenerateOrdersBehaviour extends TickerBehaviour {
         // {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
 
         orderMsg.setContent(testGson);
-        myAgent.send(orderMsg);
     }
 
     @Override

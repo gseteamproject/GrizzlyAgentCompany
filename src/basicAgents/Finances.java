@@ -27,6 +27,7 @@ public class Finances extends Agent {
 	protected void setup() {
 		MessageTemplate reqTemp = AchieveREResponder.createMessageTemplate(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
+
 		// adding behaviours
 		addBehaviour(new WaitingForTransaction(this, reqTemp));
 	}
