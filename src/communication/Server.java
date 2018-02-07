@@ -6,6 +6,9 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import jade.lang.acl.ACLMessage;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /*
     SocketIO implementation to communicate with the client website
  */
@@ -17,6 +20,8 @@ public class Server implements Runnable {
     private SocketIOClient conClient;
     private int connectionCounter;
 
+    private Map<String, JsonWrapper> arrows;
+
     @Override
     /*
     just an example of the communication, not finished yet.
@@ -24,6 +29,8 @@ public class Server implements Runnable {
     public void run() {
         System.out.println("[Server] -> Started on port " + port);
         connectionCounter = 0;
+
+        arrows = new HashMap<>();
 
         conServer = new SocketIOServer(getConfig());
 
@@ -57,7 +64,7 @@ public class Server implements Runnable {
             receiving messages from the client
          */
         conServer.addEventListener("msgevent", MessageObject.class, (socketIOClient, messageObject, ackRequest) -> {
-            if (messageObject.getMessage() == "stop_server") {
+            if (messageObject.getMessage().equals("stop_server")) {
                 System.out.println("[Server] -> Client stopped the server!");
                 stopServer();
             }
@@ -77,8 +84,27 @@ public class Server implements Runnable {
                 if (msgObj.getReceiver()!=null) {
                 String from = msgObj.getSender().replace("Agent", "");
                 String to = msgObj.getReceiver().replace("Agent", "");
+                String json = "[";
 
-                wrapper.setMessage("{\"from\": \"" + from + "\", \"to\": \"" + to + "\", \"color\": \"red\", \"text\": \"" + msgObj.getOrderText() + "\"}");
+                if (arrows.containsKey(from)) {
+                    JsonWrapper jsonWrapper = new JsonWrapper();
+                    jsonWrapper.setFrom(from);
+                    jsonWrapper.setTo(to);
+
+
+                    String text = msgObj.getPerformative() + ": " + msgObj.getOrderText();
+                    jsonWrapper.setText(text);
+                    arrows.put(from, jsonWrapper);
+                }
+
+                for (Map.Entry<String, JsonWrapper> entry : arrows.entrySet()) {
+                    json += "{\"from\": \"" + entry.getValue().getFrom() + "\", \"to\": \"" + entry.getValue().getTo() + "\", \"color\": \"red\", \"text\": \"" + entry.getValue().getText() + "\"}";
+                }
+
+                json += "]";
+
+                wrapper.setMessage(json);
+
                 conClient.sendEvent("jsonevent", wrapper);
             } else {
                     conClient.sendEvent("alcevent", wrapper);
