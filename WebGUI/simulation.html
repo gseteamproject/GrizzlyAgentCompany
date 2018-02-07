@@ -65,10 +65,9 @@
         var obj = jQuery.parseJSON(json);
 
         myDiagram.startTransaction("start transaction");
-        model.addLinkData(obj);
+        model.addLinkDataCollection(obj);
         myDiagram.commitTransaction("commit transaction");
         myDiagram.updateAllTargetBindings();
-        //model.removeLinkData(obj);
       }
 
     </script>

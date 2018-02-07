@@ -89,11 +89,11 @@ public class Server implements Runnable {
 
         if (conClient != null){
                 if (msgObj.getReceiver()!=null) {
-                String from = msgObj.getSender().replace("Agent", "");
-                String to = msgObj.getReceiver().replace("Agent", "");
-                String json = "[";
+                    String from = msgObj.getSender().replace("Agent", "");
+                    String to = msgObj.getReceiver().replace("Agent", "");
 
-                if (arrows.containsKey(from)) {
+                    String json = "[";
+
                     JsonWrapper jsonWrapper = new JsonWrapper();
                     jsonWrapper.setFrom(from);
                     jsonWrapper.setTo(to);
@@ -102,18 +102,20 @@ public class Server implements Runnable {
                     String text = msgObj.getPerformative() + ": " + msgObj.getOrderText();
                     jsonWrapper.setText(text);
                     arrows.put(from, jsonWrapper);
-                }
 
-                for (Map.Entry<String, JsonWrapper> entry : arrows.entrySet()) {
-                    json += "{\"from\": \"" + entry.getValue().getFrom() + "\", \"to\": \"" + entry.getValue().getTo() + "\", \"color\": \"red\", \"text\": \"" + entry.getValue().getText() + "\"}";
-                }
+                    for (Map.Entry<String, JsonWrapper> entry : arrows.entrySet()) {
+                        json += "{\"from\": \"" + entry.getValue().getFrom() + "\", \"to\": \"" + entry.getValue().getTo() + "\", \"color\": \"red\", \"text\": \"" + entry.getValue().getText() + "\"},";
+                    }
 
-                json += "]";
+                    json = json.substring(0, json.length() - 1);
+                    json += "]";
 
-                wrapper.setMessage(json);
+                    System.out.println(json);
 
-                conClient.sendEvent("jsonevent", wrapper);
-            } else {
+                    wrapper.setMessage(json);
+
+                    conClient.sendEvent("jsonevent", wrapper);
+                } else {
                     conClient.sendEvent("alcevent", wrapper);
                 }
         }
