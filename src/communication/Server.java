@@ -12,6 +12,7 @@ import jade.lang.acl.ACLMessage;
 public class Server implements Runnable {
     private final String server = "localhost";
     private final int port = 9092;
+    public static long delaytime;
 
     private SocketIOServer conServer;
     private SocketIOClient conClient;
@@ -72,6 +73,12 @@ public class Server implements Runnable {
     }
     public void sendMessageToClient(MessageObject msgObj) {
         MessageWrapper wrapper = new MessageWrapper(msgObj);
+
+        try {
+            Thread.sleep(delaytime);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         if (conClient != null){
                 if (msgObj.getReceiver()!=null) {
