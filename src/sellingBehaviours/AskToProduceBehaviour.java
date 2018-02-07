@@ -34,9 +34,6 @@ public class AskToProduceBehaviour extends OneShotBehaviour {
         msgObj = new MessageObject("AgentSelling", orderText +  " is in production\"");
         Communication.server.sendMessageToClient(msgObj);
 
-       /* System.out.println("SellingAgent: " + orderText + " is in production");
-        Communication.server.sendMessageToClient("SellingAgent", orderText + " is in production");*/
-
 
         myAgent.addBehaviour(new AskToProduceInitiatorBehaviour(interactionBehaviour, dataStore));
     }
