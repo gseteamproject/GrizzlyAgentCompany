@@ -1,5 +1,6 @@
 package basicAgents;
 
+import customerBehaviours.GenerateOrdersBehaviour;
 import customerBehaviours.OneOrderBehaviour;
 import jade.core.Agent;
 
@@ -12,8 +13,8 @@ public class Customer  extends Agent {
     
     @Override
     protected void setup() {
-//        addBehaviour(new GenerateOrdersBehaviour(this, 15000));
+        addBehaviour(new GenerateOrdersBehaviour(this, 15000));
 
-        addBehaviour(new OneOrderBehaviour(this, 4000));
+       // addBehaviour(new OneOrderBehaviour(this, 4000));
     }
 }

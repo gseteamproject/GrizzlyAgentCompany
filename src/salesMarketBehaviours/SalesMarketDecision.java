@@ -17,19 +17,12 @@ public class SalesMarketDecision extends Decision {
 
     @Override
     public ACLMessage execute(ACLMessage request) {
-/*
-        System.out.println("request " + request.getContent());
-*/
+
         Order order = Order.gson.fromJson(request.getContent(), Order.class);
         String orderText = order.getTextOfOrder();
 
         MessageObject msgObj = new MessageObject(request, orderText);
         Communication.server.sendMessageToClient(msgObj);
-    /*    Communication.server.sendJson(request, "lol", "Procurement", "Selling");
-        Communication.server.sendJson(request, "halz maul ohren", "Selling", "Sales Market");
-        Communication.server.sendJson(request, "rofl", "Production", "Finances");*/
-
-    /*    System.out.println(msgObj.getReceivedMessage());*/
 
         // Agent should send agree or refuse
         ACLMessage response = request.createReply();
@@ -40,14 +33,11 @@ public class SalesMarketDecision extends Decision {
             msgObj = new MessageObject(response, orderText);
             Communication.server.sendMessageToClient(msgObj);
 
- /*           System.out.println(msgObj.getReceivedMessage());*/
-
         } else {
             response.setPerformative(ACLMessage.REFUSE);
             msgObj = new MessageObject(response, orderText);
             Communication.server.sendMessageToClient(msgObj);
 
-          /*  System.out.println(msgObj.getReceivedMessage());*/
         }
         return response;
     }
