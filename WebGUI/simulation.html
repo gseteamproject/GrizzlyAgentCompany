@@ -28,11 +28,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="assets/js/go.js"></script>
     <script id="code">
+        var diagramModel = [
+          { key: "ProcurementMarket", color: "lightblue", loc: new go.Point(20, 175) },
+          { key: "Procurement", color: "orange", loc: new go.Point(200, 175) },
+          { key: "Production", color: "lightgreen", loc: new go.Point(400, 50) },
+          { key: "Selling", color: "pink", loc: new go.Point(600, 175) },
+          { key: "SalesMarket", color: "red", loc: new go.Point(750, 175) },
+          { key: "Finances", color: "yellow", loc: new go.Point(400, 300) }
+        ];
       function init() {
         var $ = go.GraphObject.make;  // for conciseness in defining templates
         myDiagram = $(go.Diagram, "myDiagramDiv",  // create a Diagram for the DIV HTML element
                       {
                         initialContentAlignment: go.Spot.Center,  // center the content
+                        "animationManager.isEnabled": false,
                         "undoManager.isEnabled": true
                       });
         // define a simple Node template
@@ -49,24 +58,17 @@
                                     $(go.TextBlock, new go.Binding("text", "text"), { segmentOffset: new go.Point(0, -10) })
                                     );
 
-        myDiagram.model = new go.GraphLinksModel(
-        [
-          { key: "ProcurementMarket", color: "lightblue", loc: new go.Point(20, 175) },
-          { key: "Procurement", color: "orange", loc: new go.Point(200, 175) },
-          { key: "Production", color: "lightgreen", loc: new go.Point(400, 50) },
-          { key: "Selling", color: "pink", loc: new go.Point(600, 175) },
-          { key: "SalesMarket", color: "red", loc: new go.Point(750, 175) },
-          { key: "Finances", color: "yellow", loc: new go.Point(400, 300) }
-        ]);
+        myDiagram.model = new go.GraphLinksModel(diagramModel);
       }
 
       function loadJson(json) {
-        var model = myDiagram.model;
+        //var model = myDiagram.model;
         var obj = jQuery.parseJSON(json);
 
-        myDiagram.startTransaction("start transaction");
-        model.addLinkDataCollection(obj);
-        myDiagram.commitTransaction("commit transaction");
+        myDiagram.model = new go.GraphLinksModel(diagramModel, obj);
+        //myDiagram.startTransaction("start transaction");
+        //model.addLinkDataCollection(obj);
+        //myDiagram.commitTransaction("commit transaction");
         myDiagram.updateAllTargetBindings();
       }
 

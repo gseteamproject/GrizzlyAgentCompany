@@ -7,7 +7,9 @@ import com.corundumstudio.socketio.SocketIOServer;
 import jade.lang.acl.ACLMessage;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /*
     SocketIO implementation to communicate with the client website
@@ -93,15 +95,18 @@ public class Server implements Runnable {
                     String to = msgObj.getReceiver().replace("Agent", "");
 
                     String json = "[";
-
+                    String identifier = from + ";" + to;
                     JsonWrapper jsonWrapper = new JsonWrapper();
                     jsonWrapper.setFrom(from);
                     jsonWrapper.setTo(to);
-
-
                     String text = msgObj.getPerformative() + ": " + msgObj.getOrderText();
                     jsonWrapper.setText(text);
-                    arrows.put(from, jsonWrapper);
+
+                    for (Map.Entry<String, JsonWrapper> entry : arrows.entrySet()) {
+                        entry.getValue().setText("");
+                    }
+
+                    arrows.put(identifier, jsonWrapper);
 
                     for (Map.Entry<String, JsonWrapper> entry : arrows.entrySet()) {
                         json += "{\"from\": \"" + entry.getValue().getFrom() + "\", \"to\": \"" + entry.getValue().getTo() + "\", \"color\": \"red\", \"text\": \"" + entry.getValue().getText() + "\"},";
@@ -110,11 +115,10 @@ public class Server implements Runnable {
                     json = json.substring(0, json.length() - 1);
                     json += "]";
 
-                    System.out.println(json);
-
+                    //System.out.println(json);
                     wrapper.setMessage(json);
-
                     conClient.sendEvent("jsonevent", wrapper);
+
                 } else {
                     conClient.sendEvent("alcevent", wrapper);
                 }
@@ -134,14 +138,6 @@ public class Server implements Runnable {
             conClient.sendEvent("msgevent", new MessageObject(sender, msg));
     }
 
-    public void sendJson(ACLMessage acl, String ordertext, String from, String to) {
-        MessageWrapper wrapper = new MessageWrapper(new MessageObject(acl, ordertext));
-
-        if (conClient != null) {
-            wrapper.setMessage("{\"from\": \"" + from + "\", \"to\": \"" + to + "\", \"color\": \"red\", \"text\": \"" + ordertext + "\"}");
-            conClient.sendEvent("jsonevent", wrapper);
-        }
-    }
     /*
     setup configuration
      */

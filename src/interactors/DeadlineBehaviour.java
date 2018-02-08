@@ -1,5 +1,6 @@
 package interactors;
 
+import communication.Server;
 import jade.core.behaviours.WakerBehaviour;
 
 public class DeadlineBehaviour extends WakerBehaviour {
@@ -13,7 +14,7 @@ public class DeadlineBehaviour extends WakerBehaviour {
     protected RequestResult interactor;
 
     public DeadlineBehaviour(ResponderBehaviour interactionBehaviour, long wakeTime) {
-        super(interactionBehaviour.getAgent(), wakeTime);
+        super(interactionBehaviour.getAgent(), wakeTime * Server.delaytime/150);
         this.interactionBehaviour = interactionBehaviour;
     }
 

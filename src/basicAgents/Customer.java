@@ -15,6 +15,6 @@ public class Customer  extends Agent {
     protected void setup() {
         addBehaviour(new GenerateOrdersBehaviour(this, 15000));
 
-       // addBehaviour(new OneOrderBehaviour(this, 4000));
+       //addBehaviour(new OneOrderBehaviour(this, 4000));
     }
 }
