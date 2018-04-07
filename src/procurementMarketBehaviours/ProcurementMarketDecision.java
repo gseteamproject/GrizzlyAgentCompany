@@ -12,23 +12,40 @@ public class ProcurementMarketDecision extends Decision {
     private String orderText;
     private MessageObject msgObj;
 
-    public ProcurementMarketDecision(OrderDataStore dataStore) {
-        super(dataStore);
+    public ProcurementMarketDecision(ProcurementMarketResponder interactionBehaviour, OrderDataStore dataStore) {
+        super(interactionBehaviour, dataStore);
         // TODO Auto-generated constructor stub
     }
     
     public ACLMessage execute(ACLMessage request) {
-        orderText = Order.gson.fromJson(request.getContent(), Order.class).getTextOfOrder();
+        Order order = Order.gson.fromJson(request.getContent(), Order.class);
+        String orderText = order.getTextOfOrder();
 
         // Agent should send agree or refuse
         // TODO: Add refuse answer (some conditions should be added)
+        
+        System.out.println("deadline ProcurementMarket: " + (order.deadline - System.currentTimeMillis()) * 0.0667);
+        
+        dataStore.setDeadline(order.deadline - System.currentTimeMillis());        
+        System.out.println("currentDeadline: " + order.deadline);
+        
+        dataStore.setAgent(interactionBehaviour.getAgent().getLocalName());
+        System.out.println("currentAgent: " + dataStore.getAgent());
+
+        order.state = (dataStore.getAgent());
+        
+        String orderGson = Order.gson.toJson(order);
+        request.setContent(orderGson);
+        
+        dataStore.setRequestMessage(request);
+        
         ACLMessage response = request.createReply();
         response.setContent(request.getContent());
         response.setPerformative(ACLMessage.AGREE);
         response.setSender(new AID(("AgentProcurementMarket"), AID.ISLOCALNAME));
 
-        msgObj = new MessageObject(request, orderText);
-        Communication.server.sendMessageToClient(msgObj);
+//        msgObj = new MessageObject(request, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
 /*
         System.out.println(msgObj.getReceivedMessage());
 */

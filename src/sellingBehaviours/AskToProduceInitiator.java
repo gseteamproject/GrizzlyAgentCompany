@@ -24,7 +24,7 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
     public AskToProduceInitiator(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
         super(dataStore);
         this.interactionBehaviour = interactionBehaviour;
-        this.interactor = SellingActivityBehaviour.interactor;
+        this.interactor = SellingResponder.interactor;
     }
 
     @Override
@@ -40,8 +40,6 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
         Vector<ACLMessage> l = new Vector<ACLMessage>(1);
         l.addElement(request);
 
-
-
         return l;
     }
 
@@ -50,8 +48,8 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(agree.getContent(), Order.class).getTextOfOrder();
 
-        msgObj = new MessageObject(agree, orderText);
-        Communication.server.sendMessageToClient(msgObj);
+//        msgObj = new MessageObject(agree, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
 
         msgObj = new MessageObject("AgentSelling" , "Production of " + orderText + " is initiated.");
         Communication.server.sendMessageToClient(msgObj);
@@ -61,8 +59,6 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
     @Override
     public void handleRefuse(ACLMessage refuse) {
         // TODO Auto-generated method stub
-
-
     }
 
     @Override
@@ -72,10 +68,10 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
         Order order = Order.gson.fromJson(inform.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
-        msgObj = new MessageObject(inform, orderText);
-        Communication.server.sendMessageToClient(msgObj);
+//        msgObj = new MessageObject(inform, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
 
-        msgObj = new MessageObject("AgentSelling", orderText + " is delivered to warehouse.");
+        msgObj = new MessageObject("AgentSelling", orderText + " is delivered to warehouse");
         Communication.server.sendMessageToClient(msgObj);
 
 
@@ -85,7 +81,7 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
                 order = orderInQueue;
             }
         }
-        interactor.execute(interactionBehaviour.getRequest());
+        interactor.execute(dataStore.getRequestMessage());
 
     }
 
@@ -93,8 +89,8 @@ public class AskToProduceInitiator extends RequestInteractor implements AchieveR
     public void handleFailure(ACLMessage failure) {
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-        msgObj = new MessageObject(failure, orderText);
-        Communication.server.sendMessageToClient(msgObj);
+//        msgObj = new MessageObject(failure, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
         /*System.out.println("SellingAgent: received [failure] is not produced");*/
 
         msgObj = new MessageObject("AgentSelling" , orderText + " is not produced.");

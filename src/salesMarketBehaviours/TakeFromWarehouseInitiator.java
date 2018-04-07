@@ -23,7 +23,7 @@ public class TakeFromWarehouseInitiator extends RequestInteractor implements Ach
     public TakeFromWarehouseInitiator(SalesMarketResponder interactionBehaviour, OrderDataStore dataStore) {
         super(dataStore);
         this.interactionBehaviour = interactionBehaviour;
-        this.interactor = SalesMarketActivityBehaviour.interactor;
+        this.interactor = SalesMarketResponder.interactor;
     }
 
     @Override
@@ -59,19 +59,10 @@ public class TakeFromWarehouseInitiator extends RequestInteractor implements Ach
         Order order = Order.gson.fromJson(inform.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
-        msgObj = new MessageObject(inform, orderText);
-        Communication.server.sendMessageToClient(msgObj);
-
-        // TODO: add function to deliver order to customer
-        if (SalesMarket.orderQueue.remove(order)) {
-            msgObj = new MessageObject("AgentSalesMarket" , orderText + " is removed from Orderqueue.");
-            Communication.server.sendMessageToClient(msgObj);
-
-/*
-            System.out.println("SalesMarketAgent: " + orderText + " is removed from Orderqueue.");
-*/
-            interactor.execute(interactionBehaviour.getRequest());
-        }
+//        msgObj = new MessageObject(inform, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
+        
+        interactionBehaviour.getAgent().addBehaviour(new DeliverToCustomerBehaviour(interactionBehaviour, dataStore));
     }
 
     @Override
@@ -79,8 +70,8 @@ public class TakeFromWarehouseInitiator extends RequestInteractor implements Ach
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
-        msgObj = new MessageObject(failure, orderText);
-        Communication.server.sendMessageToClient(msgObj);
+//        msgObj = new MessageObject(failure, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
 /*
         System.out.println(msgObj.getReceivedMessage());
 */

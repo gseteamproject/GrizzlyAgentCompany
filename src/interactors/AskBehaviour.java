@@ -29,6 +29,7 @@ public class AskBehaviour extends SimpleBehaviour {
     @Override
     public boolean done() {
         if (interactor.done()) {
+            System.out.println("Done of " + interactionBehaviour.getAgent().getLocalName());
             interactionBehaviour.setResult(interactor.execute(interactionBehaviour.getRequest()));
         }
         return interactor.done();

@@ -12,6 +12,6 @@ public class ProductionDecisionBehaviour extends DecisionBehaviour {
 
     public ProductionDecisionBehaviour(ProductionResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour);
-        this.interactor = new ProductionDecision(dataStore);
+        this.interactor = new ProductionDecision(interactionBehaviour, dataStore);
     }
 }

@@ -37,14 +37,20 @@ public class OneOrderBehaviour extends WakerBehaviour {
 
         // it is an example of order
         Order order = new Order();
+
         order.id = SalesMarket.orderQueue.size() + 1;
 
         order.addProduct(new Product(10, "red"), 1);
         order.addProduct(new Product(10, "blue"), 2);
         order.addProduct(new Product(10, "green"), 3);
+        
+        order.deadline = 60000; // 60 seconds
+        order.price = 100;
+        order.state = getAgent().getLocalName();
 
         String testGson = Order.gson.toJson(order);
-        // {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":2}]}
+        System.out.println(testGson);
+        // {"id":1,"orderList":[{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"red","price":0},"price":0},"amount":1},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"blue","price":0},"price":0},"amount":2},{"product":{"stone":{"size":10.0,"price":0},"paint":{"color":"green","price":0},"price":0},"amount":3}],"deadline":60000,"price":100}
 
         testMsg.setContent(testGson);
         myAgent.send(testMsg);

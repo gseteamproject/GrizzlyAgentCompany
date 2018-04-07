@@ -20,6 +20,7 @@ public class SalesMarket extends Agent {
 
     // creating list of orders
     public static List<Order> orderQueue = new ArrayList<Order>();
+    public static long currentDeadline;
     protected OrderDataStore dataStore;
 
     @Override

@@ -8,15 +8,19 @@ public class MessageWrapper {
 
     public MessageWrapper(MessageObject msgObj) {
 
-        if (msgObj.getActingAgent()==null) {
-            this.message = msgObj.getReceivedMessage();
-            this.color1 = msgObj.getColorForPerformative();
-            this.color2 = msgObj.getColorForAgent();
-            this.performative = msgObj.getPerformative();
-        } else{
+        if (msgObj.getPerformative()==null) {
+//            this.message = msgObj.getReceivedMessage();
             this.message = msgObj.getActionMessage();
-            this.color2 = msgObj.getColorForAction();
+            this.setColor2(msgObj.getColorForAction());
+        } else{
+//            this.setColor1(msgObj.getColorForPerformative());
+//            this.message = msgObj.getReceivedMessage();
+            this.message = msgObj.getActionMessage();
+//            this.setColor2(msgObj.getColorForAgent());
+            this.setColor2(msgObj.getColorForAction());
+//            this.performative = msgObj.getPerformative();
         }
+        System.out.println(this.message);
     }
 
     public String getMessage() {

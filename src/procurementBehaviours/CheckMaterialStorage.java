@@ -43,6 +43,9 @@ public class CheckMaterialStorage extends OneShotBehaviour {
         // part of order, that needs to be produced
         Order orderToBuy = new Order();
         orderToBuy.id = order.id;
+        orderToBuy.deadline = order.deadline;
+        orderToBuy.price = order.price;
+        orderToBuy.state = order.state;
 
         for (OrderPart orderPart : order.orderList) {
             Product productToCheck = orderPart.getProduct();

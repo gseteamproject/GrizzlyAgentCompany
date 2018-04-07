@@ -12,6 +12,6 @@ public class SellingDecisionBehaviour extends DecisionBehaviour {
 
     public SellingDecisionBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour);
-        this.interactor = new SellingDecision(dataStore);
+        this.interactor = new SellingDecision(interactionBehaviour, dataStore);
     }
 }

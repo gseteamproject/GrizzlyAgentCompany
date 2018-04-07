@@ -58,7 +58,7 @@ public class AskForMaterialsInitiator extends RequestInteractor implements Achie
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
-        msgObj = new MessageObject(inform, orderText);
+        msgObj = new MessageObject(inform, "received [inform] materials for " + orderText + " are in storage");
         Communication.server.sendMessageToClient(msgObj);
 
 /*        System.out.println(msgObj.getReceivedMessage());*/
@@ -75,7 +75,7 @@ public class AskForMaterialsInitiator extends RequestInteractor implements Achie
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
-        msgObj = new MessageObject(failure, orderText);
+        msgObj = new MessageObject(failure, "received [failure] materials for " + orderText + " are not in storage");
         Communication.server.sendMessageToClient(msgObj);
        /* System.out.println(msgObj.getReceivedMessage());*/
 

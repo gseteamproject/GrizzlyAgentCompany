@@ -20,12 +20,15 @@ public class SalesMarketAskBehaviour extends AskBehaviour {
     @Override
     public void action() {
         if (!this.isStarted) {
-            Order order = Order.gson.fromJson(interactionBehaviour.getRequest().getContent(), Order.class);
-            if (!SalesMarket.orderQueue.contains(order)) {
+            Order order = Order.gson.fromJson(dataStore.getRequestMessage().getContent(), Order.class);
+            if (!SalesMarket.orderQueue.contains(order)) {                
                 SalesMarket.orderQueue.add(order);
-
+                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+                
                 // if agent agrees it starts executing request
-                myAgent.addBehaviour(new AskForOrderBehaviour((SalesMarketResponder) interactionBehaviour, dataStore));
+                myAgent.addBehaviour(new SalesMarketActivityBehaviour((SalesMarketResponder) interactionBehaviour, (SalesMarketRequestResult) interactor, dataStore));
+//                myAgent.addBehaviour(new AskForOrderBehaviour((SalesMarketResponder) interactionBehaviour, dataStore));
+//                myAgent.addBehaviour(new DeadlineForOrderBehaviour((SalesMarketResponder) interactionBehaviour, dataStore, 6000));
             }
             this.isStarted = true;
         }

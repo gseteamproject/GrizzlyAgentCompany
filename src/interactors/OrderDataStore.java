@@ -13,8 +13,32 @@ public class OrderDataStore extends DataStore {
     public void setRequestMessage(ACLMessage msg) {
         put("request-message", msg);
     }
-
+    
     public ACLMessage getRequestMessage() {
         return (ACLMessage) get("request-message");
+    }
+    
+    public void setSubMessage(ACLMessage msg) {
+        put("sub-message", msg);
+    }
+    
+    public ACLMessage getSubMessage() {
+        return (ACLMessage) get("sub-message");
+    }
+    
+    public void setDeadline(long deadline) {
+        put("deadline", deadline);
+    }
+    
+    public long getDeadline() {
+        return (long) get("deadline");
+    }
+    
+    public void setAgent(String agentName) {
+        put("agent", agentName);
+    }
+    
+    public String getAgent() {
+        return (String) get("agent");
     }
 }

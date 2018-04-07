@@ -26,7 +26,7 @@ public class GiveMaterialToProduction extends OneShotBehaviour {
     public GiveMaterialToProduction(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
         this.interactionBehaviour = interactionBehaviour;
-        this.interactor = ProcurementActivityBehaviour.interactor;
+        this.interactor = ProcurementResponder.interactor;
         this.dataStore = dataStore;
         materialsToGive = interactionBehaviour.getRequest().getContent();
     }

@@ -56,13 +56,13 @@ public class AskForOrderInitiator extends RequestInteractor implements AchieveRE
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
-        msgObj = new MessageObject(inform, orderText);
-        Communication.server.sendMessageToClient(msgObj);
+//        msgObj = new MessageObject(inform, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
 
        /* System.out.println(msgObj.getReceivedMessage());*/
 
         interactionBehaviour.getAgent()
-                .addBehaviour(new TakeFromWarehouseBehaviour(interactionBehaviour, inform, dataStore));
+                .addBehaviour(new TakeFromWarehouseBehaviour(interactionBehaviour, dataStore));
     }
 
     @Override
@@ -71,8 +71,8 @@ public class AskForOrderInitiator extends RequestInteractor implements AchieveRE
         Order order = Order.gson.fromJson(failure.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
-        msgObj = new MessageObject(failure, orderText);
-        Communication.server.sendMessageToClient(msgObj);
+//        msgObj = new MessageObject(failure, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
 
      /*   System.out.println(msgObj.getReceivedMessage());*/
 

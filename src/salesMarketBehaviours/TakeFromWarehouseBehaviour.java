@@ -19,24 +19,26 @@ public class TakeFromWarehouseBehaviour extends OneShotBehaviour {
     private SalesMarketResponder interactionBehaviour;
     private MessageObject msgObj;
 
-    public TakeFromWarehouseBehaviour(SalesMarketResponder interactionBehaviour, ACLMessage msg,
-            OrderDataStore dataStore) {
+    public TakeFromWarehouseBehaviour(SalesMarketResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
-        this.interactionBehaviour = interactionBehaviour;
         this.dataStore = dataStore;
-        orderToTake = msg.getContent();
-        orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
-        msgObj = new MessageObject(msg, orderText);
-        this.dataStore.setRequestMessage(msg);
+        this.interactionBehaviour = interactionBehaviour;
     }
 
     @Override
     public void action() {
 
+        orderToTake = dataStore.getRequestMessage().getContent();
+//        orderToTake = interactionBehaviour.getRequest().getContent();
+        orderText = Order.gson.fromJson(orderToTake, Order.class).getTextOfOrder();
+        dataStore.setRequestMessage(dataStore.getRequestMessage());
+//        dataStore.setRequestMessage(interactionBehaviour.getRequest());
+
+        msgObj = new MessageObject("AgentSalesMarket", orderText);
         Communication.server.sendMessageToClient(msgObj);
-/*
-        System.out.println(msgObj.getReceivedMessage());
-*/
+        /*
+         * System.out.println(msgObj.getReceivedMessage());
+         */
         myAgent.addBehaviour(new TakeFromWarehouseInitiatorBehaviour(interactionBehaviour, dataStore));
     }
 }

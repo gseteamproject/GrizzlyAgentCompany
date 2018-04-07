@@ -39,7 +39,7 @@ public class RequestToBuy extends SimpleBehaviour {
         this.requestState = RequestState.PREPARE_CALL_FOR_PROPOSAL;
         this.currentOrder = currentOrder;
         this.interactionBehaviour = interactionBehaviour;
-        this.interactor = ProcurementMarketActivityBehaviour.interactor;
+        this.interactor = ProcurementMarketResponder.interactor;
     }
 
     MessageTemplate replyTemplate = null;

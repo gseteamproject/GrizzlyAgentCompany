@@ -23,7 +23,8 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
 
     public CheckWarehouseBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
-        requestMessage = interactionBehaviour.getRequest();
+        requestMessage = dataStore.getRequestMessage();
+        
         this.interactionBehaviour = interactionBehaviour;
         this.dataStore = dataStore;
     }
@@ -42,6 +43,9 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
         // part of order, that needs to be produced
         Order orderToProduce = new Order();
         orderToProduce.id = order.id;
+        orderToProduce.deadline = order.deadline;
+        orderToProduce.price = order.price;
+        orderToProduce.state = order.state;
 
         for (OrderPart orderPart : order.orderList) {
             Product productToCheck = orderPart.getProduct();
@@ -79,11 +83,12 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
         // productToCheck needs to be produced
         if (!isInQueue && (orderToProduce.orderList.size() > 0)) {
             String testGson = Order.gson.toJson(orderToProduce);
-            ACLMessage msgToProduction = (ACLMessage) requestMessage.clone();
-            msgToProduction.setContent(testGson);
+            ACLMessage msgToFinances = (ACLMessage) requestMessage.clone();
+            msgToFinances.setContent(testGson);
+            dataStore.setSubMessage(msgToFinances);            
 
-            // add order to queue
-            Selling.productionQueue.add(order);
+//            // add order to queue
+//            Selling.productionQueue.add(order);
 
             msgObj = new MessageObject("AgentSelling", "Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());
             Communication.server.sendMessageToClient(msgObj);
@@ -93,7 +98,7 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
             Communication.server.sendMessageToClient("SellingAgent",
                     "Sending an info to Finance Agent to produce " + orderToProduce.getTextOfOrder());*/
 
-            myAgent.addBehaviour(new AskToProduceBehaviour(interactionBehaviour, msgToProduction, dataStore));
+            myAgent.addBehaviour(new AskFinancesBehaviour(interactionBehaviour, dataStore));
         }
     }
 }

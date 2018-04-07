@@ -7,7 +7,7 @@ public class ProductionDeadlineBehaviour extends DeadlineBehaviour {
 
     public ProductionDeadlineBehaviour(ProductionResponder interactionBehaviour, ProductionRequestResult interactor,
             OrderDataStore dataStore) {
-        super(interactionBehaviour, 16000);
+        super(interactionBehaviour, dataStore);
         this.interactor = interactor;
     }
 

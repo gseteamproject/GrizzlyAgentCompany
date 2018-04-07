@@ -12,7 +12,7 @@ public class SalesMarketDecisionBehaviour extends DecisionBehaviour {
 
     public SalesMarketDecisionBehaviour(SalesMarketResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour);
-        this.interactor = new SalesMarketDecision(dataStore);
+        this.interactor = new SalesMarketDecision(interactionBehaviour, dataStore);
     }
 
 }

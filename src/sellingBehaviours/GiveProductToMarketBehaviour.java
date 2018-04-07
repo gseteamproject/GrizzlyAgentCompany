@@ -27,7 +27,7 @@ public class GiveProductToMarketBehaviour extends OneShotBehaviour {
     public GiveProductToMarketBehaviour(SellingResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent());
         this.interactionBehaviour = interactionBehaviour;
-        this.interactor = SellingActivityBehaviour.interactor;
+        this.interactor = SellingResponder.interactor;
         this.dataStore = dataStore;
         orderToGive = interactionBehaviour.getRequest().getContent();
     }

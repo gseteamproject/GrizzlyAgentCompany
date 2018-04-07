@@ -7,7 +7,7 @@ public class ProcurementMarketDeadlineBehaviour extends DeadlineBehaviour {
 
     public ProcurementMarketDeadlineBehaviour(ProcurementMarketResponder interactionBehaviour,
             ProcurementMarketRequestResult interactor, OrderDataStore dataStore) {
-        super(interactionBehaviour, 4000);
+        super(interactionBehaviour, dataStore);
         this.interactor = interactor;
     }
 

@@ -23,7 +23,7 @@ public class AskForAuctionInitiator extends RequestInteractor implements Achieve
     public AskForAuctionInitiator(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
         super(dataStore);
         this.interactionBehaviour = interactionBehaviour;
-        this.interactor = ProcurementActivityBehaviour.interactor;
+        this.interactor = ProcurementResponder.interactor;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class AskForAuctionInitiator extends RequestInteractor implements Achieve
     public void handleInform(ACLMessage inform) {
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
-        msgObj = new MessageObject(inform, orderText);
+        msgObj = new MessageObject(inform, "received [inform] order " + orderText + " is delivered to materialStorage");
         Communication.server.sendMessageToClient(msgObj);
 
        /* System.out.println("ProcurementAgent: received [inform] " + orderText + " is delivered to materialStorage");
@@ -72,7 +72,7 @@ public class AskForAuctionInitiator extends RequestInteractor implements Achieve
     public void handleFailure(ACLMessage failure) {
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-        msgObj = new MessageObject(failure, orderText);
+        msgObj = new MessageObject(failure, "received [failure] order " + orderText + " was not purchased");
         Communication.server.sendMessageToClient(msgObj);
 
        /* System.out.println("ProcurementAgent: received [failure] were not purchased");

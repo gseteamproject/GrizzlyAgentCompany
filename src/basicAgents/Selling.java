@@ -20,6 +20,7 @@ public class Selling extends Agent {
     private static final long serialVersionUID = 7150875080288668056L;
     public static boolean isInWarehouse;
     public static boolean isTaken;
+    public static long currentDeadline;
     protected OrderDataStore dataStore;
 
     // queue for orders that in production

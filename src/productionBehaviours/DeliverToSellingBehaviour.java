@@ -29,7 +29,7 @@ class DeliverToSellingBehaviour extends OneShotBehaviour {
         super(interactionBehaviour.getAgent());
         this.dataStore = dataStore;
         this.interactionBehaviour = interactionBehaviour;
-        this.interactor = ProductionActivityBehaviour.interactor;
+        this.interactor = ProductionResponder.interactor;
     }
 
     @Override

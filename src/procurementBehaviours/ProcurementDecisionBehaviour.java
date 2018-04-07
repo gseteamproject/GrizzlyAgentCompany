@@ -12,6 +12,6 @@ public class ProcurementDecisionBehaviour extends DecisionBehaviour {
 
     public ProcurementDecisionBehaviour(ProcurementResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour);
-        this.interactor = new ProcurementDecision(dataStore);
+        this.interactor = new ProcurementDecision(interactionBehaviour, dataStore);
     }
 }

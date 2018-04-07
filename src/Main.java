@@ -22,7 +22,7 @@ Main {
         // AgentSalesMarket, AgentSelling, AgentFinances, AgentCapitalMarket,
         // AgentProcurement, AgentProcurementMarket, AgentProduction
 
-        parameters[2] = "1000"; // this is the delayTime in ms for the GUI-Messages of the Agent-Communication
+        parameters[2] = "10"; // this is the delayTime in ms for the GUI-Messages of the Agent-Communication
 
 
         Server.delaytime = Long.parseLong(parameters[2]);

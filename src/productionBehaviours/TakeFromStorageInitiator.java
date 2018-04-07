@@ -57,13 +57,13 @@ public class TakeFromStorageInitiator extends RequestInteractor implements Achie
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(inform.getContent(), Order.class).getTextOfOrder();
 
-        msgObj = new MessageObject(inform, orderText);
-        Communication.server.sendMessageToClient(msgObj);
+//        msgObj = new MessageObject(inform, orderText);
+//        Communication.server.sendMessageToClient(msgObj);
 
       /*  System.out.println(
                 "ProductionAgent: received [inform] materials for " + orderText + " will be taken from storage");*/
 
-        msgObj = new MessageObject("AgentProduction" , "Now I have materials for " + orderText);
+        msgObj = new MessageObject("AgentProduction" , "now have materials for " + orderText);
         Communication.server.sendMessageToClient(msgObj);
 
 /*

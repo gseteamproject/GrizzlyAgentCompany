@@ -30,7 +30,7 @@ public class AskForMaterialsBehaviour extends OneShotBehaviour {
         orderText = Order.gson.fromJson(materialsToRequest, Order.class).getTextOfOrder();
         dataStore.setRequestMessage(interactionBehaviour.getRequest());
 
-        msgObj = new MessageObject("Agent Production", "Asking ProcurementAgent to get materials for " + orderText );
+        msgObj = new MessageObject("AgentProduction", "Asking ProcurementAgent to get materials for " + orderText );
         Communication.server.sendMessageToClient(msgObj);
 /*
         System.out.println("ProductionAgent: Asking ProcurementAgent to get materials for " + orderText);

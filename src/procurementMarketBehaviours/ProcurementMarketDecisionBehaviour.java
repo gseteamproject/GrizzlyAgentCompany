@@ -2,13 +2,12 @@ package procurementMarketBehaviours;
 
 import interactors.DecisionBehaviour;
 import interactors.OrderDataStore;
-import interactors.ResponderBehaviour;
 
 public class ProcurementMarketDecisionBehaviour extends DecisionBehaviour {
 
-    public ProcurementMarketDecisionBehaviour(ResponderBehaviour interactionBehaviour, OrderDataStore dataStore) {
+    public ProcurementMarketDecisionBehaviour(ProcurementMarketResponder interactionBehaviour, OrderDataStore dataStore) {
         super(interactionBehaviour);
-        this.interactor = new ProcurementMarketDecision(dataStore);
+        this.interactor = new ProcurementMarketDecision(interactionBehaviour, dataStore);
     }
 
     /**
