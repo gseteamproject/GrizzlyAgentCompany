@@ -59,8 +59,8 @@ public class TakeFromWarehouseInitiator extends RequestInteractor implements Ach
         Order order = Order.gson.fromJson(inform.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
-//        msgObj = new MessageObject(inform, orderText);
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject(inform, orderText);
+        Communication.server.sendMessageToClient(msgObj);
         
         interactionBehaviour.getAgent().addBehaviour(new DeliverToCustomerBehaviour(interactionBehaviour, dataStore));
     }
@@ -70,8 +70,8 @@ public class TakeFromWarehouseInitiator extends RequestInteractor implements Ach
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
 
-//        msgObj = new MessageObject(failure, orderText);
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject(failure, orderText);
+        Communication.server.sendMessageToClient(msgObj);
 /*
         System.out.println(msgObj.getReceivedMessage());
 */

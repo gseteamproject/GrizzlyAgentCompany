@@ -26,7 +26,7 @@ public class ProcurementAskBehaviour extends AskBehaviour {
             if (!this.isStarted) {
                 this.interactor.isDone = false;
 
-                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
                 
                 myAgent.addBehaviour(new ProcurementActivityBehaviour((ProcurementResponder) interactionBehaviour, (ProcurementRequestResult) interactor, dataStore));
 //                myAgent.addBehaviour(new CheckMaterialStorage((ProcurementResponder) interactionBehaviour, dataStore));
@@ -36,7 +36,7 @@ public class ProcurementAskBehaviour extends AskBehaviour {
             if (this.isStarted) {
                 this.interactor.isDone = false;
 
-                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
 
                 myAgent.addBehaviour(new ProcurementActivityBehaviour((ProcurementResponder) interactionBehaviour, (ProcurementRequestResult) interactor, dataStore));
 //                myAgent.addBehaviour(

@@ -7,7 +7,7 @@ public class FinancesDeadlineBehaviour extends DeadlineBehaviour {
 
     public FinancesDeadlineBehaviour(FinancesResponder interactionBehaviour, FinancesRequestResult interactor,
             OrderDataStore dataStore) {
-        super(interactionBehaviour, dataStore);
+        super(interactionBehaviour, interactor, dataStore);
         this.interactor = interactor;
     }
 

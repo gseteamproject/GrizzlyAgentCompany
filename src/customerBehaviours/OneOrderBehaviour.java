@@ -46,7 +46,7 @@ public class OneOrderBehaviour extends WakerBehaviour {
         
         order.deadline = 60000; // 60 seconds
         order.price = 100;
-        order.state = getAgent().getLocalName();
+        order.agent = getAgent().getLocalName();
 
         String testGson = Order.gson.toJson(order);
         System.out.println(testGson);

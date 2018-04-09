@@ -32,7 +32,7 @@ public class DeadlineForOrderBehaviour extends WakerBehaviour {
             System.out.println("dataStore " + dataStore.getRequestMessage().getContent());
             Order order = Order.gson.fromJson(dataStore.getRequestMessage().getContent(), Order.class);
             
-            String agentName = SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state;
+            String agentName = SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent;
             ACLMessage deadlineMsg = new ACLMessage(ACLMessage.REQUEST);
             
             System.out.println("Big deadline of " + order);

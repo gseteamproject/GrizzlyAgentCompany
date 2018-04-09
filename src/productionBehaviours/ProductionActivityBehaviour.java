@@ -1,5 +1,6 @@
 package productionBehaviours;
 
+import interactors.DeadlineBehaviour;
 import interactors.OrderDataStore;
 import jade.core.behaviours.ParallelBehaviour;
 
@@ -16,7 +17,9 @@ public class ProductionActivityBehaviour extends ParallelBehaviour {
         super(interactionBehaviour.getAgent(), WHEN_ANY);
 
         // TODO: Should I remove Ask????
-        addSubBehaviour(new ProductionDeadlineBehaviour(interactionBehaviour, interactor, dataStore));
+
+        addSubBehaviour(new DeadlineBehaviour((ProductionResponder) interactionBehaviour, (ProductionRequestResult) interactor, dataStore));
+//        addSubBehaviour(new ProductionDeadlineBehaviour(interactionBehaviour, interactor, dataStore));
         addSubBehaviour(new AskForMaterialsBehaviour((ProductionResponder) interactionBehaviour, dataStore));
         // addSubBehaviour(new AskForMaterialsBehaviour(interactionBehaviour,
         // dataStore));

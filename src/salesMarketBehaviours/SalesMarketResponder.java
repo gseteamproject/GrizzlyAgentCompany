@@ -20,6 +20,6 @@ public class SalesMarketResponder extends ResponderBehaviour {
 
         registerHandleRequest(new SalesMarketDecisionBehaviour(this, dataStore));
         registerPrepareResultNotification(new SalesMarketAskBehaviour(this, interactor, dataStore));
-//        registerPrepareResultNotification(new SalesMarketActivityBehaviour(this, dataStore));
+//        registerPrepareResultNotification(new SalesMarketActivityBehaviour(this, interactor, dataStore));
     }
 }

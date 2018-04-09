@@ -25,8 +25,8 @@ public class ProductionDecision extends Decision {
         Order order = Order.gson.fromJson(request.getContent(), Order.class);
         String orderText = order.getTextOfOrder();
 
-//        msgObj = new MessageObject(request, orderText);
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject(request, orderText);
+        Communication.server.sendMessageToClient(msgObj);
 
      /*   System.out.println("ProductionAgent: [request] SellingAgent asks to produce " + orderText);*/
         // Agent should send agree or refuse
@@ -40,7 +40,7 @@ public class ProductionDecision extends Decision {
         dataStore.setAgent(interactionBehaviour.getAgent().getLocalName());
         System.out.println("currentAgent: " + dataStore.getAgent());
 
-        order.state = (dataStore.getAgent());
+        order.agent = (dataStore.getAgent());
         
         String orderGson = Order.gson.toJson(order);
         request.setContent(orderGson);
@@ -52,8 +52,8 @@ public class ProductionDecision extends Decision {
         response.setPerformative(ACLMessage.AGREE);
         response.setSender(new AID(("AgentProduction"), AID.ISLOCALNAME));
 
-//        msgObj = new MessageObject("AgentProduction", orderText + " will be produced");
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject("AgentProduction", orderText + " will be produced");
+        Communication.server.sendMessageToClient(msgObj);
 /*
         System.out.println("ProductionAgent: [agree] I will produce " + orderText);
 */

@@ -22,7 +22,7 @@ public class ProductionAskBehaviour extends AskBehaviour {
         if (!this.isStarted) {
             Order order = Order.gson.fromJson(interactionBehaviour.getRequest().getContent(), Order.class);
 
-            SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+            SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
             
             myAgent.addBehaviour(new ProductionActivityBehaviour((ProductionResponder) interactionBehaviour, (ProductionRequestResult) interactor, dataStore));
 //            myAgent.addBehaviour(new AskForMaterialsBehaviour((ProductionResponder) interactionBehaviour, dataStore));

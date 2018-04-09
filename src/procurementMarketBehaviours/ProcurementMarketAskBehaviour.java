@@ -23,7 +23,7 @@ public class ProcurementMarketAskBehaviour extends AskBehaviour {
             // TODO: pass DataStore?
             Order order = Order.gson.fromJson(interactionBehaviour.getRequest().getContent(), Order.class);
 
-            SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+            SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
             
             myAgent.addBehaviour(new ProcurementMarketActivityBehaviour((ProcurementMarketResponder) interactionBehaviour, (ProcurementMarketRequestResult) interactor, dataStore));
 //            myAgent.addBehaviour(new AuctionInitiator((ProcurementMarketResponder) interactionBehaviour));

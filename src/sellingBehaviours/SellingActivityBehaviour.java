@@ -1,5 +1,6 @@
 package sellingBehaviours;
 
+import interactors.DeadlineBehaviour;
 import interactors.OrderDataStore;
 import jade.core.behaviours.ParallelBehaviour;
 
@@ -19,7 +20,9 @@ public class SellingActivityBehaviour extends ParallelBehaviour {
 
         // addSubBehaviour(new SellingAskBehaviour(interactionBehaviour, interactor,
         // dataStore));
-        addSubBehaviour(new SellingDeadlineBehaviour(interactionBehaviour, interactor, dataStore));
+
+        addSubBehaviour(new DeadlineBehaviour((SellingResponder) interactionBehaviour, (SellingRequestResult) interactor, dataStore));
+//        addSubBehaviour(new SellingDeadlineBehaviour(interactionBehaviour, interactor, dataStore));
         if (dataStore.getRequestMessage().getConversationId() == "Ask") {
             addSubBehaviour(new CheckWarehouseBehaviour(interactionBehaviour, dataStore));
         } else if (dataStore.getRequestMessage().getConversationId() == "Take") {

@@ -30,7 +30,7 @@ public class FinancesDecision extends Decision {
         dataStore.setAgent(interactionBehaviour.getAgent().getLocalName());
         System.out.println("currentAgent: " + dataStore.getAgent());
         
-        order.state = (dataStore.getAgent());
+        order.agent = (dataStore.getAgent());
         
         String orderGson = Order.gson.toJson(order);
         request.setContent(orderGson);
@@ -41,8 +41,8 @@ public class FinancesDecision extends Decision {
         response.setContent(request.getContent());
         response.setPerformative(ACLMessage.AGREE);
 
-//        msgObj = new MessageObject(request, orderText);
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject(request, orderText);
+        Communication.server.sendMessageToClient(msgObj);
         /*
          * System.out.println(msgObj.getReceivedMessage());
          */

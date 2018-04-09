@@ -47,8 +47,8 @@ public class ReportFinancesInitiator extends RequestInteractor implements Achiev
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(agree.getContent(), Order.class).getTextOfOrder();
 
-//        msgObj = new MessageObject(agree, orderText);
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject(agree, orderText);
+        Communication.server.sendMessageToClient(msgObj);
 
         msgObj = new MessageObject("AgentProcurementMarket", "Purchase of " + orderText + " is initiated.");
         Communication.server.sendMessageToClient(msgObj);
@@ -67,8 +67,8 @@ public class ReportFinancesInitiator extends RequestInteractor implements Achiev
         Order order = Order.gson.fromJson(inform.getContent(), Order.class);
         orderText = order.getTextOfOrder();
 
-//        msgObj = new MessageObject(inform, orderText);
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject(inform, orderText);
+        Communication.server.sendMessageToClient(msgObj);
 
         msgObj = new MessageObject("AgentProcurementMarket", orderText + " is allowed to purchase");
         Communication.server.sendMessageToClient(msgObj);
@@ -88,8 +88,8 @@ public class ReportFinancesInitiator extends RequestInteractor implements Achiev
     public void handleFailure(ACLMessage failure) {
         // TODO Auto-generated method stub
         orderText = Order.gson.fromJson(failure.getContent(), Order.class).getTextOfOrder();
-//        msgObj = new MessageObject(failure, orderText);
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject(failure, orderText);
+        Communication.server.sendMessageToClient(msgObj);
         /* System.out.println("SellingAgent: received [failure] is not produced"); */
 
         msgObj = new MessageObject("AgentProcurementMarket", orderText + " is forbidden to purchase");

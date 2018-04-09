@@ -45,7 +45,7 @@ public class CheckWarehouseBehaviour extends OneShotBehaviour {
         orderToProduce.id = order.id;
         orderToProduce.deadline = order.deadline;
         orderToProduce.price = order.price;
-        orderToProduce.state = order.state;
+        orderToProduce.agent = order.agent;
 
         for (OrderPart orderPart : order.orderList) {
             Product productToCheck = orderPart.getProduct();

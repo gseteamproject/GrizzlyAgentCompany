@@ -34,7 +34,7 @@ public class SellingAskBehaviour extends AskBehaviour {
                 myAgent.addBehaviour(new SellingActivityBehaviour((SellingResponder) interactionBehaviour, (SellingRequestResult) interactor, dataStore));
 //                myAgent.addBehaviour(new SellingDeadlineBehaviour((SellingResponder) interactionBehaviour, (SellingRequestResult) interactor, dataStore));
                 
-                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
                 
                 /*
                  * System.out.println(msgObj.getReceivedMessage());
@@ -54,7 +54,7 @@ public class SellingAskBehaviour extends AskBehaviour {
                 myAgent.addBehaviour(new SellingActivityBehaviour((SellingResponder) interactionBehaviour, (SellingRequestResult) interactor, dataStore));
 //                myAgent.addBehaviour(new SellingDeadlineBehaviour((SellingResponder) interactionBehaviour, (SellingRequestResult) interactor, dataStore));
                 
-                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
                 
                 /*
                  * System.out.println(msgObj.getReceivedMessage());

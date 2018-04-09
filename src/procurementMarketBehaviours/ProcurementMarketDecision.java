@@ -32,7 +32,7 @@ public class ProcurementMarketDecision extends Decision {
         dataStore.setAgent(interactionBehaviour.getAgent().getLocalName());
         System.out.println("currentAgent: " + dataStore.getAgent());
 
-        order.state = (dataStore.getAgent());
+        order.agent = (dataStore.getAgent());
         
         String orderGson = Order.gson.toJson(order);
         request.setContent(orderGson);
@@ -44,8 +44,8 @@ public class ProcurementMarketDecision extends Decision {
         response.setPerformative(ACLMessage.AGREE);
         response.setSender(new AID(("AgentProcurementMarket"), AID.ISLOCALNAME));
 
-//        msgObj = new MessageObject(request, orderText);
-//        Communication.server.sendMessageToClient(msgObj);
+        msgObj = new MessageObject(request, orderText);
+        Communication.server.sendMessageToClient(msgObj);
 /*
         System.out.println(msgObj.getReceivedMessage());
 */

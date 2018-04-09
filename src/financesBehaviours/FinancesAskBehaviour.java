@@ -31,7 +31,7 @@ public class FinancesAskBehaviour extends AskBehaviour {
                 Communication.server.sendMessageToClient(msgObj);
                 System.out.println("Finances: Order");
 
-                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
                 
 //                myAgent.addBehaviour(new TransferMoneyToBank((FinancesResponder) interactionBehaviour, dataStore));
                 myAgent.addBehaviour(new FinancesActivityBehaviour((FinancesResponder) interactionBehaviour, (FinancesRequestResult) interactor, dataStore));
@@ -44,7 +44,7 @@ public class FinancesAskBehaviour extends AskBehaviour {
                 Communication.server.sendMessageToClient(msgObj);
                 System.out.println("Finances: Material");
 
-                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
                 
 //                myAgent.addBehaviour(new TransferMoneyFromBank((FinancesResponder) interactionBehaviour, dataStore));
                 myAgent.addBehaviour(new FinancesActivityBehaviour((FinancesResponder) interactionBehaviour, (FinancesRequestResult) interactor, dataStore));

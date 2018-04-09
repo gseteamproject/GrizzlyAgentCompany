@@ -23,7 +23,7 @@ public class SalesMarketAskBehaviour extends AskBehaviour {
             Order order = Order.gson.fromJson(dataStore.getRequestMessage().getContent(), Order.class);
             if (!SalesMarket.orderQueue.contains(order)) {                
                 SalesMarket.orderQueue.add(order);
-                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).state = interactionBehaviour.getAgent().getLocalName();
+                SalesMarket.orderQueue.get(order.searchInList(SalesMarket.orderQueue)).agent = interactionBehaviour.getAgent().getLocalName();
                 
                 // if agent agrees it starts executing request
                 myAgent.addBehaviour(new SalesMarketActivityBehaviour((SalesMarketResponder) interactionBehaviour, (SalesMarketRequestResult) interactor, dataStore));

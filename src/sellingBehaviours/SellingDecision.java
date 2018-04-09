@@ -20,7 +20,7 @@ public class SellingDecision extends Decision {
         
         Order order = Order.gson.fromJson(request.getContent(), Order.class);
         String orderText = order.getTextOfOrder();
-//        MessageObject msgObj = new MessageObject(request, orderText);
+        MessageObject msgObj = new MessageObject(request, orderText);
         // Agent should send agree or refuse
         // TODO: Add refuse answer (some conditions should be added)
         
@@ -32,7 +32,7 @@ public class SellingDecision extends Decision {
         dataStore.setAgent(interactionBehaviour.getAgent().getLocalName());
         System.out.println("currentAgent: " + dataStore.getAgent());
 
-        order.state = (dataStore.getAgent());
+        order.agent = (dataStore.getAgent());
         
         String orderGson = Order.gson.toJson(order);
         request.setContent(orderGson);
@@ -50,15 +50,15 @@ public class SellingDecision extends Decision {
 
         if (request.getConversationId() == "Ask") {
 
-//            msgObj = new MessageObject(response, orderText);
-//            Communication.server.sendMessageToClient(msgObj);
+            msgObj = new MessageObject(response, orderText);
+            Communication.server.sendMessageToClient(msgObj);
 
             /*System.out.println(msgObj.getReceivedMessage());
             Communication.server.sendMessageToClient("SellingAgent", "[agree] I will check warehouse for " + orderText);*/
         } else if (request.getConversationId() == "Take") {
 
-//            msgObj = new MessageObject(response, orderText);
-//            Communication.server.sendMessageToClient(msgObj);
+            msgObj = new MessageObject(response, orderText);
+            Communication.server.sendMessageToClient(msgObj);
 
             /*System.out.println(msgObj.getReceivedMessage());
             Communication.server.sendMessageToClient("SellingAgent",

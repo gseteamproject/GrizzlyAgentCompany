@@ -21,7 +21,7 @@ public class Order implements Serializable {
     public List<OrderPart> orderList = new ArrayList<OrderPart>();
     public long deadline;
     public int price;
-    public String state;
+    public String agent;
 
     public Order() {
     }

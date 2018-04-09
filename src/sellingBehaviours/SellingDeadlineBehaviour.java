@@ -12,7 +12,7 @@ public class SellingDeadlineBehaviour extends DeadlineBehaviour {
 
     public SellingDeadlineBehaviour(SellingResponder interactionBehaviour, SellingRequestResult interactor,
             OrderDataStore dataStore) {
-        super(interactionBehaviour, dataStore);
+        super(interactionBehaviour, interactor, dataStore);
         this.interactor = interactor;
     }
 }

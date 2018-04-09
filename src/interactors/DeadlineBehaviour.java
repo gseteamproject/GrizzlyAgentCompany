@@ -15,12 +15,12 @@ public class DeadlineBehaviour extends WakerBehaviour {
     protected OrderDataStore dataStore;
     protected RequestResult interactor;
 
-    public DeadlineBehaviour(ResponderBehaviour interactionBehaviour, OrderDataStore dataStore) {
+    public DeadlineBehaviour(ResponderBehaviour interactionBehaviour, RequestResult interactor, OrderDataStore dataStore) {
         super(interactionBehaviour.getAgent(), dataStore.getDeadline() * Server.delaytime / 150);
+//        super(interactionBehaviour.getAgent(), 60000);
         this.interactionBehaviour = interactionBehaviour;
+        this.interactor = interactor;
         this.dataStore = dataStore;
-        System.out.println(
-                "interactionBehaviour.getAgent().getLocalName() " + interactionBehaviour.getAgent().getLocalName());
     }
 
     @Override

@@ -20,7 +20,7 @@ public class MessageObject {
         this.setOrderText(orderText);
         this.setPerformative();
         this.setSender();
-//        this.setReceiver();
+        this.setReceiver();
         this.setReceivedMessage();
         
         this.actingAgent = this.getSender();
