@@ -7,3 +7,5 @@
 This repository now is in read-only mode
 
 Further development of the project continues https://github.com/gseteamproject/smartfactory
+
+For information contact kinnder@mail.ru
